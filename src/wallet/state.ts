@@ -195,7 +195,7 @@ export function varialNetwork(network: NetworkInfo): VarialNetwork {
     networkUrl: network.rpcUrl,
     networkPassphrase: network.networkPassphrase,
     sorobanRpcUrl: network.rpcUrl,
-    ...(network.friendbotUrl ? { friendbotUrl: network.friendbotUrl } : {}),
+    friendbotUrl: network.friendbotUrl ?? '',
   };
 }
 

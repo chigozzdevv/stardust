@@ -190,8 +190,9 @@ describe('networks', () => {
       sorobanRpcUrl: custom.rpcUrl,
       friendbotUrl: custom.friendbotUrl,
     });
-    expect(varialNetwork({ ...custom, friendbotUrl: null })).not.toHaveProperty(
+    expect(varialNetwork({ ...custom, friendbotUrl: null })).toHaveProperty(
       'friendbotUrl',
+      '',
     );
   });
 });
