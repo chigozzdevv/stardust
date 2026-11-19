@@ -26,6 +26,7 @@ interface Provider {
 type PageWindow = typeof window & {
   freighterApi: WalletPackage;
   providers: { info: ProviderInfo; provider: Provider }[];
+  messages: unknown[];
   __stardust(payload: object): Promise<unknown>;
 };
 
@@ -50,6 +51,33 @@ const discovery = `
   window.addEventListener('sep0060:announceProvider', (event) => window.providers.push(event.detail));
   window.dispatchEvent(new Event('sep0060:requestProvider'));
 `;
+
+const recorder = `
+  window.messages = [];
+  window.addEventListener('message', (event) => window.messages.push(event.data));
+`;
+
+// Asks for the connection status as the packages do, and gives up after
+// timeoutMs with null.
+function connectionStatus(timeoutMs: number): Promise<unknown> {
+  return new Promise((resolve) => {
+    const messageId = Math.random();
+    const timer = setTimeout(() => resolve(null), timeoutMs);
+    window.addEventListener('message', ({ data }) => {
+      if (data?.messagedId !== messageId) return;
+      clearTimeout(timer);
+      resolve(data);
+    });
+    window.postMessage(
+      {
+        source: 'FREIGHTER_EXTERNAL_MSG_REQUEST',
+        messageId,
+        type: 'REQUEST_CONNECTION_STATUS',
+      },
+      window.location.origin,
+    );
+  });
+}
 
 // One browser per test, so a crash stays in its test.
 const browsers: Browser[] = [];
@@ -111,11 +139,34 @@ function signedMessage(text: string): Buffer {
 }
 
 describe.each(packages)('%s in Chromium', (api) => {
-  it('sees the wallet without sending a message', async () => {
-    const { page } = await open({ api });
-    await expect(
-      page.evaluate(() => (window as PageWindow).freighterApi.isConnected()),
-    ).resolves.toEqual({ isConnected: true });
+  it('answers isConnected() through REQUEST_CONNECTION_STATUS, without window.freighter', async () => {
+    const { page } = await open({ api, script: recorder });
+    const { result, elapsed, messages, flag } = await page.evaluate(
+      async () => {
+        const started = performance.now();
+        const result = await (window as PageWindow).freighterApi.isConnected();
+        return {
+          result,
+          elapsed: performance.now() - started,
+          messages: (window as PageWindow).messages,
+          flag: 'freighter' in window,
+        };
+      },
+    );
+    expect(result).toEqual({ isConnected: true });
+    expect(flag).toBe(false);
+    expect(elapsed).toBeLessThan(1_000);
+    const [sent, answered] = messages as Record<string, unknown>[];
+    expect(messages).toHaveLength(2);
+    expect(sent).toMatchObject({
+      source: 'FREIGHTER_EXTERNAL_MSG_REQUEST',
+      type: 'REQUEST_CONNECTION_STATUS',
+    });
+    expect(answered).toEqual({
+      source: 'FREIGHTER_EXTERNAL_MSG_RESPONSE',
+      messagedId: sent?.messageId,
+      isConnected: true,
+    });
   });
 
   it('connects through a prompt from the page origin', async () => {
@@ -191,6 +242,42 @@ describe.each(packages)('%s in Chromium', (api) => {
     ).toBe(true);
   });
 
+  it('connects again before signing a message while locked, then signs after unlock', async () => {
+    const { page, wallet, keypair } = await open({
+      api,
+      options: { connected: true },
+    });
+    await wallet.lock();
+    await expect(
+      page.evaluate(() => (window as PageWindow).freighterApi.getAddress()),
+    ).resolves.toEqual({ address: '' });
+    const signing = page.evaluate(
+      ([text, networkPassphrase]) =>
+        (window as PageWindow).freighterApi.signMessage(text, {
+          networkPassphrase,
+        }),
+      [message, Networks.TESTNET] as const,
+    );
+    await expect(wallet.nextPrompt('connect')).resolves.toMatchObject({
+      blocked: 'locked',
+      status: 'pending',
+    });
+
+    await wallet.unlock();
+    const { signedMessage: signature, signerAddress } = await signing;
+    expect(signerAddress).toBe(wallet.address);
+    expect(
+      keypair.verify(
+        signedMessage(message),
+        Buffer.from(String(signature), 'base64'),
+      ),
+    ).toBe(true);
+    expect(wallet.prompts()).toMatchObject([
+      { kind: 'connect', status: 'approved' },
+      { kind: 'signMessage', status: 'approved' },
+    ]);
+  });
+
   it('gives up after 2 s on a page without a wallet', async () => {
     const { page, wallet } = await open({ api, wallet: 'none' });
     const { result, elapsed } = await page.evaluate(async () => {
@@ -230,17 +317,15 @@ describe('the Playwright host', () => {
     });
     const frame = page.frames().find((child) => child.url().endsWith('/frame'));
     if (!frame) throw new Error('the iframe did not load');
-    await expect(frame.evaluate(() => 'freighter' in window)).resolves.toBe(
-      false,
-    );
+    await expect(frame.evaluate(connectionStatus, 500)).resolves.toBeNull();
     await expect(
       frame.evaluate(() =>
         (window as PageWindow).__stardust({ type: 'REQUEST_ACCESS' }),
       ),
     ).rejects.toThrow("__stardust answers only the page's top frame.");
-    await expect(page.evaluate(() => 'freighter' in window)).resolves.toBe(
-      true,
-    );
+    await expect(page.evaluate(connectionStatus, 500)).resolves.toMatchObject({
+      isConnected: true,
+    });
     expect(wallet.prompts()).toEqual([]);
   });
 });

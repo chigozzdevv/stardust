@@ -103,14 +103,29 @@ describe('pageScript', () => {
 });
 
 describe("'varial' in the page", () => {
-  it('sets window.freighter, so isConnected() sends nothing', async () => {
-    const { window, calls } = page();
-    expect(window.freighter).toBe(true);
-    const api = window.load('@stellar/freighter-api');
-    await expect(api.isConnected()).resolves.toEqual({ isConnected: true });
-    expect(calls).toEqual([]);
-    expect(window.posted).toEqual([]);
-  });
+  it.each(packages)(
+    "leaves window.freighter unset, so %s's isConnected() asks with REQUEST_CONNECTION_STATUS",
+    async (name) => {
+      vi.useFakeTimers();
+      const { window, types } = page();
+      expect('freighter' in window).toBe(false);
+      const api = window.load(name);
+      await expect(api.isConnected()).resolves.toEqual({ isConnected: true });
+      expect(types()).toEqual(['REQUEST_CONNECTION_STATUS']);
+      const [sent, answered] = window.posted.map(
+        ({ data }) => data as Record<string, unknown>,
+      );
+      expect(sent).toMatchObject({
+        source: request,
+        type: 'REQUEST_CONNECTION_STATUS',
+      });
+      expect(answered).toEqual({
+        source: response,
+        messagedId: sent?.messageId,
+        isConnected: true,
+      });
+    },
+  );
 
   it('forwards { type, ...fields } with the frame origin and posts the reply as messagedId', async () => {
     const { window, calls } = page();
@@ -158,7 +173,6 @@ describe("'varial' in the page", () => {
       return { publicKey: '' };
     });
     frame.run(pageScript({ wallet: 'varial', binding }));
-    expect('freighter' in frame).toBe(false);
 
     frame.postMessage(
       { source: request, messageId: 1, type: 'REQUEST_PUBLIC_KEY' },
@@ -219,6 +233,40 @@ describe("'varial' in the page", () => {
     expect(queue.prompts()).toMatchObject([{ kind: 'connect' }]);
     expect(state.isConnected('https://app.test')).toBe(false);
   });
+
+  it.each(packages)(
+    'lets %s ask to connect before signing while locked, even on a connected site',
+    async (name) => {
+      const { window, queue, state, types } = page({ connected: true });
+      state.locked = true;
+      const api = window.load(name);
+      const options = { networkPassphrase: Networks.TESTNET };
+      const entry = api.signAuthEntry(preimage(state.address), options);
+      const connect = await queue.nextPrompt('connect');
+      expect(connect.blocked).toBe('locked');
+      await connect.reject();
+      await expect(entry).resolves.toEqual({
+        signedAuthEntry: null,
+        signerAddress: '',
+        error: declined,
+      });
+
+      const message = api.signMessage('Sign in', options);
+      await (await queue.nextPrompt('connect')).reject();
+      await expect(message).resolves.toEqual({
+        signedMessage: null,
+        signerAddress: '',
+        error: declined,
+      });
+      expect(types()).toEqual([
+        'REQUEST_ALLOWED_STATUS',
+        'REQUEST_ACCESS',
+        'REQUEST_ALLOWED_STATUS',
+        'REQUEST_ACCESS',
+      ]);
+      expect(state.isConnected('https://app.test')).toBe(true);
+    },
+  );
 
   it("answers getAddress well inside the package's 2 s timeout", async () => {
     vi.useFakeTimers();

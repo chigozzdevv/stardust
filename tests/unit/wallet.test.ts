@@ -240,6 +240,32 @@ describe('user actions', () => {
     expect(prompt).toMatchObject({ status: 'approved', blocked: null });
   });
 
+  it('lock hides the account until unlock, so the app connects again before signing', async () => {
+    const { wallet, host } = await attached({ connected: true });
+    const api = host.open(`${site}/`).load('@stellar/freighter-api');
+    await wallet.lock();
+    await expect(api.isConnected()).resolves.toEqual({ isConnected: true });
+    await expect(api.getAddress()).resolves.toEqual({ address: '' });
+    await expect(api.isAllowed()).resolves.toEqual({ isAllowed: false });
+
+    const signed = api.signMessage('Sign in', onTestnet);
+    const connect = await wallet.nextPrompt('connect');
+    expect(connect).toMatchObject({ status: 'pending', blocked: 'locked' });
+    expect(wallet.prompts('signMessage')).toEqual([]);
+
+    await wallet.unlock();
+    await expect(signed).resolves.toMatchObject({
+      signerAddress: wallet.address,
+    });
+    expect(wallet.prompts()).toMatchObject([
+      { kind: 'connect', status: 'approved' },
+      { kind: 'signMessage', status: 'approved' },
+    ]);
+    await expect(api.getAddress()).resolves.toEqual({
+      address: wallet.address,
+    });
+  });
+
   it('reject() answers a prompt while the wallet is locked', async () => {
     const { wallet, call } = await attached({ connected: true });
     await wallet.lock();

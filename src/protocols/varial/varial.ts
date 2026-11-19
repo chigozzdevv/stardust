@@ -109,15 +109,15 @@ export class Varial {
       case 'REQUEST_CONNECTION_STATUS':
         return { isConnected: true };
       case 'REQUEST_ACCESS':
-        return state.isConnected(origin)
+        return this.allowed(origin)
           ? { publicKey: state.address }
           : this.connect(origin, () => ({ publicKey: state.address }));
       case 'REQUEST_PUBLIC_KEY':
         return { publicKey: this.connectedAddress(origin) };
       case 'REQUEST_ALLOWED_STATUS':
-        return { isAllowed: state.isConnected(origin) };
+        return { isAllowed: this.allowed(origin) };
       case 'SET_ALLOWED_STATUS':
-        return state.isConnected(origin)
+        return this.allowed(origin)
           ? { isAllowed: true }
           : this.connect(origin, () => ({ isAllowed: true }));
       case 'REQUEST_NETWORK_DETAILS':
@@ -405,8 +405,14 @@ export class Varial {
     }
   }
 
+  // The Lock button empties Varial's session public key, so no site is allowed
+  // until unlock. blocked() doesn't use this: signing prompts wait for unlock.
+  private allowed(origin: string): boolean {
+    return !this.state.locked && this.state.isConnected(origin);
+  }
+
   private connectedAddress(origin: string): string {
-    return this.state.isConnected(origin) ? this.state.address : '';
+    return this.allowed(origin) ? this.state.address : '';
   }
 
   private get passphrase(): string {

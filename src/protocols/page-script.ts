@@ -18,7 +18,6 @@ export function install(options: PageScriptOptions): void {
   const call = (payload: object) => (page[options.binding] as Binding)(payload);
 
   if (options.wallet === 'varial') {
-    page.freighter = true;
     window.addEventListener('message', (event: MessageEvent) => {
       if (event.source !== window) return;
       if (event.data?.source !== 'FREIGHTER_EXTERNAL_MSG_REQUEST') return;

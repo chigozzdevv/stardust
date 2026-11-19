@@ -69,13 +69,14 @@ test('signs a message', async ({ users: { trader } }) => {
 
 test('waits while the wallet is locked', async ({ users: { trader } }) => {
   await connect(trader);
+  await trader.wallet.nextPrompt('connect');
   await expect(trader.page.getByTestId('address')).toHaveText(
     trader.account.address,
   );
   await trader.wallet.lock();
   await signMessage(trader, 'Signed after unlocking');
 
-  const prompt = await trader.wallet.nextPrompt('signMessage');
+  const prompt = await trader.wallet.nextPrompt('connect');
   expect(prompt.blocked).toBe('locked');
   expect(prompt.status).toBe('pending');
 
@@ -83,6 +84,9 @@ test('waits while the wallet is locked', async ({ users: { trader } }) => {
   await expect(trader.page.getByRole('status')).toHaveText(
     'Signature verified',
   );
+  expect(trader.wallet.prompts('signMessage')).toMatchObject([
+    { status: 'approved' },
+  ]);
 });
 
 test('refuses to add XLM twice', async ({ users: { trader } }) => {

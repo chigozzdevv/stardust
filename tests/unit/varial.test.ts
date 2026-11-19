@@ -118,11 +118,23 @@ describe('answers from state', () => {
     });
   });
 
-  it('keeps sharing the address while the wallet is locked', async () => {
+  it('hides the account while locked, even from a connected site', async () => {
     const { ask, state } = varial({ connected: true });
     state.locked = true;
+    await expect(ask('REQUEST_PUBLIC_KEY')).resolves.toEqual({ publicKey: '' });
+    await expect(ask('REQUEST_USER_INFO')).resolves.toEqual({
+      userInfo: { publicKey: '' },
+    });
+    await expect(ask('REQUEST_ALLOWED_STATUS')).resolves.toEqual({
+      isAllowed: false,
+    });
+
+    state.locked = false;
     await expect(ask('REQUEST_PUBLIC_KEY')).resolves.toEqual({
       publicKey: state.address,
+    });
+    await expect(ask('REQUEST_ALLOWED_STATUS')).resolves.toEqual({
+      isAllowed: true,
     });
   });
 
@@ -257,6 +269,33 @@ describe('connect prompts', () => {
     queue.resume();
     await expect(reply).resolves.toEqual({ publicKey: state.address });
   });
+
+  it.each([
+    ['REQUEST_ACCESS', (address: string) => ({ publicKey: address })],
+    ['SET_ALLOWED_STATUS', () => ({ isAllowed: true })],
+  ])(
+    'turns %s from a connected site into a connect prompt while locked',
+    async (type, expected) => {
+      const { ask, state, queue } = varial({
+        connected: true,
+        policy: 'approve',
+      });
+      state.locked = true;
+      const rejected = ask(type);
+      const prompt = await queue.nextPrompt('connect');
+      expect(prompt).toMatchObject({ blocked: 'locked', status: 'pending' });
+      await prompt.reject();
+      await expect(rejected).resolves.toEqual(failure(declined));
+
+      const approved = ask(type);
+      await queue.nextPrompt('connect');
+      expect(await isPending(approved)).toBe(true);
+      state.locked = false;
+      queue.resume();
+      await expect(approved).resolves.toEqual(expected(state.address));
+      expect(state.isConnected(site)).toBe(true);
+    },
+  );
 
   it('takes the origin from the browser, never from the message', async () => {
     const { ask, state, queue } = varial({ policy: 'approve' });
