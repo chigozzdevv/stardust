@@ -6,10 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { xlm } from '@/amounts';
 import { createStardust } from '@/index';
 import type { CoreConfig } from '@/index';
-import { FakeLedger } from '@tests/fixtures/rpc/fake-ledger';
-import type { RpcRequest } from '@tests/fixtures/rpc/replay';
-import { payment } from '@tests/fixtures/wallet/envelopes';
-import { FakeHost } from '@tests/fixtures/wallet/fake-page';
+import { payment } from '@tests/helpers/envelopes';
+import { FakeLedger } from '@tests/helpers/ledger';
+import { FakeHost } from '@tests/helpers/page';
+import type { RpcRequest } from '@tests/helpers/replay';
 
 const home = vi.hoisted(() => ({ dir: '' }));
 

@@ -8,9 +8,9 @@ import { Varial } from '@/protocols/varial/varial';
 import type { Policy } from '@/wallet/policy';
 import { declined } from '@/wallet/prompts';
 import { Violations } from '@/wallet/strict';
-import { preimage, sha256 } from '@tests/fixtures/wallet/envelopes';
-import { FakeWindow } from '@tests/fixtures/wallet/fake-page';
-import { promptQueue, settled } from '@tests/fixtures/wallet/prompt-queue';
+import { preimage, sha256 } from '@tests/helpers/envelopes';
+import { FakeWindow } from '@tests/helpers/page';
+import { promptQueue, settled } from '@tests/helpers/prompt-queue';
 
 interface PageOptions {
   readonly policy?: Policy;

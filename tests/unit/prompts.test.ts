@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { declined, internalError } from '@/wallet/prompts';
 import type { BlockedReason, PromptKind } from '@/wallet/prompts';
-import { answer, recording, replay } from '@tests/fixtures/rpc/replay';
 import {
   deferred,
   fields,
   kinds,
   promptQueue,
   settled,
-} from '@tests/fixtures/wallet/prompt-queue';
+} from '@tests/helpers/prompt-queue';
+import { answer, recording, replay } from '@tests/helpers/replay';
 
 const signing = kinds.filter((kind) => kind !== 'connect');
 

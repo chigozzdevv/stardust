@@ -26,6 +26,7 @@ This is a single TypeScript ESM package with two entries, `stardust-stellar` and
 | `conformance`    | Comparison against the real Varial extension (spec section 11).                           |
 | `tests/unit`     | Vitest unit tests, `*.test.ts`.                                                           |
 | `tests/fixtures` | Golden Varial replies, SEP-53 vectors, recorded testnet responses.                        |
+| `tests/helpers`  | Shared test code: fake ledger, RPC replay, fake page, envelopes, test benches.            |
 | `tests/e2e`      | Stardust against the test app on testnet.                                                 |
 | `tests/test-app` | The small test app.                                                                       |
 

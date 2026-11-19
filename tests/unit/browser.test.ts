@@ -11,9 +11,9 @@ import type { ProviderInfo } from '@/protocols/sep60/sep60';
 import { pageHost } from '@/test/host';
 import { EmulatedWallet } from '@/wallet/wallet';
 import type { WalletOptions } from '@/wallet/wallet';
-import { payment, sha256 } from '@tests/fixtures/wallet/envelopes';
-import type { WalletPackage } from '@tests/fixtures/wallet/fake-page';
-import { account, testnet } from '@tests/fixtures/wallet/prompt-queue';
+import { payment, sha256 } from '@tests/helpers/envelopes';
+import type { WalletPackage } from '@tests/helpers/page';
+import { account, testnet } from '@tests/helpers/prompt-queue';
 
 interface Provider {
   getAddress(): Promise<{ address: string }>;

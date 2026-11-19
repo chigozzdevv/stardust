@@ -23,7 +23,7 @@ import {
   recordedResult,
   recording,
   replay,
-} from '@tests/fixtures/rpc/replay';
+} from '@tests/helpers/replay';
 
 const testnet = 'https://soroban-testnet.stellar.org';
 const standalone = 'Standalone Network ; February 2017';

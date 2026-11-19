@@ -8,8 +8,8 @@ import {
   recordedResult,
   recording,
   replay,
-} from '@tests/fixtures/rpc/replay';
-import type { RecordedCall } from '@tests/fixtures/rpc/replay';
+} from '@tests/helpers/replay';
+import type { RecordedCall } from '@tests/helpers/replay';
 
 const testnet = 'https://soroban-testnet.stellar.org';
 const native = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';

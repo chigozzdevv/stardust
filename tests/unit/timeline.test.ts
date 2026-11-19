@@ -24,8 +24,8 @@ import {
 import type { PageRequest } from '@/test/timeline';
 import type { Policy } from '@/wallet/policy';
 import { EmulatedWallet } from '@/wallet/wallet';
-import { answer, recordedResult } from '@tests/fixtures/rpc/replay';
-import { account, testnet } from '@tests/fixtures/wallet/prompt-queue';
+import { account, testnet } from '@tests/helpers/prompt-queue';
+import { answer, recordedResult } from '@tests/helpers/replay';
 
 type Callback = (source: object, payload: unknown) => Promise<unknown>;
 

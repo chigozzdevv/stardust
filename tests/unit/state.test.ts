@@ -1,7 +1,7 @@
 import { Networks } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 import { WalletState, varialNetwork } from '@/wallet/state';
-import { account, testnet } from '@tests/fixtures/wallet/prompt-queue';
+import { account, testnet } from '@tests/helpers/prompt-queue';
 
 const app = 'http://localhost:3000';
 

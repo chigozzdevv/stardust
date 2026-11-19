@@ -23,13 +23,9 @@ import {
   signMessage,
   signTransaction,
 } from '@/wallet/signer';
-import {
-  FakeLedger,
-  sacInstance,
-  trustlineEntry,
-} from '@tests/fixtures/rpc/fake-ledger';
-import { answer, recording, replay } from '@tests/fixtures/rpc/replay';
 import sep53 from '@tests/fixtures/sep53-vectors.json';
+import { FakeLedger, sacInstance, trustlineEntry } from '@tests/helpers/ledger';
+import { answer, recording, replay } from '@tests/helpers/replay';
 
 const testnet = 'https://soroban-testnet.stellar.org';
 const nativeSac = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';

@@ -1,7 +1,7 @@
 import { Keypair, Networks } from '@stellar/stellar-sdk';
 import { connect, packages, test } from '@conformance/conformance';
 import type { Session } from '@conformance/conformance';
-import { payment } from '@tests/fixtures/wallet/envelopes';
+import { payment } from '@tests/helpers/envelopes';
 
 const testnet = { networkPassphrase: Networks.TESTNET };
 

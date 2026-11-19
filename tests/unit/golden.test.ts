@@ -8,9 +8,9 @@ import type { NetworkInfo } from '@/network/network';
 import { EmulatedWallet } from '@/wallet/wallet';
 import type { GoldenEntry, Step } from '@conformance/conformance';
 import type { Exchange, Message } from '@conformance/test-page/page';
-import { FakeHost } from '@tests/fixtures/wallet/fake-page';
-import type { FakeWindow } from '@tests/fixtures/wallet/fake-page';
-import { testnet } from '@tests/fixtures/wallet/prompt-queue';
+import { FakeHost } from '@tests/helpers/page';
+import type { FakeWindow } from '@tests/helpers/page';
+import { testnet } from '@tests/helpers/prompt-queue';
 
 type Call = Extract<Step, { readonly call: string }>;
 type Action = Exclude<Step, Call>;

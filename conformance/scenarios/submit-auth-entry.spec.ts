@@ -1,6 +1,6 @@
 import { Keypair, Networks } from '@stellar/stellar-sdk';
 import { connect, packages, test } from '@conformance/conformance';
-import { preimage } from '@tests/fixtures/wallet/envelopes';
+import { preimage } from '@tests/helpers/envelopes';
 
 const testnet = { networkPassphrase: Networks.TESTNET };
 const promptMs = 60_000;

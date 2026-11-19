@@ -1,7 +1,7 @@
 import { Asset, Networks } from '@stellar/stellar-sdk';
 import { connect, packages, test } from '@conformance/conformance';
 import { varialTestToken } from '@conformance/setup';
-import { nativeSac } from '@tests/fixtures/wallet/envelopes';
+import { nativeSac } from '@tests/helpers/envelopes';
 
 const usdc = new Asset(
   'USDC',

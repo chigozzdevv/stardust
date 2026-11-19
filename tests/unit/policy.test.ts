@@ -9,7 +9,7 @@ import {
   kinds,
   promptQueue,
   settled,
-} from '@tests/fixtures/wallet/prompt-queue';
+} from '@tests/helpers/prompt-queue';
 
 const signing = kinds.filter((kind) => kind !== 'connect');
 const reasons: readonly Exclude<BlockedReason, 'locked'>[] = [

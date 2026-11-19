@@ -6,7 +6,7 @@ import {
   fields,
   promptQueue,
   settled,
-} from '@tests/fixtures/wallet/prompt-queue';
+} from '@tests/helpers/prompt-queue';
 
 describe('nextPrompt', () => {
   it('returns prompts that arrived before the call, oldest first, each once', async () => {

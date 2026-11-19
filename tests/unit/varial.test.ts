@@ -14,18 +14,9 @@ import type { Policy } from '@/wallet/policy';
 import { declined, internalError } from '@/wallet/prompts';
 import type { WalletError } from '@/wallet/prompts';
 import { Violations } from '@/wallet/strict';
-import {
-  FakeLedger,
-  sacInstance,
-  wasmInstance,
-} from '@tests/fixtures/rpc/fake-ledger';
-import {
-  nativeSac,
-  payment,
-  preimage,
-  sha256,
-} from '@tests/fixtures/wallet/envelopes';
-import { isPending, promptQueue } from '@tests/fixtures/wallet/prompt-queue';
+import { nativeSac, payment, preimage, sha256 } from '@tests/helpers/envelopes';
+import { FakeLedger, sacInstance, wasmInstance } from '@tests/helpers/ledger';
+import { isPending, promptQueue } from '@tests/helpers/prompt-queue';
 
 interface BenchOptions {
   readonly policy?: Policy;

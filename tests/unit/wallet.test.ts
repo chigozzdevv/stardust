@@ -9,16 +9,16 @@ import type { ProviderInfo } from '@/protocols/sep60/sep60';
 import { declined } from '@/wallet/prompts';
 import { EmulatedWallet } from '@/wallet/wallet';
 import type { WalletOptions } from '@/wallet/wallet';
-import { FakeLedger } from '@tests/fixtures/rpc/fake-ledger';
-import type { RpcRequest } from '@tests/fixtures/rpc/replay';
-import { payment } from '@tests/fixtures/wallet/envelopes';
-import { FakeHost } from '@tests/fixtures/wallet/fake-page';
+import { payment } from '@tests/helpers/envelopes';
+import { FakeLedger } from '@tests/helpers/ledger';
+import { FakeHost } from '@tests/helpers/page';
 import {
   account,
   isPending,
   settled,
   testnet,
-} from '@tests/fixtures/wallet/prompt-queue';
+} from '@tests/helpers/prompt-queue';
+import type { RpcRequest } from '@tests/helpers/replay';
 
 interface Detail {
   readonly info: ProviderInfo;

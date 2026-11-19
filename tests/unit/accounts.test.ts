@@ -8,8 +8,8 @@ import { createAccounts, mergeAccounts } from '@/funding/accounts';
 import type { Account } from '@/funding/accounts';
 import { Funder } from '@/funding/funder';
 import type { SubFunder } from '@/funding/funder';
-import { FakeLedger } from '@tests/fixtures/rpc/fake-ledger';
-import type { AccountState } from '@tests/fixtures/rpc/fake-ledger';
+import { FakeLedger } from '@tests/helpers/ledger';
+import type { AccountState } from '@tests/helpers/ledger';
 
 const fee = 100n;
 

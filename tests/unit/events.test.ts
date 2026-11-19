@@ -15,7 +15,7 @@ import {
   decodeEvents,
 } from '@/network/events';
 import { transactionInfo } from '@/network/schema';
-import { recordedResult } from '@tests/fixtures/rpc/replay';
+import { recordedResult } from '@tests/helpers/replay';
 
 const native = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';
 const usdc = 'CBM44TNMCPYIFJO4PSMDZA7IXKJRRNHA6EOWNWI3X4V47DDC7WQXXD3E';

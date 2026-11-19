@@ -13,8 +13,8 @@ import { ContractSpecs } from '@/contracts/spec';
 import type { FundingContext } from '@/funding/funder';
 import { Rpc } from '@/network/network';
 import type { NetworkInfo } from '@/network/network';
-import { answer } from '@tests/fixtures/rpc/replay';
-import type { RpcRequest } from '@tests/fixtures/rpc/replay';
+import { answer } from '@tests/helpers/replay';
+import type { RpcRequest } from '@tests/helpers/replay';
 
 export interface AccountState {
   balance: bigint;

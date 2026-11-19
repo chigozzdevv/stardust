@@ -4,8 +4,8 @@ import { expect as check } from '@/test/index';
 import type { DecodedTransaction, Invocation } from '@/wallet/decode';
 import type { Policy } from '@/wallet/policy';
 import type { PromptStatus, TransactionPrompt } from '@/wallet/prompts';
-import { answer, recording, replay } from '@tests/fixtures/rpc/replay';
-import { fields, promptQueue } from '@tests/fixtures/wallet/prompt-queue';
+import { fields, promptQueue } from '@tests/helpers/prompt-queue';
+import { answer, recording, replay } from '@tests/helpers/replay';
 
 const native = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';
 const router = 'CADQOBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQP5KR';

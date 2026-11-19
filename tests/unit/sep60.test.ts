@@ -14,11 +14,11 @@ import type { ProviderInfo } from '@/protocols/sep60/sep60';
 import type { Policy } from '@/wallet/policy';
 import { declined } from '@/wallet/prompts';
 import { Violations } from '@/wallet/strict';
-import { FakeLedger } from '@tests/fixtures/rpc/fake-ledger';
-import type { RpcRequest } from '@tests/fixtures/rpc/replay';
-import { payment, preimage, sha256 } from '@tests/fixtures/wallet/envelopes';
-import { FakeWindow } from '@tests/fixtures/wallet/fake-page';
-import { isPending, promptQueue } from '@tests/fixtures/wallet/prompt-queue';
+import { payment, preimage, sha256 } from '@tests/helpers/envelopes';
+import { FakeLedger } from '@tests/helpers/ledger';
+import { FakeWindow } from '@tests/helpers/page';
+import { isPending, promptQueue } from '@tests/helpers/prompt-queue';
+import type { RpcRequest } from '@tests/helpers/replay';
 
 interface BenchOptions {
   readonly policy?: Policy;

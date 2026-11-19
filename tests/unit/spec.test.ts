@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { assetSpec } from '@/contracts/asset-spec';
 import { ContractSpecs } from '@/contracts/spec';
 import { Rpc } from '@/network/network';
-import { answer, recording, replay } from '@tests/fixtures/rpc/replay';
+import { answer, recording, replay } from '@tests/helpers/replay';
 
 const testnet = 'https://soroban-testnet.stellar.org';
 const nativeSac = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';

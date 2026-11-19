@@ -14,7 +14,7 @@ import { xlm } from '@/amounts';
 import { Funder, topUpAmount } from '@/funding/funder';
 import type { FundingContext } from '@/funding/funder';
 import { networkId } from '@/network/network';
-import { FakeLedger } from '@tests/fixtures/rpc/fake-ledger';
+import { FakeLedger } from '@tests/helpers/ledger';
 
 const fee = 100n;
 const keyName = `${networkId(Networks.TESTNET).toString('hex')}.json`;
