@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
-  timeout: 240_000,
+  timeout: 120_000,
   expect: { timeout: 15_000 },
   reporter: [
     ['list'],
@@ -15,6 +15,8 @@ export default defineConfig({
   ],
   use: {
     ignoreHTTPSErrors: true,
+    actionTimeout: 10_000,
+    navigationTimeout: 20_000,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

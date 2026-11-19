@@ -6,6 +6,7 @@ import { chromium, expect } from '@playwright/test';
 import type { BrowserContext, Locator, Page } from '@playwright/test';
 import type { Account } from '@/funding/accounts';
 import type { PromptKind } from '@/wallet/prompts';
+import { noIndexer, standInIndexer } from '@conformance/indexer';
 
 export type NetworkLabel = 'Test Net' | 'Future Net' | 'Main Net';
 
@@ -21,9 +22,29 @@ export interface Popup {
   readonly page: Page;
 }
 
+interface StoredNetworks {
+  readonly active: string;
+  readonly listed: readonly string[];
+  readonly futurenet: boolean;
+}
+
 const repository = 'https://github.com/stellar/freighter.git';
 const clones = join(import.meta.dirname, '.varial');
 const password = 'Stardust-conformance1';
+const futurenet: NetworkLabel = 'Future Net';
+
+// A UI step that can't finish in time fails at once, naming the step.
+const uiTimeoutMs = 10_000;
+const homeTimeoutMs = 20_000;
+const trustlineTimeoutMs = 45_000;
+
+const views = {
+  home: '/',
+  importAccount: '/account/import',
+  settings: '/settings',
+  advancedSettings: '/settings/advanced-settings',
+  networkSettings: '/manage-network/network-settings',
+};
 
 const routes: Record<string, PromptKind> = {
   'grant-access': 'connect',
@@ -46,9 +67,6 @@ const approveButtons: Record<PromptKind, string[]> = {
   ],
   addToken: ['add-token-approve'],
 };
-
-// Varial's own CI builds with this host when no backend is configured.
-const noIndexer = 'http://indexer.invalid';
 
 export default async function globalSetup(): Promise<void> {
   const tag = process.env.VARIAL_TAG || (await latestTag());
@@ -113,8 +131,6 @@ export function varialTestToken(tag: string): string | null {
 export class VarialExtension {
   private readonly popups: Page[] = [];
   private readonly waiting: ((page: Page) => void)[] = [];
-  private network = '';
-  private account = '';
   private locked = false;
 
   private constructor(
@@ -141,7 +157,10 @@ export class VarialExtension {
         `--load-extension=${build}`,
       ],
     });
-    if (!process.env.INDEXER_URL) await stubIndexer(context);
+    context.setDefaultTimeout(uiTimeoutMs);
+    context.setDefaultNavigationTimeout(homeTimeoutMs);
+    // Only the unset backend's host is routed, so a real backend still works.
+    await standInIndexer(context);
     const worker =
       context.serviceWorkers()[0] ??
       (await context.waitForEvent('serviceworker'));
@@ -152,8 +171,8 @@ export class VarialExtension {
 
   async onboard(accounts: readonly Account[]): Promise<void> {
     const { home } = this;
-    await this.open('');
-    await home.getByText('Import wallet').click();
+    await this.open(views.home);
+    await home.getByText('Import wallet').click({ timeout: homeTimeoutMs });
     await home.locator('#new-password-input').fill(password);
     await home.locator('#confirm-password-input').fill(password);
     await home.locator('#termsOfUse-input').check({ force: true });
@@ -163,16 +182,17 @@ export class VarialExtension {
       await home.locator(`#MnemonicPhrase-${index + 1}`).fill(word);
     }
     await home.getByRole('button', { name: 'Import' }).click();
-    await expect(home.getByText('You’re all set!')).toBeVisible({
-      timeout: 20_000,
-    });
+    await expect(
+      home.getByText('You’re all set!'),
+      'Varial finishes importing the recovery phrase',
+    ).toBeVisible({ timeout: homeTimeoutMs });
     await this.switchNetwork('Test Net');
     for (const account of accounts) await this.importAccount(account);
   }
 
   async importAccount({ address, keypair }: Account): Promise<void> {
     const { home } = this;
-    await this.open('/account/import');
+    await this.open(views.importAccount);
     await home.locator('#privateKey-input').fill(keypair.secret());
     await home.locator('#password-input').fill(password);
     await home.locator('#authorization-input').check({ force: true });
@@ -181,66 +201,91 @@ export class VarialExtension {
     await this.switchAccount(address);
   }
 
+  // Always clicked: a signing popup can switch Varial to the account it signs
+  // for, so the active account isn't known here.
   async switchAccount(address: string): Promise<void> {
     const { home } = this;
-    await this.open('');
+    await this.open(views.home);
+    await this.homeReady();
     await home.getByTestId('account-view-account-name').click();
     await home
       .getByTestId('wallet-row-select')
-      .filter({ hasText: `${address.slice(0, 4)}…${address.slice(-4)}` })
+      .filter({ hasText: shortKey(address) })
       .click();
+    await expect(
+      home.getByTestId('AccountSheet'),
+      `Varial switches to ${address} and closes the account list`,
+    ).toBeHidden();
     await this.homeReady();
-    this.account = address;
   }
 
-  async switchNetwork(label: NetworkLabel): Promise<void> {
+  // Futurenet is listed only while "Use Futurenet" is on, which replaces
+  // mainnet with it and makes it the active network.
+  async switchNetwork(name: string): Promise<void> {
     const { home } = this;
-    await this.networkSettings();
-    await home.getByTestId('network-settings-select').selectOption(label);
-    await home.getByTestId('BackButton').click();
-    await home.getByTestId('BackButton').click();
-    await this.homeReady();
-    this.network = label;
+    const useFuturenet = name === futurenet;
+    if ((await this.networks()).futurenet !== useFuturenet) {
+      await this.useFuturenet(useFuturenet);
+    }
+    if ((await this.networks()).active === name) return;
+    await this.open(views.networkSettings);
+    const select = home.getByTestId('network-settings-select');
+    await expect(select, "Varial's network settings").toBeVisible();
+    const { listed } = await this.networks();
+    if (!listed.includes(name)) {
+      throw new Error(
+        `Varial lists no network named "${name}". It lists ${listed.join(', ')}.`,
+      );
+    }
+    await select.selectOption(name);
+    await this.expectNetwork(name);
   }
 
   async addNetwork(network: CustomNetwork): Promise<void> {
     const { home } = this;
-    await this.networkSettings();
-    await home.getByText('Add custom network').click();
+    if ((await this.networks()).listed.includes(network.name)) {
+      await this.switchNetwork(network.name);
+      return;
+    }
+    await this.open(views.networkSettings);
+    await home.getByRole('button', { name: 'Add custom network' }).click();
     await home.getByTestId('NetworkForm__networkName').fill(network.name);
     await home.getByTestId('NetworkForm__networkUrl').fill(network.url);
     await home.getByTestId('NetworkForm__sorobanRpcUrl').fill(network.rpcUrl);
     await home
       .getByTestId('NetworkForm__networkPassphrase')
       .fill(network.passphrase);
+    await home.locator('#isSwitchSelected-input').check({ force: true });
     await home.getByTestId('NetworkForm__add').click();
-    await home.getByTestId('BackButton').click();
-    await home.getByTestId('BackButton').click();
-    await this.homeReady();
-    this.network = network.name;
+    await this.expectNetwork(network.name);
   }
 
   async lock(): Promise<void> {
-    await this.settings();
+    await this.open(views.settings);
     await this.home.getByTestId('settings-lock-freighter').click();
-    await expect(this.home.locator('#password-input')).toBeVisible();
+    await expect(
+      this.home.locator('#password-input'),
+      'Varial shows its unlock screen',
+    ).toBeVisible();
     this.locked = true;
   }
 
   async unlock(): Promise<void> {
     const { home } = this;
-    await this.open('');
+    await this.open(views.home);
     await home.locator('#password-input').fill(password);
     await home.getByRole('button', { name: 'Unlock' }).click();
     await this.homeReady();
     this.locked = false;
   }
 
-  // Every scenario starts unlocked, on testnet, with the given account.
+  // Every scenario starts unlocked, on testnet, with the given account and
+  // no popup left open.
   async reset(address: string): Promise<void> {
+    await this.closePopups();
     if (this.locked) await this.unlock();
-    if (this.network !== 'Test Net') await this.switchNetwork('Test Net');
-    if (this.account !== address) await this.switchAccount(address);
+    await this.switchNetwork('Test Net');
+    await this.switchAccount(address);
   }
 
   clearPopups(): void {
@@ -269,9 +314,13 @@ export class VarialExtension {
   // button, otherwise only close it.
   async answer(popup: Popup, approve: boolean): Promise<boolean> {
     const button = approveButton(popup);
-    const approvable = button !== null && (await isEnabled(button));
-    if (approve && approvable && button) await button.click();
-    else await popup.page.close();
+    const approvable = button !== null && (await isEnabled(popup.page, button));
+    if (approve && approvable && button) {
+      await button.click();
+      if (popup.kind === 'addToken') await confirmTrustline(popup.page);
+    } else {
+      await popup.page.close();
+    }
     return !approvable;
   }
 
@@ -289,28 +338,83 @@ export class VarialExtension {
     return wallet.generateMnemonic({ entropyBits: 128 });
   }
 
-  private async open(route: string): Promise<void> {
-    await this.home.goto(
-      `chrome-extension://${this.id}/index.html#${route || '/'}`,
-    );
+  // Reloaded when already there, so the view starts over with fresh data.
+  private async open(view: string): Promise<void> {
+    const url = `chrome-extension://${this.id}/index.html#${view}`;
+    if (this.home.url() === url) await this.home.reload();
+    else await this.home.goto(url);
   }
 
-  private async settings(): Promise<void> {
+  private async useFuturenet(on: boolean): Promise<void> {
     const { home } = this;
-    await this.open('');
-    await home.getByTestId('account-chip').click();
-    await home.getByTestId('account-sheet-settings').click();
+    await this.open(views.advancedSettings);
+    await home.getByText('I understand, continue').click();
+    const toggle = home.locator('#isExperimentalModeEnabledValue');
+    if ((await toggle.isChecked()) !== on) {
+      await home.getByTestId('isExperimentalModeEnabledValue').click();
+    }
+    await expect
+      .poll(async () => (await this.networks()).futurenet, {
+        message: `Varial turns "Use Futurenet" ${on ? 'on' : 'off'}`,
+        timeout: uiTimeoutMs,
+      })
+      .toBe(on);
   }
 
-  private async networkSettings(): Promise<void> {
-    await this.settings();
-    await this.home.getByTestId('settings-network-link').click();
+  private async expectNetwork(name: string): Promise<void> {
+    await expect
+      .poll(async () => (await this.networks()).active, {
+        message: `Varial switches to the network "${name}"`,
+        timeout: uiTimeoutMs,
+      })
+      .toBe(name);
+  }
+
+  // Read from Varial's storage, where its background keeps the networks.
+  private networks(): Promise<StoredNetworks> {
+    return this.home.evaluate(async () => {
+      interface Network {
+        readonly networkName?: string;
+      }
+      interface Stored {
+        readonly network?: Network;
+        readonly networksList?: readonly Network[];
+        readonly isExperimentalMode?: boolean;
+      }
+      const { chrome } = globalThis as unknown as {
+        chrome: {
+          storage: { local: { get(keys: string[]): Promise<Stored> } };
+        };
+      };
+      const {
+        network,
+        networksList = [],
+        isExperimentalMode,
+      } = await chrome.storage.local.get([
+        'network',
+        'networksList',
+        'isExperimentalMode',
+      ]);
+      return {
+        active: network?.networkName ?? '',
+        listed: networksList.map(({ networkName = '' }) => networkName),
+        futurenet: isExperimentalMode === true,
+      };
+    });
+  }
+
+  private async closePopups(): Promise<void> {
+    this.clearPopups();
+    for (const page of this.context.pages()) {
+      if (this.isPopup(page)) await page.close();
+    }
   }
 
   private async homeReady(): Promise<void> {
-    await expect(this.home.getByTestId('account-view')).toBeVisible({
-      timeout: 30_000,
-    });
+    await expect(
+      this.home.getByTestId('account-view'),
+      "Varial's home screen",
+    ).toBeVisible({ timeout: homeTimeoutMs });
   }
 
   private isPopup(page: Page): boolean {
@@ -319,6 +423,10 @@ export class VarialExtension {
       page.url().startsWith(`chrome-extension://${this.id}/`)
     );
   }
+}
+
+function shortKey(address: string): string {
+  return `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
 
 function popupKind(page: Page): Popup['kind'] {
@@ -335,9 +443,20 @@ function approveButton({ kind, page }: Popup): Locator | null {
 }
 
 // Popups load their data after they open, so a button may start disabled.
-async function isEnabled(button: Locator): Promise<boolean> {
+// Varial warns before signing from an account without XLM for the fee, and a
+// user can dismiss that warning to reach the button.
+async function isEnabled(page: Page, button: Locator): Promise<boolean> {
+  const warning = page.getByTestId('InsufficientBalanceWarning');
   try {
-    await button.first().waitFor({ state: 'visible', timeout: 15_000 });
+    await button
+      .first()
+      .or(warning)
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 });
+    if (await warning.isVisible()) {
+      await page.getByRole('button', { name: 'Got it' }).click();
+      await button.first().waitFor({ state: 'visible' });
+    }
     await expect(button.first()).toBeEnabled({ timeout: 5_000 });
     return true;
   } catch {
@@ -345,23 +464,29 @@ async function isEnabled(button: Locator): Promise<boolean> {
   }
 }
 
-// The answers Varial's own e2e stubs give for the backend calls every screen
-// makes, so an unconfigured backend shows no error toasts over the buttons.
-async function stubIndexer(context: BrowserContext): Promise<void> {
-  const answers: Record<string, unknown> = {
-    'rpc-health': { status: 'healthy' },
-    'feature-flags': { useSorobanPublic: true },
-    'user-notification': { enabled: false, message: '' },
-    'subscription/account': { data: {}, error: null },
-  };
-  await context.route(`${noIndexer}/**`, async (route) => {
-    const { pathname } = new URL(route.request().url());
-    const answer = Object.entries(answers).find(([path]) =>
-      pathname.endsWith(path),
+// For a Stellar Asset Contract, Add opens a changeTrust review. Varial answers
+// the app once it has submitted that transaction. A plain token's popup closes.
+async function confirmTrustline(page: Page): Promise<void> {
+  const reviewing = await page
+    .getByTestId('ChangeTrustInternal__Body')
+    .waitFor({ timeout: uiTimeoutMs })
+    .then(
+      () => true,
+      () => false,
     );
-    if (answer) await route.fulfill({ json: answer[1] });
-    else await route.abort();
-  });
+  if (!reviewing) return;
+  await page.getByRole('button', { name: 'Confirm', exact: true }).click();
+  await expect(
+    page.getByTestId('SubmitTransaction__Title__Success'),
+    'Varial adds the trustline on testnet',
+  ).toBeVisible({ timeout: trustlineTimeoutMs });
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect
+    .poll(() => page.isClosed(), {
+      message: 'Varial closes the popup after Done',
+      timeout: uiTimeoutMs,
+    })
+    .toBe(true);
 }
 
 function run(

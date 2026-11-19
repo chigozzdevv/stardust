@@ -1,7 +1,13 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
-import { Keypair, Networks } from '@stellar/stellar-sdk';
-import type { Asset } from '@stellar/stellar-sdk';
+import {
+  Asset,
+  Horizon,
+  Keypair,
+  Networks,
+  Operation,
+  TransactionBuilder,
+} from '@stellar/stellar-sdk';
 import { test as base, expect } from '@playwright/test';
 import type { Browser, BrowserContext, Page, TestInfo } from '@playwright/test';
 import { format, resolveConfig } from 'prettier';
@@ -13,6 +19,7 @@ import { Rpc, resolveNetwork } from '@/network/network';
 import { pageHost } from '@/test/host';
 import type { Wallet } from '@/wallet/wallet';
 import { addTrustline } from '@/wallet/signer';
+import { testnet } from '@conformance/indexer';
 import { VarialExtension } from '@conformance/setup';
 import type { CustomNetwork, NetworkLabel } from '@conformance/setup';
 import type {
@@ -85,6 +92,7 @@ interface WorkerFixtures {
 
 const promptTimeoutMs = 20_000;
 const replyTimeoutMs = 30_000;
+const trustlineFee = '10000';
 const goldenFolder = join(import.meta.dirname, '../tests/fixtures/varial');
 const labels: Record<Network, NetworkLabel> = {
   testnet: 'Test Net',
@@ -326,33 +334,21 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
   ) => {
     await use(async (scenario, options = {}) => {
       const url = server.url(`site${++sites}.localhost`);
-      const [own, mine] = options.funded
-        ? await Promise.all([
-            fundedAccount(stardust, options),
-            fundedAccount(stardust, options),
-          ])
-        : [];
+      const funded = options.funded
+        ? await fundedAccount(stardust, options)
+        : undefined;
+      const wallet = withFirst(funded, accounts);
       const custom = options.network;
 
-      if (own) await varial.importAccount(own);
+      if (funded) await varial.importAccount(funded);
       if (custom) await varial.addNetwork(custom);
-      const real = await VarialDriver.open(
-        varial,
-        withFirst(own, accounts),
-        url,
-      );
-      const recorded = await play(real, scenario).finally(async () => {
-        await real.close();
-        await varial.reset(accounts[0].address);
-      });
+      const real = await VarialDriver.open(varial, wallet, url);
+      const recorded = await play(real, scenario).finally(() => real.close());
+      await varial.reset(accounts[0].address);
+      if (funded) await removeTrustlines(funded, options);
 
       const wallets = custom ? await customStardust(custom) : stardust;
-      const emulated = await StardustDriver.open(
-        browser,
-        wallets,
-        withFirst(mine, accounts),
-        url,
-      );
+      const emulated = await StardustDriver.open(browser, wallets, wallet, url);
       const replayed = await play(emulated, scenario).finally(() =>
         emulated.close(),
       );
@@ -363,7 +359,7 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
         await record(testInfo, {
           varial: varial.tag,
           origin: new URL(url).origin,
-          accounts: withFirst(own, accounts).map(({ address }) => address),
+          accounts: wallet.map(({ address }) => address),
           network: custom ?? 'testnet',
           steps: recorded,
         });
@@ -398,6 +394,39 @@ async function fundedAccount(
     );
   }
   return account;
+}
+
+// Varial's run may add a trustline on testnet. Removing it lets Stardust's run
+// start from the same account in the same state.
+async function removeTrustlines(
+  { address, keypair }: Account,
+  { trustline }: CompareOptions,
+): Promise<void> {
+  const horizon = new Horizon.Server(testnet.horizonUrl);
+  const account = await horizon.loadAccount(address);
+  const held = account.balances.flatMap((line) =>
+    line.asset_type === 'credit_alphanum4' ||
+    line.asset_type === 'credit_alphanum12'
+      ? [new Asset(line.asset_code, line.asset_issuer)]
+      : [],
+  );
+  const added = held.filter((asset) => !trustline?.equals(asset));
+  if (added.length === 0) return;
+  const builder = new TransactionBuilder(account, {
+    fee: trustlineFee,
+    networkPassphrase: Networks.TESTNET,
+  });
+  for (const asset of added) {
+    builder.addOperation(Operation.changeTrust({ asset, limit: '0' }));
+  }
+  const transaction = builder.setTimeout(30).build();
+  transaction.sign(keypair);
+  await horizon.submitTransaction(transaction).catch((error: unknown) => {
+    throw new Error(
+      `Horizon didn't confirm the changeTrust that removes ${added.join(', ')} from ${address}, so Stardust's run can't start from the same state.`,
+      { cause: error },
+    );
+  });
 }
 
 // The wallet's network comes from getNetwork, so a custom network is an RPC
