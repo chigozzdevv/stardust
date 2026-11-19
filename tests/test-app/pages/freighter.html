@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Varial - Stardust test app</title>
+    <script type="module" src="/freighter.js"></script>
+  </head>
+  <body>
+    <h1>Varial</h1>
+    <button id="connect">Connect wallet</button>
+    <a id="install" href="https://varialwallet.com" hidden>Install Varial</a>
+    <p id="address" data-testid="address"></p>
+    <p id="status" role="status"></p>
+    <section id="wallet" hidden>
+      <label>Recipient <input id="recipient" /></label>
+      <label>Amount (XLM) <input id="amount" /></label>
+      <button id="pay">Send payment</button>
+      <button id="transfer">Transfer with contract</button>
+      <button id="pay-without-passphrase">
+        Send without network passphrase
+      </button>
+      <label>Message <input id="message" /></label>
+      <button id="sign-message">Sign message</button>
+      <button id="add-token">Add XLM token</button>
+    </section>
+  </body>
+</html>

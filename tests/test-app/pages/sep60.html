@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SEP-60 - Stardust test app</title>
+    <script type="module" src="/sep60.js"></script>
+  </head>
+  <body>
+    <h1>SEP-60 wallets</h1>
+    <div id="wallets"></div>
+    <p id="install" hidden>No Stellar wallet found. Install one to continue.</p>
+    <p id="address" data-testid="address"></p>
+    <p id="status" role="status"></p>
+    <section id="wallet" hidden>
+      <label>Message <input id="message" /></label>
+      <button id="sign-message">Sign message</button>
+    </section>
+  </body>
+</html>
