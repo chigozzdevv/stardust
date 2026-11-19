@@ -20,4 +20,11 @@ export default tseslint.config(
       'no-restricted-imports': ['error', { patterns: ['./*', '../*'] }],
     },
   },
+  {
+    // Playwright fixtures that need no other fixture take {} first.
+    files: ['conformance/**/*.ts', 'src/test/**/*.ts'],
+    rules: {
+      'no-empty-pattern': 'off',
+    },
+  },
 );

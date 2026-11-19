@@ -289,21 +289,18 @@ class StardustDriver implements Driver {
 
 export const test = base.extend<Fixtures, WorkerFixtures>({
   accounts: [
-    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       await use([randomAccount(), randomAccount()]);
     },
     { scope: 'worker' },
   ],
   stardust: [
-    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       await use(await createStardust({ network: 'testnet' }));
     },
     { scope: 'worker' },
   ],
   server: [
-    // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
       const server = await serveTestPage();
       await use(server);

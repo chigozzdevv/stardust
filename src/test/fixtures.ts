@@ -137,7 +137,6 @@ export const test: StardustTest = base.extend<InternalFixtures, WorkerFixtures>(
     ],
 
     _stardustReport: [
-      // eslint-disable-next-line no-empty-pattern
       async ({}, use, testInfo) => {
         const report: Report = { timeline: null, problems: [] };
         await use(report);
@@ -149,7 +148,6 @@ export const test: StardustTest = base.extend<InternalFixtures, WorkerFixtures>(
     ],
 
     _stardustWorker: [
-      // eslint-disable-next-line no-empty-pattern
       async ({}, use) => {
         const worker = new StardustWorker(process.cwd());
         await use(worker);
