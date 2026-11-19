@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
+    inputs:
+      scenarios:
+        description: Scenario files to run, separated by spaces, for example "submit-token.spec.ts network-details.spec.ts". Empty runs every file.
+        type: string
+        default: ''
+      grep:
+        description: Run only the scenarios whose title matches this regular expression (Playwright --grep).
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -45,7 +54,13 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Compare Stardust with Varial
-        run: pnpm test:conformance
+        env:
+          SCENARIOS: ${{ inputs.scenarios }}
+          GREP: ${{ inputs.grep }}
+        run: |
+          read -ra args <<< "$SCENARIOS"
+          if [ -n "$GREP" ]; then args+=(--grep "$GREP"); fi
+          pnpm test:conformance "${args[@]}"
 
       - name: Upload recorded Varial replies
         if: ${{ !cancelled() }}
