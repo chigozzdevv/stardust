@@ -9,13 +9,13 @@ import {
   sep43Failure,
   sep43Replies,
   sep43Request,
-} from '@/protocols/sep60/sep43.schema';
+} from '@/protocols/sep60/schema';
 import type {
   Sep43Error,
   Sep43Reply,
   Sep43Request,
   SignOptions,
-} from '@/protocols/sep60/sep43.schema';
+} from '@/protocols/sep60/schema';
 import {
   boundAddress,
   decodeAuthPreimage,

@@ -13,7 +13,7 @@ import type {
   ContractFailure,
 } from '@/network/events';
 import type { Rpc } from '@/network/network';
-import type { TransactionInfo } from '@/network/network.schema';
+import type { TransactionInfo } from '@/network/schema';
 
 export type Landed =
   | {

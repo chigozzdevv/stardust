@@ -2,12 +2,8 @@ import { stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ZodError } from 'zod';
-import {
-  accountOptions,
-  stardustConfig,
-  testOptions,
-} from '@/config/config.schema';
-import type { TestOptions } from '@/config/config.schema';
+import { accountOptions, stardustConfig, testOptions } from '@/config/schema';
+import type { TestOptions } from '@/config/schema';
 import { StardustError } from '@/errors';
 
 export interface StardustConfig {

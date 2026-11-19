@@ -7,11 +7,8 @@ import {
   varialRequest,
   varialType,
   versionPattern,
-} from '@/protocols/varial/varial.schema';
-import type {
-  VarialReply,
-  VarialRequest,
-} from '@/protocols/varial/varial.schema';
+} from '@/protocols/varial/schema';
+import type { VarialReply, VarialRequest } from '@/protocols/varial/schema';
 import {
   boundAddress,
   decodeAuthPreimage,

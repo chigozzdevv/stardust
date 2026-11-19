@@ -15,7 +15,7 @@ import type {
 } from '@playwright/test';
 import { loadConfig, parseTestOptions } from '@/config/config';
 import type { LoadedConfig } from '@/config/config';
-import type { TestOptions } from '@/config/config.schema';
+import type { TestOptions } from '@/config/schema';
 import { ContractSpecs } from '@/contracts/spec';
 import { StardustError } from '@/errors';
 import { createAccounts, mergeAccounts } from '@/funding/accounts';

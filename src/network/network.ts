@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { Networks } from '@stellar/stellar-sdk';
 import type { z } from 'zod';
 import { StardustError } from '@/errors';
-import { rpcEnvelope, rpcResults } from '@/network/network.schema';
-import type { RpcMethod, RpcResult } from '@/network/network.schema';
+import { rpcEnvelope, rpcResults } from '@/network/schema';
+import type { RpcMethod, RpcResult } from '@/network/schema';
 
 export interface CoreConfig {
   network: 'testnet' | { rpcUrl: string };

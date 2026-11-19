@@ -14,7 +14,7 @@ import {
   contractFailure,
   decodeEvents,
 } from '@/network/events';
-import { transactionInfo } from '@/network/network.schema';
+import { transactionInfo } from '@/network/schema';
 import { recordedResult } from '@tests/fixtures/rpc/replay';
 
 const native = 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC';

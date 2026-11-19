@@ -52,7 +52,7 @@ pnpm conformance:record   # the same, and writes Varial's replies to tests/fixtu
 
 ## Conventions
 
-- File names are kebab-case with at most 2 hyphens. A domain folder's main file is named after the folder (`network/network.ts`, `protocols/varial/varial.ts`). Zod schemas go in `<name>.schema.ts` next to it.
+- File names are kebab-case with at most 2 hyphens. A domain folder's main file is named after the folder (`network/network.ts`, `protocols/varial/varial.ts`), and its Zod schemas go in `schema.ts` in the same folder.
 - Imports use the aliases `@/` (`src`) and `@tests/` (`tests`). ESLint rejects relative imports.
 - Use `import type` for type-only imports.
 - Identifiers are camelCase, matching the API in the spec.

@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { xlm } from '@/amounts';
 import type { Account } from '@/funding/accounts';
 import { Varial } from '@/protocols/varial/varial';
-import { varialReplies, varialRequest } from '@/protocols/varial/varial.schema';
+import { varialReplies, varialRequest } from '@/protocols/varial/schema';
 import type { Policy } from '@/wallet/policy';
 import { declined, internalError } from '@/wallet/prompts';
 import type { WalletError } from '@/wallet/prompts';
