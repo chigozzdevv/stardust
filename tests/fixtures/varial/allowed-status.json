@@ -1,0 +1,318 @@
+{
+  "freighter: isAllowed() on a site that is not connected": {
+    "varial": "5.53.0",
+    "origin": "https://site1.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "freighter: isAllowed() on a connected site": {
+    "varial": "5.53.0",
+    "origin": "https://site2.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": true },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: isAllowed() on a site that is not connected": {
+    "varial": "5.53.0",
+    "origin": "https://site3.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "varial.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: isAllowed() on a connected site": {
+    "varial": "5.53.0",
+    "origin": "https://site4.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": true },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "after switching account": {
+    "varial": "5.53.0",
+    "origin": "https://site5.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      { "action": "switchAccount", "account": 1 },
+      {
+        "call": "freighter.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "after switching network": {
+    "varial": "5.53.0",
+    "origin": "https://site6.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      { "action": "switchNetwork", "network": "futurenet" },
+      {
+        "call": "freighter.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked": {
+    "varial": "5.53.0",
+    "origin": "https://site7.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      { "action": "lock" },
+      {
+        "call": "freighter.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

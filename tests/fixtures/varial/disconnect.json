@@ -1,0 +1,265 @@
+{
+  "on a connected site": {
+    "varial": "5.53.0",
+    "origin": "https://site13.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.disconnect",
+        "args": [],
+        "prompts": [],
+        "value": {},
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "DISCONNECT"
+            },
+            "reply": { "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE" }
+          }
+        ]
+      },
+      {
+        "call": "varial.getAddress",
+        "args": [],
+        "prompts": [],
+        "value": { "address": "" },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_PUBLIC_KEY"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": ""
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.isAllowed",
+        "args": [],
+        "prompts": [],
+        "value": { "isAllowed": false },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ALLOWED_STATUS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "isAllowed": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on a site that is not connected": {
+    "varial": "5.53.0",
+    "origin": "https://site14.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "varial.disconnect",
+        "args": [],
+        "prompts": [],
+        "value": {},
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "DISCONNECT"
+            },
+            "reply": { "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE" }
+          }
+        ]
+      }
+    ]
+  },
+  "only for the active account": {
+    "varial": "5.53.0",
+    "origin": "https://site15.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      { "action": "switchAccount", "account": 1 },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.disconnect",
+        "args": [],
+        "prompts": [],
+        "value": {},
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "DISCONNECT"
+            },
+            "reply": { "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE" }
+          }
+        ]
+      },
+      { "action": "switchAccount", "account": 0 },
+      {
+        "call": "varial.getAddress",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_PUBLIC_KEY"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked": {
+    "varial": "5.53.0",
+    "origin": "https://site16.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4"
+            }
+          }
+        ]
+      },
+      { "action": "lock" },
+      {
+        "call": "varial.disconnect",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "error": {
+            "code": -1,
+            "message": "The wallet is locked. Unlock Varial and try again."
+          }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "DISCONNECT"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -1,
+                "message": "The wallet is locked. Unlock Varial and try again."
+              },
+              "error": "The wallet is locked. Unlock Varial and try again."
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

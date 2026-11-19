@@ -1,0 +1,441 @@
+{
+  "freighter: requestAccess() approved": {
+    "varial": "5.53.0",
+    "origin": "https://site9.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.getAddress",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_PUBLIC_KEY"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "freighter: requestAccess() rejected": {
+    "varial": "5.53.0",
+    "origin": "https://site10.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "reject" }
+        ],
+        "value": {
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              },
+              "error": "The user rejected this request."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: requestAccess() approved": {
+    "varial": "5.53.0",
+    "origin": "https://site11.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "varial.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.getAddress",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_PUBLIC_KEY"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: requestAccess() rejected": {
+    "varial": "5.53.0",
+    "origin": "https://site12.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "varial.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "reject" }
+        ],
+        "value": {
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              },
+              "error": "The user rejected this request."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on a connected site": {
+    "varial": "5.53.0",
+    "origin": "https://site13.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "after switching account": {
+    "varial": "5.53.0",
+    "origin": "https://site14.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      { "action": "switchAccount", "account": 1 },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "after switching network": {
+    "varial": "5.53.0",
+    "origin": "https://site15.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      { "action": "switchNetwork", "network": "futurenet" },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked, on a connected site": {
+    "varial": "5.53.0",
+    "origin": "https://site16.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      { "action": "lock" },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [{ "kind": "connect", "blocked": true, "answer": "reject" }],
+        "value": {
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              },
+              "error": "The user rejected this request."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked, on a site that is not connected": {
+    "varial": "5.53.0",
+    "origin": "https://site17.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "lock" },
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [{ "kind": "connect", "blocked": true, "answer": "reject" }],
+        "value": {
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              },
+              "error": "The user rejected this request."
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

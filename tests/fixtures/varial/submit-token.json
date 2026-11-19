@@ -1,0 +1,633 @@
+{
+  "freighter: native XLM": {
+    "varial": "5.53.0",
+    "origin": "https://site56.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: native XLM": {
+    "varial": "5.53.0",
+    "origin": "https://site57.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.addToken",
+        "args": [
+          {
+            "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "a plain Soroban token": {
+    "varial": "5.53.0",
+    "origin": "https://site58.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "a plain Soroban token on a site that is not connected": {
+    "varial": "5.53.0",
+    "origin": "https://site59.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "a plain Soroban token, rejected": {
+    "varial": "5.53.0",
+    "origin": "https://site60.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": false, "answer": "reject" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CAZXEHTSQATVQVWDPWWDTFSY6CM764JD4MZ6HUVPO3QKS64QEEP4KJH7",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "a Stellar Asset Contract without a trustline": {
+    "varial": "5.53.0",
+    "origin": "https://site61.localhost:32973",
+    "accounts": [
+      "GBKS6J3KI5EDZWGYO5TIKRLF4SOICXPNGZAYCXJOR77DT7TYELIMQXCH",
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GBKS6J3KI5EDZWGYO5TIKRLF4SOICXPNGZAYCXJOR77DT7TYELIMQXCH"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GBKS6J3KI5EDZWGYO5TIKRLF4SOICXPNGZAYCXJOR77DT7TYELIMQXCH"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "a Stellar Asset Contract with a trustline": {
+    "varial": "5.53.0",
+    "origin": "https://site62.localhost:32973",
+    "accounts": [
+      "GDVGIOOBDF2TFOZPUTH4QJ3FAOVW55TLFQQYIMZP7JG2HSS2DOOAKNDH",
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDVGIOOBDF2TFOZPUTH4QJ3FAOVW55TLFQQYIMZP7JG2HSS2DOOAKNDH"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDVGIOOBDF2TFOZPUTH4QJ3FAOVW55TLFQQYIMZP7JG2HSS2DOOAKNDH"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "without networkPassphrase": {
+    "varial": "5.53.0",
+    "origin": "https://site63.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "for another network": {
+    "varial": "5.53.0",
+    "origin": "https://site64.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+            "networkPassphrase": "Test SDF Future Network ; October 2022"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+              "networkPassphrase": "Test SDF Future Network ; October 2022",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked": {
+    "varial": "5.53.0",
+    "origin": "https://site65.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.requestAccess",
+        "args": [],
+        "prompts": [
+          { "kind": "connect", "blocked": false, "answer": "approve" }
+        ],
+        "value": {
+          "address": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_ACCESS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "publicKey": "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB"
+            }
+          }
+        ]
+      },
+      { "action": "lock" },
+      {
+        "call": "freighter.addToken",
+        "args": [
+          {
+            "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "networkPassphrase": "Test SDF Network ; September 2015"
+          }
+        ],
+        "prompts": [
+          { "kind": "addToken", "blocked": true, "answer": "approve" }
+        ],
+        "value": {
+          "contractId": "",
+          "error": { "code": -4, "message": "The user rejected this request." }
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "contractId": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "networkPassphrase": "Test SDF Network ; September 2015",
+              "type": "SUBMIT_TOKEN"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "apiError": {
+                "code": -4,
+                "message": "The user rejected this request."
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

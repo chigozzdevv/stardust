@@ -1,0 +1,311 @@
+{
+  "freighter: getNetworkDetails() and getNetwork() on testnet": {
+    "varial": "5.53.0",
+    "origin": "https://site17.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "freighter.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "TESTNET",
+          "networkUrl": "https://horizon-testnet.stellar.org",
+          "networkPassphrase": "Test SDF Network ; September 2015",
+          "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot.stellar.org",
+                "network": "TESTNET",
+                "networkName": "Test Net",
+                "networkPassphrase": "Test SDF Network ; September 2015",
+                "networkUrl": "https://horizon-testnet.stellar.org",
+                "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "call": "freighter.getNetwork",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "TESTNET",
+          "networkPassphrase": "Test SDF Network ; September 2015"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot.stellar.org",
+                "network": "TESTNET",
+                "networkName": "Test Net",
+                "networkPassphrase": "Test SDF Network ; September 2015",
+                "networkUrl": "https://horizon-testnet.stellar.org",
+                "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "varial: getNetworkDetails() and getNetwork() on testnet": {
+    "varial": "5.53.0",
+    "origin": "https://site18.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "varial.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "TESTNET",
+          "networkUrl": "https://horizon-testnet.stellar.org",
+          "networkPassphrase": "Test SDF Network ; September 2015",
+          "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot.stellar.org",
+                "network": "TESTNET",
+                "networkName": "Test Net",
+                "networkPassphrase": "Test SDF Network ; September 2015",
+                "networkUrl": "https://horizon-testnet.stellar.org",
+                "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "call": "varial.getNetwork",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "TESTNET",
+          "networkPassphrase": "Test SDF Network ; September 2015"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot.stellar.org",
+                "network": "TESTNET",
+                "networkName": "Test Net",
+                "networkPassphrase": "Test SDF Network ; September 2015",
+                "networkUrl": "https://horizon-testnet.stellar.org",
+                "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on futurenet": {
+    "varial": "5.53.0",
+    "origin": "https://site19.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "switchNetwork", "network": "futurenet" },
+      {
+        "call": "freighter.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "FUTURENET",
+          "networkUrl": "https://horizon-futurenet.stellar.org",
+          "networkPassphrase": "Test SDF Future Network ; October 2022",
+          "sorobanRpcUrl": "https://rpc-futurenet.stellar.org/"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot-futurenet.stellar.org",
+                "network": "FUTURENET",
+                "networkName": "Future Net",
+                "networkPassphrase": "Test SDF Future Network ; October 2022",
+                "networkUrl": "https://horizon-futurenet.stellar.org",
+                "sorobanRpcUrl": "https://rpc-futurenet.stellar.org/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on mainnet": {
+    "varial": "5.53.0",
+    "origin": "https://site20.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "switchNetwork", "network": "mainnet" },
+      {
+        "call": "freighter.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "PUBLIC",
+          "networkUrl": "https://horizon.stellar.org",
+          "networkPassphrase": "Public Global Stellar Network ; September 2015",
+          "sorobanRpcUrl": "http://stellar-rpc-pubnet-prd:8000"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "network": "PUBLIC",
+                "networkName": "Main Net",
+                "networkPassphrase": "Public Global Stellar Network ; September 2015",
+                "networkUrl": "https://horizon.stellar.org",
+                "sorobanRpcUrl": "http://stellar-rpc-pubnet-prd:8000"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on a custom network": {
+    "varial": "5.53.0",
+    "origin": "https://site21.localhost:33103",
+    "accounts": [
+      "GAMX43VAT5DLZXDL27IQ2VPSF25YZIXSPA4I5VRF466HFTG2JW3ADJY4",
+      "GAUY4WWWQBGMEQL3NS5NUILY2TSXKKLCN6VCIXTVB2LTO6MWXULBN7SL"
+    ],
+    "network": {
+      "name": "Custom Network",
+      "url": "https://localhost:8000/",
+      "rpcUrl": "https://localhost:8000/",
+      "passphrase": "Standalone Network ; February 2017"
+    },
+    "steps": [
+      {
+        "call": "freighter.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "STANDALONE",
+          "networkUrl": "https://localhost:8000/",
+          "networkPassphrase": "Standalone Network ; February 2017",
+          "sorobanRpcUrl": "https://localhost:8000/"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "",
+                "network": "STANDALONE",
+                "networkName": "Custom Network",
+                "networkPassphrase": "Standalone Network ; February 2017",
+                "networkUrl": "https://localhost:8000/",
+                "sorobanRpcUrl": "https://localhost:8000/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked": {
+    "varial": "5.53.0",
+    "origin": "https://site1.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "lock" },
+      {
+        "call": "freighter.getNetworkDetails",
+        "args": [],
+        "prompts": [],
+        "value": {
+          "network": "TESTNET",
+          "networkUrl": "https://horizon-testnet.stellar.org",
+          "networkPassphrase": "Test SDF Network ; September 2015",
+          "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+        },
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK_DETAILS"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "networkDetails": {
+                "friendbotUrl": "https://friendbot.stellar.org",
+                "network": "TESTNET",
+                "networkName": "Test Net",
+                "networkPassphrase": "Test SDF Network ; September 2015",
+                "networkUrl": "https://horizon-testnet.stellar.org",
+                "sorobanRpcUrl": "https://soroban-testnet.stellar.org/"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

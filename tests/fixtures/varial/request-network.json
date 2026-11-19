@@ -1,0 +1,91 @@
+{
+  "on testnet": {
+    "varial": "5.53.0",
+    "origin": "https://site18.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      {
+        "call": "postMessage",
+        "args": [{ "type": "REQUEST_NETWORK" }],
+        "prompts": [],
+        "value": null,
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "network": "TESTNET"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "on futurenet": {
+    "varial": "5.53.0",
+    "origin": "https://site19.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "switchNetwork", "network": "futurenet" },
+      {
+        "call": "postMessage",
+        "args": [{ "type": "REQUEST_NETWORK" }],
+        "prompts": [],
+        "value": null,
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "network": "FUTURENET"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "while locked": {
+    "varial": "5.53.0",
+    "origin": "https://site20.localhost:32973",
+    "accounts": [
+      "GDHROT43MH6HOMOUSURJX4T4QG6QTRHTICTBXIBCWCLYZBNI2JBH3ZOB",
+      "GAVE7GJECCQ2KKGSNZOG6W7FRXQRJ4ECNYS3UUSPKUP4KGGFUITQ6XT2"
+    ],
+    "network": "testnet",
+    "steps": [
+      { "action": "lock" },
+      {
+        "call": "postMessage",
+        "args": [{ "type": "REQUEST_NETWORK" }],
+        "prompts": [],
+        "value": null,
+        "exchanges": [
+          {
+            "request": {
+              "source": "FREIGHTER_EXTERNAL_MSG_REQUEST",
+              "type": "REQUEST_NETWORK"
+            },
+            "reply": {
+              "source": "FREIGHTER_EXTERNAL_MSG_RESPONSE",
+              "network": "TESTNET"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
