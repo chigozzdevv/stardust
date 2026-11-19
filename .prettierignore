@@ -5,3 +5,4 @@ stardust-results
 .agents
 conformance/.varial
 stardust.md
+tests/api/*.api.md

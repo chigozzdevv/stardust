@@ -53,6 +53,9 @@ jobs:
       - name: Run unit tests
         run: pnpm test
 
+      - name: Check the public API
+        run: pnpm api:check
+
   e2e:
     name: End-to-end tests on testnet
     needs: checks

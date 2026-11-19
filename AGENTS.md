@@ -29,6 +29,7 @@ This is a single TypeScript ESM package with two entries, `stardust-stellar` and
 | `tests/helpers`  | Shared test code: fake ledger, RPC replay, fake page, envelopes, test benches.            |
 | `tests/e2e`      | Stardust against the test app on testnet.                                                 |
 | `tests/test-app` | The small test app.                                                                       |
+| `tests/api`      | API Extractor configs and the public API reports of both entries, checked in CI.          |
 
 ## Commands
 
@@ -43,6 +44,8 @@ pnpm test                 # unit tests (Vitest)
 pnpm test:e2e             # build, then stardust test in tests/test-app on testnet
 pnpm test:conformance     # the scenarios against real Varial and against Stardust
 pnpm conformance:record   # the same, and writes Varial's replies to tests/fixtures/varial/
+pnpm api:check            # build, then fail if the public API differs from the reports in tests/api/
+pnpm api:update           # build, then rewrite the reports in tests/api/
 ```
 
 - Run `pnpm build` before `pnpm typecheck`. The e2e specs and `tests/test-app/stardust.config.ts` import `stardust-stellar` from `dist`, so typecheck reads its type files.
@@ -50,6 +53,7 @@ pnpm conformance:record   # the same, and writes Varial's replies to tests/fixtu
 - `pnpm test:e2e` sends real testnet transactions and funds every test's accounts through the machine funder in `~/.stardust/funders/`, which calls Friendbot when it's created or refilled. Pass a file to run only that one, for example `pnpm test:e2e pay.spec.ts`. Results, with screenshots and traces of failed tests, go to `tests/test-app/stardust-results/`.
 - `pnpm test:conformance` clones `stellar/freighter` at its latest release into `conformance/.varial/<tag>` and builds it with Yarn 4 (run `corepack enable yarn` once on Node 22). Set `VARIAL_TAG` to pin a release, and `INDEXER_URL` and `INDEXER_V2_URL` to use Varial's backend instead of the stub. The two Stellar Asset Contract `addToken` scenarios fund accounts through the machine funder. Results go to `conformance/stardust-results/`, and the nightly `conformance.yml` runs it in record mode.
 - `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/fixtures/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences.
+- `pnpm api:check` compares the public API of both entries with `tests/api/index.api.md` and `tests/api/test.api.md`, and on any difference prints it and fails. CI runs it. When you change the public API on purpose, run `pnpm api:update`, review the reports' diff, and commit the reports with the change.
 
 ## Conventions
 
@@ -84,4 +88,4 @@ These come from section 9 of the spec. Do not weaken them.
 
 ## Before you finish
 
-Run the checks that cover what you changed, in this order: at least `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm format:check` and `pnpm test`.
+Run the checks that cover what you changed, in this order: at least `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` and `pnpm api:check`.

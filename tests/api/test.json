@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "extends": "./index.json",
+  "mainEntryPointFilePath": "<projectFolder>/dist/test/index.d.ts",
+  "apiReport": {
+    "enabled": true,
+    "reportFileName": "test"
+  }
+}
