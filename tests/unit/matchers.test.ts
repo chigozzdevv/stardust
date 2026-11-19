@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { xlm } from '@/amounts';
 import { expect as check } from '@/test/index';
 import type { DecodedTransaction, Invocation } from '@/wallet/decode';
@@ -287,15 +287,21 @@ describe('toLand', () => {
   );
 
   it('waits for a pending prompt to be answered', async () => {
-    const prompt = await transactionPrompt({
-      policy: 'manual',
-      send: replay(...recording('classic-payment')),
-      transaction: { hash: hashOf('classic-payment') },
-    });
-    const landed = check(prompt).toLand({ timeoutMs: 5_000 });
-    setTimeout(() => void prompt.approve(), 20);
-    await landed;
-    expect(prompt.status).toBe('approved');
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    try {
+      const prompt = await transactionPrompt({
+        policy: 'manual',
+        send: replay(...recording('classic-payment')),
+        transaction: { hash: hashOf('classic-payment') },
+      });
+      const landed = check(prompt).toLand({ timeoutMs: 5_000 });
+      setTimeout(() => void prompt.approve(), 20);
+      await vi.advanceTimersByTimeAsync(20);
+      await landed;
+      expect(prompt.status).toBe('approved');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('fails naming the status when a pending prompt is not answered in time', async () => {
@@ -306,10 +312,18 @@ describe('toLand', () => {
   });
 
   it('fails naming the status when a pending prompt is rejected while waiting', async () => {
-    const prompt = await transactionPrompt({ policy: 'manual' });
-    const landed = check(prompt).toLand({ timeoutMs: 5_000 });
-    setTimeout(() => void prompt.reject(), 20);
-    await expect(landed).rejects.toThrow('p1 signTransaction is rejected');
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    try {
+      const prompt = await transactionPrompt({ policy: 'manual' });
+      const failed = expect(
+        check(prompt).toLand({ timeoutMs: 5_000 }),
+      ).rejects.toThrow('p1 signTransaction is rejected');
+      setTimeout(() => void prompt.reject(), 20);
+      await vi.advanceTimersByTimeAsync(20);
+      await failed;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('throws OUTCOME_UNKNOWN when the transaction never appears', async () => {
