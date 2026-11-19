@@ -1,0 +1,57 @@
+{
+  "name": "stardust-stellar",
+  "version": "0.1.0",
+  "description": "End-to-end testing for Stellar dapps",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": "^22.18.0 || >=23.6.0"
+  },
+  "bin": {
+    "stardust": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./test": {
+      "types": "./dist/test/index.d.ts",
+      "default": "./dist/test/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests/e2e",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "pnpm build && cd tests/test-app && node ../../dist/cli/index.js test",
+    "test:conformance": "playwright test -c conformance",
+    "conformance:record": "CONFORMANCE_RECORD=1 playwright test -c conformance"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.65.0",
+    "@stellar/stellar-sdk": "^17.4.0",
+    "zod": "^4.6.0"
+  },
+  "devDependencies": {
+    "@creit.tech/stellar-wallets-kit": "2.8.0",
+    "@eslint/js": "10.0.1",
+    "@stellar/freighter-api": "6.0.1",
+    "@stellar/varial-sdk": "7.0.0",
+    "@types/node": "22.20.5",
+    "esbuild": "0.27.7",
+    "eslint": "10.13.0",
+    "prettier": "3.9.10",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "5.0.5"
+  }
+}

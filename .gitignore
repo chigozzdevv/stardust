@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+stardust-results/
+.agents/
+conformance/.varial/
+.env
+.env.*
+.DS_Store
+*.tsbuildinfo
