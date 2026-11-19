@@ -1,0 +1,36 @@
+{
+  "source": "https://github.com/stellar/stellar-protocol/blob/b1933843d71eea2a5b537b5a1af6592c4bdc6afe/ecosystem/sep-0053.md#test-cases",
+  "version": "1.0.0",
+  "vectors": [
+    {
+      "name": "Sign a simple ASCII message",
+      "message": "Hello, World!",
+      "seed": "SAKICEVQLYWGSOJS4WW7HZJWAHZVEEBS527LHK5V4MLJALYKICQCJXMW",
+      "address": "GBXFXNDLV4LSWA4VB7YIL5GBD7BVNR22SGBTDKMO2SBZZHDXSKZYCP7L",
+      "signature": {
+        "base64": "fO5dbYhXUhBMhe6kId/cuVq/AfEnHRHEvsP8vXh03M1uLpi5e46yO2Q8rEBzu3feXQewcQE5GArp88u6ePK6BA==",
+        "hex": "7cee5d6d885752104c85eea421dfdcb95abf01f1271d11c4bec3fcbd7874dccd6e2e98b97b8eb23b643cac4073bb77de5d07b0710139180ae9f3cbba78f2ba04"
+      }
+    },
+    {
+      "name": "Sign a Japanese message",
+      "message": "こんにちは、世界！",
+      "seed": "SAKICEVQLYWGSOJS4WW7HZJWAHZVEEBS527LHK5V4MLJALYKICQCJXMW",
+      "address": "GBXFXNDLV4LSWA4VB7YIL5GBD7BVNR22SGBTDKMO2SBZZHDXSKZYCP7L",
+      "signature": {
+        "base64": "CDU265Xs8y3OWbB/56H9jPgUss5G9A0qFuTqH2zs2YDgTm+++dIfmAEceFqB7bhfN3am59lCtDXrCtwH2k1GBA==",
+        "hex": "083536eb95ecf32dce59b07fe7a1fd8cf814b2ce46f40d2a16e4ea1f6cecd980e04e6fbef9d21f98011c785a81edb85f3776a6e7d942b435eb0adc07da4d4604"
+      }
+    },
+    {
+      "name": "Sign a binary message",
+      "messageBase64": "2zZDP1sa1BVBfLP7TeeMk3sUbaxAkUhBhDiNdrksaFo=",
+      "seed": "SAKICEVQLYWGSOJS4WW7HZJWAHZVEEBS527LHK5V4MLJALYKICQCJXMW",
+      "address": "GBXFXNDLV4LSWA4VB7YIL5GBD7BVNR22SGBTDKMO2SBZZHDXSKZYCP7L",
+      "signature": {
+        "base64": "VA1+7hefNwv2NKScH6n+Sljj15kLAge+M2wE7fzFOf+L0MMbssA1mwfJZRyyrhBORQRle10X1Dxpx+UOI4EbDQ==",
+        "hex": "540d7eee179f370bf634a49c1fa9fe4a58e3d7990b0207be336c04edfcc539ff8bd0c31bb2c0359b07c9651cb2ae104e4504657b5d17d43c69c7e50e23811b0d"
+      }
+    }
+  ]
+}
