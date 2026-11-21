@@ -2,7 +2,27 @@
   "name": "stardust-stellar",
   "version": "0.1.0",
   "description": "End-to-end testing for Stellar dapps",
+  "keywords": [
+    "stellar",
+    "soroban",
+    "playwright",
+    "e2e",
+    "testing",
+    "wallet",
+    "varial",
+    "freighter",
+    "dapp"
+  ],
+  "homepage": "https://github.com/chigozzdevv/stardust#readme",
+  "bugs": {
+    "url": "https://github.com/chigozzdevv/stardust/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chigozzdevv/stardust.git"
+  },
   "license": "MIT",
+  "author": "Ukpaa Chigozie",
   "type": "module",
   "packageManager": "pnpm@12.3.4",
   "engines": {
@@ -24,6 +44,10 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tests/e2e",

@@ -52,8 +52,16 @@ pnpm api:update           # build, then rewrite the reports in tests/api/
 - Some unit tests run in Chromium. Install it once with `pnpm exec playwright install chromium`.
 - `pnpm test:e2e` sends real testnet transactions and funds every test's accounts through the machine funder in `~/.stardust/funders/`, which calls Friendbot when it's created or refilled. Pass a file to run only that one, for example `pnpm test:e2e pay.spec.ts`. Results, with screenshots and traces of failed tests, go to `tests/test-app/stardust-results/`.
 - `pnpm test:conformance` clones `stellar/freighter` at its latest release into `conformance/.varial/<tag>` and builds it with Yarn 4 (run `corepack enable yarn` once on Node 22). Set `VARIAL_TAG` to pin a release, and `INDEXER_URL` and `INDEXER_V2_URL` to use Varial's backend instead of the stub. The two Stellar Asset Contract `addToken` scenarios fund accounts through the machine funder. Results go to `conformance/stardust-results/`, and the nightly `conformance.yml` runs it in record mode.
-- `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/fixtures/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences.
+- `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/fixtures/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences. When the replies come from a new Varial release, change `varialVersion` in `src/protocols/varial/varial.ts` in the same commit; `golden.test.ts` fails while the two differ.
 - `pnpm api:check` compares the public API of both entries with `tests/api/index.api.md` and `tests/api/test.api.md`, and on any difference prints it and fails. CI runs it. When you change the public API on purpose, run `pnpm api:update`, review the reports' diff, and commit the reports with the change.
+
+## Releasing
+
+1. Set `version` in `package.json`, and rename `## Unreleased` in `CHANGELOG.md` to the version and date. The entry names the Varial, SEP-43 and SEP-60 versions the release matches.
+2. Commit both as `chore: release <version>`, then push a tag `v<version>` on that commit.
+3. `publish.yml` runs CI on the tag, checks the tag matches `package.json`, and publishes to npm with provenance.
+
+Never publish from a local machine, and never move or reuse a version tag.
 
 ## Conventions
 
