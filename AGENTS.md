@@ -77,7 +77,7 @@ Never publish from a local machine, and never move or reuse a version tag.
 - Comment only when the code can't explain itself. No large comment blocks or banners.
 - Public API types, functions and members get a short TSDoc comment, worded from the spec, when it says something the name and type don't: units, formats, defaults, behaviour, errors thrown. It's what users see when they hover in their editor. Don't add one that only repeats the name; the API report then shows the item as `(undocumented)`, which is fine.
 - Unit tests go in `tests/unit`, test data in `tests/data`. Never hand-write data that claims to be recorded: golden Varial replies come from the conformance suite, RPC responses from real testnet calls.
-- Commit messages use a type prefix: `feat:`, `fix:`, `refactor:`, `test:`, `doc:`, `chore:`.
+- Commit messages use a type prefix: `feat:`, `fix:`, `refactor:`, `test:`, `doc:`, `chore:`. Keep them short, a few words after the prefix, such as `refactor: rename test folders`.
 
 ## Safety rules
 
