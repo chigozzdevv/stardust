@@ -1,4 +1,5 @@
 import { stat } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ZodError } from 'zod';
@@ -33,20 +34,37 @@ export async function loadConfig(cwd: string): Promise<LoadedConfig> {
       `no stardust.config.ts in ${cwd}. Run this from your project folder.`,
     );
   }
-  const loaded = await import(pathToFileURL(file).href).catch(
-    (error: unknown) => {
-      throw new StardustError(
-        'CONFIG_INVALID',
-        `stardust.config.ts couldn't be loaded: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error },
-      );
-    },
-  );
+  const loaded = await load(file).catch((error: unknown) => {
+    throw new StardustError(
+      'CONFIG_INVALID',
+      `stardust.config.ts couldn't be loaded: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
+  });
   return parseConfig(defaultExport(loaded), cwd);
 }
 
+// In a test worker of a project without "type": "module", Playwright compiles
+// the config to CommonJS, and on Node 22 import() then fails as soon as the
+// config imports stardust-stellar. require() works there, and everywhere else
+// except a config with top-level await.
+async function load(file: string): Promise<{ default?: unknown }> {
+  try {
+    return createRequire(file)(file) as { default?: unknown };
+  } catch (error) {
+    if (codeOf(error) !== 'ERR_REQUIRE_ASYNC_MODULE') throw error;
+    return import(pathToFileURL(file).href) as Promise<{ default?: unknown }>;
+  }
+}
+
+function codeOf(error: unknown): unknown {
+  return typeof error === 'object' && error !== null && 'code' in error
+    ? error.code
+    : undefined;
+}
+
 // Inside Playwright's test workers the config is compiled to CommonJS, which
-// wraps the default export in one more object.
+// can wrap the default export in one more object.
 function defaultExport({ default: value }: { default?: unknown }): unknown {
   return typeof value === 'object' &&
     value !== null &&
