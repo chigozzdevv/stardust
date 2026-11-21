@@ -3,12 +3,21 @@ import { formatXlm, xlm } from '@/amounts';
 import { loadAccounts, submit } from '@/funding/funder';
 import type { SubFunder } from '@/funding/funder';
 
+/** A throwaway testnet account Stardust created for one test. */
 export interface Account {
+  /** The account's public address, `G...`. */
   readonly address: string;
+  /** The account's key. It stays in Node and never enters the page. */
   readonly keypair: Keypair;
 }
 
+/** How an account is created. */
 export interface AccountOptions {
+  /**
+   * The account's starting balance: `true` for 100 XLM, an amount in XLM up to
+   * `'1000'`, or `false` to leave the account uncreated on the network.
+   * Default `true`.
+   */
   fund?: boolean | string;
 }
 

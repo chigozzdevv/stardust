@@ -43,15 +43,27 @@ export type {
 export type { Violation } from '@/wallet/strict';
 export type { PageHost, Wallet, WalletOptions } from '@/wallet/wallet';
 
+/** Stardust's core, for setups that don't use `stardust-stellar/test`. */
 export interface Stardust {
+  /** The network, as checked by `createStardust`. */
   readonly network: NetworkInfo;
+  /** Creates throwaway accounts, funded from the machine's testnet funder. */
   readonly accounts: {
+    /** Creates one account. */
     create(options?: AccountOptions): Promise<Account>;
+    /** Creates several accounts in one transaction. */
     createMany(options: readonly AccountOptions[]): Promise<Account[]>;
   };
+  /** Creates an emulated wallet. Call `attach` on it to put it in a page. */
   wallet(options: WalletOptions): Wallet;
 }
 
+/**
+ * Checks the network and returns Stardust's core: accounts and wallets. Use
+ * it directly only for custom setups; tests normally use
+ * `stardust-stellar/test`. Throws `NETWORK_UNREACHABLE` when the RPC isn't
+ * healthy and `MAINNET_REFUSED` on mainnet.
+ */
 export async function createStardust({
   network,
   fetch = globalThis.fetch.bind(globalThis),

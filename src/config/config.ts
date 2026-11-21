@@ -7,12 +7,25 @@ import { accountOptions, stardustConfig, testOptions } from '@/config/schema';
 import type { TestOptions } from '@/config/schema';
 import { StardustError } from '@/errors';
 
+/** The settings in `stardust.config.ts`. */
 export interface StardustConfig {
+  /**
+   * The network the tests run on: `'testnet'`, or `{ rpcUrl }` for another
+   * RPC endpoint. Stardust reads the passphrase and Friendbot URL from the
+   * network itself, and refuses mainnet.
+   */
   network: 'testnet' | { rpcUrl: string };
+  /** The app under test. */
   app: {
+    /** Where the app runs. `page.goto('/swap')` opens this URL plus `/swap`. */
     url: string;
+    /**
+     * The command that starts the app, such as `'pnpm dev'`. Stardust runs it
+     * only when nothing answers at `url`, and stops it after the run.
+     */
     start?: string;
   };
+  /** The folder with the test files, relative to the project folder. Default `'./e2e'`. */
   tests?: string;
 }
 
@@ -22,6 +35,21 @@ export interface LoadedConfig {
   readonly tests: string;
 }
 
+/**
+ * Types the default export of `stardust.config.ts`. It returns the config
+ * unchanged.
+ *
+ * @example
+ * ```ts
+ * import { defineConfig } from 'stardust-stellar';
+ *
+ * export default defineConfig({
+ *   network: 'testnet',
+ *   app: { url: 'http://localhost:3000', start: 'pnpm dev' },
+ *   tests: './e2e',
+ * });
+ * ```
+ */
 export function defineConfig(config: StardustConfig): StardustConfig {
   return config;
 }

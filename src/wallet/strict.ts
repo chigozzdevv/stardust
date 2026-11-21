@@ -2,6 +2,16 @@ import { inspect } from 'node:util';
 import { StardustError } from '@/errors';
 import type { PromptRef } from '@/wallet/prompts';
 
+/**
+ * Something the app did that the real wallet would refuse, or that is almost
+ * certainly a bug, recorded in strict mode:
+ *
+ * - `missingNetworkPassphrase`: `signTransaction` or `addToken` without a network passphrase. Real Varial then assumes mainnet.
+ * - `networkMismatch`: the app asked to sign for a different network than the wallet's.
+ * - `invalidXdr`: the app sent something that isn't valid XDR.
+ * - `signerMismatch`: the app named a signer that isn't the wallet's account.
+ * - `unknownMessage`: the app sent a message type Varial doesn't recognize.
+ */
 export type ViolationKind =
   | 'missingNetworkPassphrase'
   | 'networkMismatch'
@@ -9,9 +19,13 @@ export type ViolationKind =
   | 'signerMismatch'
   | 'unknownMessage';
 
+/** A wallet rule the app broke. With `strict: true`, each one fails the test at its end. */
 export interface Violation {
+  /** The prompt it happened on, such as `'p2'`, or `null` when it wasn't on a prompt. */
   readonly promptId: string | null;
+  /** Which rule the app broke. */
   readonly kind: ViolationKind;
+  /** What the app did, in a sentence. */
   readonly detail: string;
 }
 

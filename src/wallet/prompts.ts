@@ -4,12 +4,23 @@ import type { Landed, LandingContext, LandingOptions } from '@/network/landing';
 import type { DecodedAuthPreimage, DecodedTransaction } from '@/wallet/decode';
 import type { WalletState } from '@/wallet/state';
 
+/**
+ * What a prompt asks for: `connect` (the address), `signTransaction`,
+ * `signAuthEntry` (one contract call's authorization), `signMessage`, or
+ * `addToken`. `addToken` exists only on `'varial'`.
+ */
 export type PromptKind =
   'connect' | 'signTransaction' | 'signAuthEntry' | 'signMessage' | 'addToken';
 
+/** Where a prompt is in its life. `'pending'` until it's answered, then the answer. */
 export type PromptStatus =
   'pending' | 'approved' | 'rejected' | 'failed' | 'hung';
 
+/**
+ * Why the real wallet would refuse a prompt: the site isn't connected, the app
+ * asked for another network, the page isn't secure and `allowHttp` is off, the
+ * token is already added, or the wallet is locked.
+ */
 export type BlockedReason =
   | 'notConnected'
   | 'networkMismatch'
@@ -17,14 +28,21 @@ export type BlockedReason =
   | 'alreadyAdded'
   | 'locked';
 
+/**
+ * How a policy function answers a prompt: approve it, reject it (error -4),
+ * fail it with a wallet error code, or never answer.
+ */
 export type Decision =
   | { action: 'approve' }
   | { action: 'reject' }
   | { action: 'fail'; code: -1 | -2 | -3; message?: string }
   | { action: 'hang' };
 
+/** How long to wait. */
 export interface WaitOptions {
+  /** How long to wait, in milliseconds. Default 10 s for prompts, 30 s for a transaction to land. */
   timeoutMs?: number;
+  /** Stops the wait early. */
   signal?: AbortSignal;
 }
 
@@ -33,45 +51,82 @@ export interface WalletError {
   readonly message: string;
 }
 
+/** A wallet error to answer a prompt with. */
 interface Failure {
+  /** `-1` for an internal error, `-2` for an external service, `-3` for an invalid request. */
   code: -1 | -2 | -3;
+  /** The error message. Default: Varial's text for `-1`, `Stardust: simulated wallet error (code N)` otherwise. */
   message?: string;
 }
 
+/** What every prompt has. Each prompt is answered exactly once; a second answer throws `ALREADY_ANSWERED`. */
 interface BasePrompt<K extends PromptKind> {
+  /** `'p1'`, `'p2'`, … in arrival order within a test. */
   readonly id: string;
+  /** What the prompt asks for. */
   readonly kind: K;
+  /** The site that sent it, taken from the browser, never from the page's message. */
   readonly origin: string;
+  /** The network passphrase the app asked for, or `null` when it sent none. */
   readonly networkPassphrase: string | null;
+  /** `'pending'` until the prompt is answered. */
   readonly status: PromptStatus;
+  /** Why the real wallet would refuse this prompt, or `null` when it wouldn't. */
   readonly blocked: BlockedReason | null;
 
+  /**
+   * Approves the prompt, as a user clicking the wallet's approve button. The
+   * app receives the real result. Resolves once the reply has reached the page.
+   * Throws `PROMPT_BLOCKED` when the prompt is blocked, `WALLET_LOCKED` while
+   * the wallet is locked, and `MAINNET_REFUSED` for a signature on mainnet.
+   */
   approve(): Promise<void>;
+  /** Rejects the prompt. The app receives error -4, `The user rejected this request.` */
   reject(): Promise<void>;
+  /** Answers with a wallet error. */
   fail(error: Failure): Promise<void>;
+  /** Never answers. The app's call waits forever, as when a user ignores the popup. */
   hang(): void;
 }
 
+/** The app asks for the user's address, on a site that isn't connected. */
 export type ConnectPrompt = BasePrompt<'connect'>;
 
+/** The app asks for a whole transaction to be signed. */
 export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
+  /** The transaction, decoded. */
   readonly transaction: DecodedTransaction;
+  /**
+   * Waits for the signed transaction to land and returns its outcome. Throws
+   * `OUTCOME_UNKNOWN` when it doesn't appear in time.
+   */
   landed(options?: WaitOptions): Promise<Landed>;
 }
 
+/** The app asks for one contract call to be authorized, while someone else sends the transaction. */
 export interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
+  /** The authorization entry's preimage, decoded. */
   readonly preimage: DecodedAuthPreimage;
+  /**
+   * Waits for a transaction that uses this authorization to land, and returns
+   * its outcome. Throws `OUTCOME_UNKNOWN` when none appears in time.
+   */
   landed(options?: WaitOptions): Promise<Landed>;
 }
 
+/** The app asks for a message to be signed, as proof of owning the address. Nothing moves on chain. */
 export interface MessagePrompt extends BasePrompt<'signMessage'> {
+  /** The message, as the app sent it. */
   readonly message: string;
 }
 
+/** The app asks the wallet to add a token. `'varial'` only. */
 export interface AddTokenPrompt extends BasePrompt<'addToken'> {
+  /** The token contract, `C...`. */
   readonly contractId: string;
 }
 
+/** Anything a real wallet shows the user as a popup. */
 export type Prompt =
   | ConnectPrompt
   | TransactionPrompt
@@ -79,6 +134,7 @@ export type Prompt =
   | MessagePrompt
   | AddTokenPrompt;
 
+/** The prompt type for one kind, such as `PromptOf<'signTransaction'>`. */
 export type PromptOf<K extends PromptKind> = Extract<Prompt, { kind: K }>;
 
 export interface PromptFields {

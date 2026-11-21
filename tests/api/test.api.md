@@ -13,104 +13,79 @@ import { PlaywrightWorkerArgs } from '@playwright/test';
 import { PlaywrightWorkerOptions } from '@playwright/test';
 import { TestType } from '@playwright/test';
 
-// @public (undocumented)
+// @public
 interface Account {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly keypair: Keypair;
 }
 
-// @public (undocumented)
+// @public
 interface AccountOptions {
-    // (undocumented)
     fund?: boolean | string;
 }
 
-// @public (undocumented)
+// @public
 interface AddTokenPrompt extends BasePrompt<'addToken'> {
-    // (undocumented)
     readonly contractId: string;
 }
 
-// @public (undocumented)
+// @public
 type Asset = 'native' | `${string}:${string}` | `C${string}`;
 
-// @public (undocumented)
+// @public
 interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
-    // (undocumented)
     landed(options?: WaitOptions): Promise<Landed>;
-    // (undocumented)
     readonly preimage: DecodedAuthPreimage;
 }
 
-// @public (undocumented)
+// @public
 interface BalanceChange {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly asset: Asset;
-    // (undocumented)
     readonly change: bigint;
 }
 
-// @public (undocumented)
+// @public
 type BalanceExpectation = bigint | {
     readonly min?: bigint;
     readonly max?: bigint;
 };
 
-// @public (undocumented)
+// @public
 interface BasePrompt<K extends PromptKind> {
-    // (undocumented)
     approve(): Promise<void>;
-    // (undocumented)
     readonly blocked: BlockedReason | null;
-    // (undocumented)
     fail(error: Failure): Promise<void>;
-    // (undocumented)
     hang(): void;
-    // (undocumented)
     readonly id: string;
-    // (undocumented)
     readonly kind: K;
-    // (undocumented)
     readonly networkPassphrase: string | null;
-    // (undocumented)
     readonly origin: string;
-    // (undocumented)
     reject(): Promise<void>;
-    // (undocumented)
     readonly status: PromptStatus;
 }
 
-// @public (undocumented)
+// @public
 type BlockedReason = 'notConnected' | 'networkMismatch' | 'insecureOrigin' | 'alreadyAdded' | 'locked';
 
-// @public (undocumented)
+// @public
 type ConnectPrompt = BasePrompt<'connect'>;
 
-// @public (undocumented)
+// @public
 interface ContractError {
-    // (undocumented)
     readonly code: number;
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly name: string | null;
 }
 
-// @public (undocumented)
+// @public
 interface ContractEvent {
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly data: unknown;
-    // (undocumented)
     readonly topics: readonly unknown[];
 }
 
-// @public (undocumented)
+// @public
 type Decision = {
     action: 'approve';
 } | {
@@ -123,134 +98,90 @@ type Decision = {
     action: 'hang';
 };
 
-// @public (undocumented)
+// @public
 interface DecodedAuthEntry {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly expirationLedger: number;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 interface DecodedAuthPreimage {
-    // (undocumented)
     readonly expirationLedger: number;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly networkPassphrase: string | null;
-    // (undocumented)
     readonly nonce: bigint;
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 interface DecodedOperation {
-    // (undocumented)
     readonly body: Readonly<Record<string, unknown>>;
-    // (undocumented)
     readonly source: string | null;
-    // (undocumented)
     readonly type: string;
 }
 
-// @public (undocumented)
+// @public
 interface DecodedTransaction {
-    // (undocumented)
     readonly authEntries: readonly DecodedAuthEntry[];
-    // (undocumented)
     readonly fee: bigint;
-    // (undocumented)
     readonly hash: string;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly memo: {
         type: 'none' | 'text' | 'id' | 'hash' | 'return';
         value: string | null;
     };
-    // (undocumented)
     readonly operations: readonly DecodedOperation[];
-    // (undocumented)
     readonly sequence: bigint;
-    // (undocumented)
     readonly source: string;
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 interface EmitExpectation {
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly topic: string;
 }
 
-// @public (undocumented)
-export const expect: _playwright_test.Expect<{
-    toInvoke(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected: InvokeExpectation): MatcherResult;
-    toHaveOperation(this: MatcherState, prompt: TransactionPrompt, expected: OperationExpectation): MatcherResult;
-    toLand(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, options?: WaitOptions): Promise<MatcherResult>;
-    toFail(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected?: FailExpectation, options?: WaitOptions): Promise<MatcherResult>;
-    toChangeBalance(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, address: string, asset: string, change: BalanceExpectation, options?: WaitOptions): Promise<MatcherResult>;
-    toEmit(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected: EmitExpectation, options?: WaitOptions): Promise<MatcherResult>;
-}>;
+// @public
+export const expect: _playwright_test.Expect<StardustMatchers>;
 
-// @public (undocumented)
+// @public
 interface FailExpectation {
-    // (undocumented)
     readonly contractError?: string | number;
-    // (undocumented)
     readonly resultCode?: string;
 }
 
-// @public (undocumented)
+// @public
 interface Failure {
-    // (undocumented)
     code: -1 | -2 | -3;
-    // (undocumented)
     message?: string;
 }
 
-// @public (undocumented)
+// @public
 interface Fixtures {
-    // (undocumented)
     stardust: StardustTestOptions;
-    // (undocumented)
     users: Users;
 }
 
-// @public (undocumented)
+// @public
 interface Invocation {
-    // (undocumented)
     readonly args: readonly unknown[];
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly depth: number;
-    // (undocumented)
     readonly fn: string;
-    // (undocumented)
     readonly namedArgs: Readonly<Record<string, unknown>> | null;
 }
 
-// @public (undocumented)
+// @public
 interface InvokeExpectation {
-    // (undocumented)
     readonly args?: Readonly<Record<string, unknown>>;
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly fn: string;
 }
 
-// @public (undocumented)
+// @public
 type Landed = {
     readonly status: 'success';
     readonly hash: string;
@@ -268,186 +199,151 @@ type Landed = {
     readonly contractError: ContractError | null;
 };
 
-// @public (undocumented)
+// @public
 interface MatcherResult {
-    // (undocumented)
     readonly message: () => string;
-    // (undocumented)
     readonly pass: boolean;
 }
 
-// @public (undocumented)
+// @public
 interface MatcherState {
-    // (undocumented)
     readonly isNot: boolean;
 }
 
-// @public (undocumented)
+// @public
 interface MessagePrompt extends BasePrompt<'signMessage'> {
-    // (undocumented)
     readonly message: string;
 }
 
-// @public (undocumented)
+// @public
 interface NetworkInfo {
-    // (undocumented)
     readonly friendbotUrl: string | null;
-    // (undocumented)
     readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
-    // (undocumented)
     readonly networkPassphrase: string;
-    // (undocumented)
     readonly protocolVersion: number;
-    // (undocumented)
     readonly rpcUrl: string;
 }
 
-// @public (undocumented)
+// @public
 interface OperationExpectation {
-    // (undocumented)
     readonly [field: string]: unknown;
-    // (undocumented)
     readonly type: string;
 }
 
-// @public (undocumented)
+// @public
 interface PageHost {
-    // (undocumented)
     addInitScript(source: string): Promise<void>;
-    // (undocumented)
     exposeBinding(name: string, handler: (origin: string, payload: unknown) => Promise<unknown>): Promise<void>;
 }
 
-// @public (undocumented)
+// @public
 type Policy = PolicyMode | Partial<Record<PromptKind, PolicyMode>> | ((prompt: Prompt) => Decision | Promise<Decision>);
 
-// @public (undocumented)
+// @public
 type PolicyMode = 'approve' | 'reject' | 'manual';
 
-// @public (undocumented)
+// @public
 type Prompt = ConnectPrompt | TransactionPrompt | AuthEntryPrompt | MessagePrompt | AddTokenPrompt;
 
-// @public (undocumented)
+// @public
 type PromptKind = 'connect' | 'signTransaction' | 'signAuthEntry' | 'signMessage' | 'addToken';
 
-// @public (undocumented)
+// @public
 type PromptOf<K extends PromptKind> = Extract<Prompt, {
     kind: K;
 }>;
 
-// @public (undocumented)
+// @public
 type PromptStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'hung';
 
-// @public (undocumented)
+// @public
+type StardustMatchers = {
+    toInvoke(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected: InvokeExpectation): MatcherResult;
+    toHaveOperation(this: MatcherState, prompt: TransactionPrompt, expected: OperationExpectation): MatcherResult;
+    toLand(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, options?: WaitOptions): Promise<MatcherResult>;
+    toFail(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected?: FailExpectation, options?: WaitOptions): Promise<MatcherResult>;
+    toChangeBalance(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, address: string, asset: string, change: BalanceExpectation, options?: WaitOptions): Promise<MatcherResult>;
+    toEmit(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected: EmitExpectation, options?: WaitOptions): Promise<MatcherResult>;
+};
+
+// @public
 type StardustTest = TestType<PlaywrightTestArgs & PlaywrightTestOptions & Fixtures, PlaywrightWorkerArgs & PlaywrightWorkerOptions>;
 
-// @public (undocumented)
+// @public
 export interface StardustTestOptions {
-    // (undocumented)
     users: Readonly<Record<string, UserOptions>>;
 }
 
-// @public (undocumented)
+// @public
 export const test: StardustTest;
 
-// @public (undocumented)
+// @public
 interface TransactionPrompt extends BasePrompt<'signTransaction'> {
-    // (undocumented)
     landed(options?: WaitOptions): Promise<Landed>;
-    // (undocumented)
     readonly transaction: DecodedTransaction;
 }
 
-// @public (undocumented)
+// @public
 export function units(amount: string, decimals: number): bigint;
 
-// @public (undocumented)
+// @public
 export interface User {
-    // (undocumented)
     readonly account: Account;
-    // (undocumented)
     readonly accounts: Readonly<Record<string, Account>>;
-    // (undocumented)
     readonly name: string;
-    // (undocumented)
     readonly page: Page;
-    // (undocumented)
     readonly wallet: Wallet;
 }
 
-// @public (undocumented)
+// @public
 export interface UserOptions {
-    // (undocumented)
     accounts?: Readonly<Record<string, AccountOptions>>;
-    // (undocumented)
     allowHttp?: boolean;
-    // (undocumented)
     connected?: boolean;
-    // (undocumented)
     policy?: Policy;
-    // (undocumented)
     strict?: boolean;
-    // (undocumented)
     wallet?: 'varial' | 'sep60' | 'none';
 }
 
-// @public (undocumented)
+// @public
 type Users = Readonly<Record<string, User>>;
 
-// @public (undocumented)
+// @public
 interface Violation {
-    // (undocumented)
     readonly detail: string;
-    // (undocumented)
     readonly kind: ViolationKind;
-    // (undocumented)
     readonly promptId: string | null;
 }
 
-// @public (undocumented)
+// @public
 type ViolationKind = 'missingNetworkPassphrase' | 'networkMismatch' | 'invalidXdr' | 'signerMismatch' | 'unknownMessage';
 
-// @public (undocumented)
+// @public
 interface WaitOptions {
-    // (undocumented)
     signal?: AbortSignal;
-    // (undocumented)
     timeoutMs?: number;
 }
 
-// @public (undocumented)
+// @public
 interface Wallet {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     attach(host: PageHost, options: {
         wallet: 'varial' | 'sep60';
     }): Promise<void>;
-    // (undocumented)
     disconnect(): Promise<void>;
-    // (undocumented)
     lock(): Promise<void>;
-    // (undocumented)
     readonly network: NetworkInfo;
-    // (undocumented)
     nextPrompt<K extends PromptKind = PromptKind>(kind?: K, options?: WaitOptions): Promise<PromptOf<K>>;
-    // (undocumented)
     prompts<K extends PromptKind = PromptKind>(kind?: K): readonly PromptOf<K>[];
-    // (undocumented)
     setPolicy(policy: Policy): void;
-    // (undocumented)
     subscribe(listener: (prompt: Prompt) => void): () => void;
-    // (undocumented)
     switchAccount(account: Account): Promise<void>;
-    // (undocumented)
     switchNetwork(network: 'testnet' | 'futurenet' | 'mainnet'): Promise<void>;
-    // (undocumented)
     unlock(): Promise<void>;
-    // (undocumented)
     violations(): readonly Violation[];
 }
 
-// @public (undocumented)
+// @public
 export function xlm(amount: string): bigint;
 
 // (No @packageDocumentation comment for this package)

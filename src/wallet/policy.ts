@@ -2,8 +2,23 @@ import { inspect } from 'node:util';
 import { StardustError } from '@/errors';
 import type { Decision, Prompt, PromptKind } from '@/wallet/prompts';
 
+/**
+ * How the wallet answers prompts of a kind: `'approve'`, `'reject'`, or
+ * `'manual'`, where the test answers them.
+ */
 export type PolicyMode = 'approve' | 'reject' | 'manual';
 
+/**
+ * How the wallet answers prompts: one mode for every kind, one mode per kind
+ * (kinds left out are approved), or a function that decides each prompt.
+ * Prompts the real wallet would refuse are rejected, whatever the policy.
+ *
+ * @example
+ * ```ts
+ * { signTransaction: 'manual' }
+ * (prompt) => prompt.kind === 'signMessage' ? { action: 'reject' } : { action: 'approve' }
+ * ```
+ */
 export type Policy =
   | PolicyMode
   | Partial<Record<PromptKind, PolicyMode>>

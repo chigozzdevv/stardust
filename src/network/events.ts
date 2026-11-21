@@ -6,17 +6,29 @@ import {
   xdr,
 } from '@stellar/stellar-sdk';
 
+/**
+ * An asset: `'native'` for XLM, `'CODE:ISSUER'` for a classic asset, or a
+ * token contract's address, `C...`.
+ */
 export type Asset = 'native' | `${string}:${string}` | `C${string}`;
 
+/** An event a contract emitted. */
 export interface ContractEvent {
+  /** The contract that emitted the event, `C...`. */
   readonly contract: string;
+  /** The event's topics, converted from XDR. The first is usually its name, such as `'transfer'`. */
   readonly topics: readonly unknown[];
+  /** The event's data, converted from XDR. */
   readonly data: unknown;
 }
 
+/** How much one address's balance of one asset changed. */
 export interface BalanceChange {
+  /** The account or contract whose balance changed. */
   readonly address: string;
+  /** The asset. */
   readonly asset: Asset;
+  /** The change in the asset's smallest units: stroops for XLM. Negative when the balance went down. */
   readonly change: bigint;
 }
 

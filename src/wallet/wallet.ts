@@ -21,44 +21,93 @@ import type { NetworkName } from '@/wallet/state';
 import { Violations, pendingReport } from '@/wallet/strict';
 import type { Violation, WalletKind } from '@/wallet/strict';
 
+/** The settings for one emulated wallet. */
 export interface WalletOptions {
+  /** The accounts in the wallet. The first is active. */
   accounts: readonly Account[];
+  /** Start as if the user had already connected the site, for every account. Default `false`. */
   connected?: boolean;
+  /** How the wallet answers prompts. Default `'approve'`. */
   policy?: Policy;
+  /** Fail the test at its end when the app broke wallet rules. Default `true`. */
   strict?: boolean;
+  /** Whether the wallet signs on `http://` pages. Default `true`. */
   allowHttp?: boolean;
 }
 
+/**
+ * An emulated wallet in the page, with the accounts of one user. It answers
+ * the app as the real wallet does, and records every prompt.
+ */
 export interface Wallet {
+  /** The active account's address, as the wallet reports it to the app. */
   readonly address: string;
+  /** The network the wallet reports to the app. */
   readonly network: NetworkInfo;
 
+  /**
+   * Puts the wallet in a page. The test fixtures do this for every user;
+   * call it only in a custom setup built on `createStardust`.
+   */
   attach(
     host: PageHost,
     options: { wallet: 'varial' | 'sep60' },
   ): Promise<void>;
+  /** Changes how the wallet answers prompts from now on. */
   setPolicy(policy: Policy): void;
 
+  /**
+   * Returns the oldest prompt of `kind`, or of any kind, that this method
+   * hasn't returned yet, waiting for one if needed. Under `'manual'` the test
+   * answers it; under other policies it's already answered. Throws `NO_PROMPT`,
+   * listing what did arrive, when none arrives in time (default 10 s).
+   */
   nextPrompt<K extends PromptKind = PromptKind>(
     kind?: K,
     options?: WaitOptions,
   ): Promise<PromptOf<K>>;
+  /** Every prompt so far in this test, or only those of `kind`, in arrival order. */
   prompts<K extends PromptKind = PromptKind>(kind?: K): readonly PromptOf<K>[];
+  /** The wallet rules the app has broken so far. */
   violations(): readonly Violation[];
+  /**
+   * Calls `listener` when a prompt arrives and again when it's answered.
+   * Returns a function that stops the calls.
+   */
   subscribe(listener: (prompt: Prompt) => void): () => void;
 
+  /**
+   * Makes another of the wallet's accounts active, as the user switching
+   * accounts. Throws `UNKNOWN_ACCOUNT` for an account that isn't in the wallet.
+   */
   switchAccount(account: Account): Promise<void>;
+  /**
+   * Makes the wallet report another network, as the user switching networks.
+   * On mainnet, nothing is signed.
+   */
   switchNetwork(network: 'testnet' | 'futurenet' | 'mainnet'): Promise<void>;
+  /** Locks the wallet, as the user pressing Lock. Prompts wait until `unlock()`. */
   lock(): Promise<void>;
+  /** Unlocks the wallet. Waiting prompts go ahead under the policy. */
   unlock(): Promise<void>;
+  /** Removes the site from the wallet's connected sites, as the user disconnecting it. */
   disconnect(): Promise<void>;
 }
 
+/**
+ * Where a wallet lives: a browser page, or a stand-in for one. Stardust's
+ * Playwright host builds it on a `BrowserContext`.
+ */
 export interface PageHost {
+  /**
+   * Makes `handler` callable from the page as `window[name]`. `origin` must
+   * come from the browser, never from the page.
+   */
   exposeBinding(
     name: string,
     handler: (origin: string, payload: unknown) => Promise<unknown>,
   ): Promise<void>;
+  /** Runs `source` in every page before the page's own scripts. */
   addInitScript(source: string): Promise<void>;
 }
 

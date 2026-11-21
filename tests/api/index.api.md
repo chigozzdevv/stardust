@@ -6,111 +6,84 @@
 
 import { Keypair } from '@stellar/stellar-sdk';
 
-// @public (undocumented)
+// @public
 export interface Account {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly keypair: Keypair;
 }
 
-// @public (undocumented)
+// @public
 export interface AccountOptions {
-    // (undocumented)
     fund?: boolean | string;
 }
 
-// @public (undocumented)
+// @public
 export interface AddTokenPrompt extends BasePrompt<'addToken'> {
-    // (undocumented)
     readonly contractId: string;
 }
 
-// @public (undocumented)
+// @public
 export type Asset = 'native' | `${string}:${string}` | `C${string}`;
 
-// @public (undocumented)
+// @public
 export interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
-    // (undocumented)
     landed(options?: WaitOptions): Promise<Landed>;
-    // (undocumented)
     readonly preimage: DecodedAuthPreimage;
 }
 
-// @public (undocumented)
+// @public
 export interface BalanceChange {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly asset: Asset;
-    // (undocumented)
     readonly change: bigint;
 }
 
-// @public (undocumented)
+// @public
 interface BasePrompt<K extends PromptKind> {
-    // (undocumented)
     approve(): Promise<void>;
-    // (undocumented)
     readonly blocked: BlockedReason | null;
-    // (undocumented)
     fail(error: Failure): Promise<void>;
-    // (undocumented)
     hang(): void;
-    // (undocumented)
     readonly id: string;
-    // (undocumented)
     readonly kind: K;
-    // (undocumented)
     readonly networkPassphrase: string | null;
-    // (undocumented)
     readonly origin: string;
-    // (undocumented)
     reject(): Promise<void>;
-    // (undocumented)
     readonly status: PromptStatus;
 }
 
-// @public (undocumented)
+// @public
 export type BlockedReason = 'notConnected' | 'networkMismatch' | 'insecureOrigin' | 'alreadyAdded' | 'locked';
 
-// @public (undocumented)
+// @public
 export type ConnectPrompt = BasePrompt<'connect'>;
 
-// @public (undocumented)
+// @public
 export interface ContractError {
-    // (undocumented)
     readonly code: number;
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly name: string | null;
 }
 
-// @public (undocumented)
+// @public
 export interface ContractEvent {
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly data: unknown;
-    // (undocumented)
     readonly topics: readonly unknown[];
 }
 
-// @public (undocumented)
+// @public
 export interface CoreConfig {
-    // (undocumented)
     fetch?: typeof fetch;
-    // (undocumented)
     network: 'testnet' | {
         rpcUrl: string;
     };
 }
 
-// @public (undocumented)
+// @public
 export function createStardust(input: CoreConfig): Promise<Stardust>;
 
-// @public (undocumented)
+// @public
 export type Decision = {
     action: 'approve';
 } | {
@@ -123,93 +96,65 @@ export type Decision = {
     action: 'hang';
 };
 
-// @public (undocumented)
+// @public
 export interface DecodedAuthEntry {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     readonly expirationLedger: number;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 export interface DecodedAuthPreimage {
-    // (undocumented)
     readonly expirationLedger: number;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly networkPassphrase: string | null;
-    // (undocumented)
     readonly nonce: bigint;
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 export interface DecodedOperation {
-    // (undocumented)
     readonly body: Readonly<Record<string, unknown>>;
-    // (undocumented)
     readonly source: string | null;
-    // (undocumented)
     readonly type: string;
 }
 
-// @public (undocumented)
+// @public
 export interface DecodedTransaction {
-    // (undocumented)
     readonly authEntries: readonly DecodedAuthEntry[];
-    // (undocumented)
     readonly fee: bigint;
-    // (undocumented)
     readonly hash: string;
-    // (undocumented)
     readonly invocations: readonly Invocation[];
-    // (undocumented)
     readonly memo: {
         type: 'none' | 'text' | 'id' | 'hash' | 'return';
         value: string | null;
     };
-    // (undocumented)
     readonly operations: readonly DecodedOperation[];
-    // (undocumented)
     readonly sequence: bigint;
-    // (undocumented)
     readonly source: string;
-    // (undocumented)
     readonly xdr: string;
 }
 
-// @public (undocumented)
+// @public
 export function defineConfig(config: StardustConfig): StardustConfig;
 
-// @public (undocumented)
+// @public
 interface Failure {
-    // (undocumented)
     code: -1 | -2 | -3;
-    // (undocumented)
     message?: string;
 }
 
-// @public (undocumented)
+// @public
 export interface Invocation {
-    // (undocumented)
     readonly args: readonly unknown[];
-    // (undocumented)
     readonly contract: string;
-    // (undocumented)
     readonly depth: number;
-    // (undocumented)
     readonly fn: string;
-    // (undocumented)
     readonly namedArgs: Readonly<Record<string, unknown>> | null;
 }
 
-// @public (undocumented)
+// @public
 export type Landed = {
     readonly status: 'success';
     readonly hash: string;
@@ -227,173 +172,132 @@ export type Landed = {
     readonly contractError: ContractError | null;
 };
 
-// @public (undocumented)
+// @public
 export interface MessagePrompt extends BasePrompt<'signMessage'> {
-    // (undocumented)
     readonly message: string;
 }
 
-// @public (undocumented)
+// @public
 export interface NetworkInfo {
-    // (undocumented)
     readonly friendbotUrl: string | null;
-    // (undocumented)
     readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
-    // (undocumented)
     readonly networkPassphrase: string;
-    // (undocumented)
     readonly protocolVersion: number;
-    // (undocumented)
     readonly rpcUrl: string;
 }
 
-// @public (undocumented)
+// @public
 export interface PageHost {
-    // (undocumented)
     addInitScript(source: string): Promise<void>;
-    // (undocumented)
     exposeBinding(name: string, handler: (origin: string, payload: unknown) => Promise<unknown>): Promise<void>;
 }
 
-// @public (undocumented)
+// @public
 export type Policy = PolicyMode | Partial<Record<PromptKind, PolicyMode>> | ((prompt: Prompt) => Decision | Promise<Decision>);
 
-// @public (undocumented)
+// @public
 export type PolicyMode = 'approve' | 'reject' | 'manual';
 
-// @public (undocumented)
+// @public
 export type Prompt = ConnectPrompt | TransactionPrompt | AuthEntryPrompt | MessagePrompt | AddTokenPrompt;
 
-// @public (undocumented)
+// @public
 export type PromptKind = 'connect' | 'signTransaction' | 'signAuthEntry' | 'signMessage' | 'addToken';
 
-// @public (undocumented)
+// @public
 export type PromptOf<K extends PromptKind> = Extract<Prompt, {
     kind: K;
 }>;
 
-// @public (undocumented)
+// @public
 export type PromptStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'hung';
 
-// @public (undocumented)
+// @public
 export interface Stardust {
-    // (undocumented)
     readonly accounts: {
         create(options?: AccountOptions): Promise<Account>;
         createMany(options: readonly AccountOptions[]): Promise<Account[]>;
     };
-    // (undocumented)
     readonly network: NetworkInfo;
-    // (undocumented)
     wallet(options: WalletOptions): Wallet;
 }
 
-// @public (undocumented)
+// @public
 export interface StardustConfig {
-    // (undocumented)
     app: {
         url: string;
         start?: string;
     };
-    // (undocumented)
     network: 'testnet' | {
         rpcUrl: string;
     };
-    // (undocumented)
     tests?: string;
 }
 
-// @public (undocumented)
+// @public
 export class StardustError extends Error {
     constructor(code: StardustErrorCode, message: string, options?: ErrorOptions);
-    // (undocumented)
     readonly code: StardustErrorCode;
-    // (undocumented)
     readonly retryable: boolean;
 }
 
-// @public (undocumented)
+// @public
 export type StardustErrorCode = 'CONFIG_NOT_FOUND' | 'CONFIG_INVALID' | 'NETWORK_NOT_SUPPORTED' | 'NETWORK_UNREACHABLE' | 'MAINNET_REFUSED' | 'APP_NOT_REACHABLE' | 'FUNDING_FAILED' | 'NO_PROMPT' | 'ALREADY_ANSWERED' | 'PROMPT_BLOCKED' | 'WALLET_LOCKED' | 'OUTCOME_UNKNOWN' | 'UNKNOWN_ACCOUNT' | 'UNSUPPORTED' | 'PROTOCOL_VIOLATION' | 'PROMPTS_PENDING';
 
-// @public (undocumented)
+// @public
 export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
-    // (undocumented)
     landed(options?: WaitOptions): Promise<Landed>;
-    // (undocumented)
     readonly transaction: DecodedTransaction;
 }
 
-// @public (undocumented)
+// @public
 export function units(amount: string, decimals: number): bigint;
 
-// @public (undocumented)
+// @public
 export interface Violation {
-    // (undocumented)
     readonly detail: string;
-    // (undocumented)
     readonly kind: ViolationKind;
-    // (undocumented)
     readonly promptId: string | null;
 }
 
-// @public (undocumented)
+// @public
 type ViolationKind = 'missingNetworkPassphrase' | 'networkMismatch' | 'invalidXdr' | 'signerMismatch' | 'unknownMessage';
 
-// @public (undocumented)
+// @public
 export interface WaitOptions {
-    // (undocumented)
     signal?: AbortSignal;
-    // (undocumented)
     timeoutMs?: number;
 }
 
-// @public (undocumented)
+// @public
 export interface Wallet {
-    // (undocumented)
     readonly address: string;
-    // (undocumented)
     attach(host: PageHost, options: {
         wallet: 'varial' | 'sep60';
     }): Promise<void>;
-    // (undocumented)
     disconnect(): Promise<void>;
-    // (undocumented)
     lock(): Promise<void>;
-    // (undocumented)
     readonly network: NetworkInfo;
-    // (undocumented)
     nextPrompt<K extends PromptKind = PromptKind>(kind?: K, options?: WaitOptions): Promise<PromptOf<K>>;
-    // (undocumented)
     prompts<K extends PromptKind = PromptKind>(kind?: K): readonly PromptOf<K>[];
-    // (undocumented)
     setPolicy(policy: Policy): void;
-    // (undocumented)
     subscribe(listener: (prompt: Prompt) => void): () => void;
-    // (undocumented)
     switchAccount(account: Account): Promise<void>;
-    // (undocumented)
     switchNetwork(network: 'testnet' | 'futurenet' | 'mainnet'): Promise<void>;
-    // (undocumented)
     unlock(): Promise<void>;
-    // (undocumented)
     violations(): readonly Violation[];
 }
 
-// @public (undocumented)
+// @public
 export interface WalletOptions {
-    // (undocumented)
     accounts: readonly Account[];
-    // (undocumented)
     allowHttp?: boolean;
-    // (undocumented)
     connected?: boolean;
-    // (undocumented)
     policy?: Policy;
-    // (undocumented)
     strict?: boolean;
 }
 
-// @public (undocumented)
+// @public
 export function xlm(amount: string): bigint;
 
 // (No @packageDocumentation comment for this package)

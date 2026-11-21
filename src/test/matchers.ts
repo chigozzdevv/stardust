@@ -10,36 +10,61 @@ import type {
   WaitOptions,
 } from '@/wallet/prompts';
 
+/** What a matcher can read from Playwright's `expect`. */
 export interface MatcherState {
+  /** Whether the check was called through `.not`. */
   readonly isNot: boolean;
 }
 
+/** A matcher's verdict, as Playwright's `expect` reads it. */
 export interface MatcherResult {
+  /** Whether the check passed. */
   readonly pass: boolean;
+  /** The failure message. */
   readonly message: () => string;
 }
 
+/** The contract call `toInvoke` looks for. */
 export interface InvokeExpectation {
+  /** The contract, `C...`. */
   readonly contract: string;
+  /** The function name. */
   readonly fn: string;
+  /** Arguments by name, from the contract's spec. Only listed arguments are compared. */
   readonly args?: Readonly<Record<string, unknown>>;
 }
 
+/**
+ * The operation `toHaveOperation` looks for: its `type` and any of its
+ * fields, named as in the Stellar SDK. Only listed fields are compared.
+ */
 export interface OperationExpectation {
+  /** The operation type, such as `'payment'` or `'changeTrust'`. */
   readonly type: string;
+  /** A field to compare. Assets are `'native'` or `'CODE:ISSUER'`, amounts are `bigint` stroops. */
   readonly [field: string]: unknown;
 }
 
+/** How `toFail` expects the transaction to fail. Leave both out to accept any failure. */
 export interface FailExpectation {
+  /** The result code, such as `'txFAILED'`. */
   readonly resultCode?: string;
+  /** The contract error, by name from the contract's spec or by number. */
   readonly contractError?: string | number;
 }
 
+/**
+ * The change `toChangeBalance` expects, in the asset's smallest units: an exact
+ * amount, or bounds when the exact amount can't be known.
+ */
 export type BalanceExpectation =
   bigint | { readonly min?: bigint; readonly max?: bigint };
 
+/** The event `toEmit` looks for. */
 export interface EmitExpectation {
+  /** The contract that emits the event, `C...`. */
   readonly contract: string;
+  /** The event's name, compared with its first topic, such as `'transfer'`. */
   readonly topic: string;
 }
 
@@ -47,12 +72,72 @@ type SignedPrompt = TransactionPrompt | AuthEntryPrompt;
 type Failed = Extract<Landed, { status: 'failed' }>;
 type Row = readonly [label: string, value: string];
 
+/** Stardust's checks on prompts, added to Playwright's `expect`. */
+export type StardustMatchers = {
+  /**
+   * Passes when the transaction's contract call, or a sub-call it authorizes,
+   * matches. Doesn't wait. Throws `UNSUPPORTED` when `args` is given and the
+   * contract's spec can't be read.
+   */
+  toInvoke(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected: InvokeExpectation,
+  ): MatcherResult;
+  /** Passes when the transaction contains this classic operation. Doesn't wait. */
+  toHaveOperation(
+    this: MatcherState,
+    prompt: TransactionPrompt,
+    expected: OperationExpectation,
+  ): MatcherResult;
+  /**
+   * Passes when the transaction lands with status `SUCCESS`. Waits, 30 s by
+   * default, and fails at once when the prompt was rejected, failed or hung.
+   * Checks that wait don't support `.not`: use `toFail` instead of `.not.toLand()`.
+   */
+  toLand(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  /**
+   * Passes when the transaction lands with status `FAILED`, with this error if
+   * one is given. Waits, 30 s by default. To pass only options, give `{}` first.
+   */
+  toFail(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected?: FailExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  /**
+   * Passes when the transaction changed `address`'s balance of `asset` by
+   * `change`, fees excluded. `asset` is `'native'`, `'CODE:ISSUER'` or a token
+   * contract, `C...`. Waits, 30 s by default.
+   */
+  toChangeBalance(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    address: string,
+    asset: string,
+    change: BalanceExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  /** Passes when the contract emitted an event with this first topic. Waits, 30 s by default. */
+  toEmit(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected: EmitExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+};
+
 const show = (value: unknown) =>
   typeof value === 'string'
     ? value
     : inspect(value, { breakLength: Infinity, depth: 4 });
 
-export const matchers = {
+export const matchers: StardustMatchers = {
   toInvoke(
     this: MatcherState,
     prompt: SignedPrompt,

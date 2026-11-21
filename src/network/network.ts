@@ -5,16 +5,28 @@ import { StardustError } from '@/errors';
 import { rpcEnvelope, rpcResults } from '@/network/schema';
 import type { RpcMethod, RpcResult } from '@/network/schema';
 
+/** The settings for `createStardust`. */
 export interface CoreConfig {
+  /** The network: `'testnet'`, or `{ rpcUrl }` for another RPC endpoint. Mainnet is refused. */
   network: 'testnet' | { rpcUrl: string };
+  /** The `fetch` used for RPC and Friendbot requests. Default `globalThis.fetch`. */
   fetch?: typeof fetch;
 }
 
+/** A network, as Stardust read it from its RPC. */
 export interface NetworkInfo {
+  /**
+   * The network's name, from its passphrase. `'mainnet'` appears only on
+   * `wallet.network`, after `switchNetwork('mainnet')`.
+   */
   readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
+  /** The RPC endpoint. */
   readonly rpcUrl: string;
+  /** The network passphrase. */
   readonly networkPassphrase: string;
+  /** The network's Friendbot, or `null` when it has none. */
   readonly friendbotUrl: string | null;
+  /** The ledger protocol version. */
   readonly protocolVersion: number;
 }
 

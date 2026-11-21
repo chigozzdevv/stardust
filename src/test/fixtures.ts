@@ -32,27 +32,43 @@ import type { PromptKind, WaitOptions } from '@/wallet/prompts';
 import { EmulatedWallet } from '@/wallet/wallet';
 import type { Wallet } from '@/wallet/wallet';
 
+/** Stardust's option for `test.use`: the users each test in the file gets. */
 export interface StardustTestOptions {
+  /** The users, by name. Every test gets fresh ones, with new accounts and new tabs. */
   users: Readonly<Record<string, UserOptions>>;
 }
 
+/** One user in `test.use({ stardust: { users } })`. Every setting is optional. */
 export interface UserOptions {
+  /** The wallet in the user's browser: `'varial'`, `'sep60'`, or `'none'` for no wallet. Default `'varial'`. */
   wallet?: 'varial' | 'sep60' | 'none';
+  /** Start as if the user had already connected the site. Default `false`. */
   connected?: boolean;
+  /** How the wallet answers prompts. Default `'approve'`. */
   policy?: Policy;
+  /** The wallet's accounts, by name. The first is active. Default `{ main: { fund: true } }`. */
   accounts?: Readonly<Record<string, AccountOptions>>;
+  /** Whether the wallet signs on `http://` pages. Default `true`. */
   allowHttp?: boolean;
+  /** Fail the test at its end when the app broke wallet rules. Default `true`. */
   strict?: boolean;
 }
 
+/** One person in a test: a browser tab, the wallet in it, and the wallet's accounts. */
 export interface User {
+  /** The user's name in `test.use`. */
   readonly name: string;
+  /** The user's browser tab, a Playwright `Page`. */
   readonly page: Page;
+  /** The emulated wallet in the user's tab. */
   readonly wallet: Wallet;
+  /** The account active when the test started. */
   readonly account: Account;
+  /** Every account in the user's wallet, by name, such as `accounts.main`. */
   readonly accounts: Readonly<Record<string, Account>>;
 }
 
+/** The users of a test, by name. */
 export type Users = Readonly<Record<string, User>>;
 
 type Declared = TestOptions['users'][string];
@@ -79,8 +95,11 @@ interface Report {
   readonly problems: unknown[];
 }
 
+/** What Stardust adds to Playwright's test arguments and options. */
 interface Fixtures {
+  /** The option set with `test.use({ stardust: { users } })`. */
   stardust: StardustTestOptions;
+  /** The test's users, by the names declared in `test.use`. */
   users: Users;
 }
 
@@ -93,6 +112,7 @@ interface WorkerFixtures {
   _stardustWorker: StardustWorker;
 }
 
+/** Playwright's `test`, with Stardust's `stardust` option and `users` fixture. */
 type StardustTest = TestType<
   PlaywrightTestArgs & PlaywrightTestOptions & Fixtures,
   PlaywrightWorkerArgs & PlaywrightWorkerOptions
@@ -125,6 +145,22 @@ class StardustWorker {
   }
 }
 
+/**
+ * Playwright's `test`, with Stardust's users. Declare the users once per file
+ * with `test.use`; every test gets fresh ones, with new keys, new balances
+ * and new tabs.
+ *
+ * @example
+ * ```ts
+ * test.use({ stardust: { users: { trader: { wallet: 'varial', connected: true } } } });
+ *
+ * test('swaps 10 XLM', async ({ users: { trader } }) => {
+ *   await trader.page.goto('/swap');
+ *   const prompt = await trader.wallet.nextPrompt('signTransaction');
+ *   await expect(prompt).toLand();
+ * });
+ * ```
+ */
 export const test: StardustTest = base.extend<InternalFixtures, WorkerFixtures>(
   {
     stardust: [{ users: {} }, { option: true }],

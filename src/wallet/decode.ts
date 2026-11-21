@@ -15,47 +15,81 @@ import { units } from '@/amounts';
 import type { ContractSpecs, SpecLookup } from '@/contracts/spec';
 import { networkId } from '@/network/network';
 
+/** A transaction the app asked the wallet to sign, decoded. */
 export interface DecodedTransaction {
+  /** The transaction envelope as the app sent it, base64 XDR. */
   readonly xdr: string;
+  /** The transaction hash, hex. For a fee bump, the fee bump's hash. */
   readonly hash: string;
+  /** The source account. For a fee bump, the account paying the fee. */
   readonly source: string;
+  /** The declared maximum fee, in stroops. */
   readonly fee: bigint;
+  /** The sequence number. */
   readonly sequence: bigint;
+  /** The memo. `value` is `null` for `'none'`, and hex for `'hash'` and `'return'`. */
   readonly memo: {
     type: 'none' | 'text' | 'id' | 'hash' | 'return';
     value: string | null;
   };
+  /** The operations, in order. */
   readonly operations: readonly DecodedOperation[];
+  /** The contract call and every sub-call it authorizes, flattened in order. Empty for a classic transaction. */
   readonly invocations: readonly Invocation[];
+  /** The authorization entries attached to the contract call. */
   readonly authEntries: readonly DecodedAuthEntry[];
 }
 
+/** One operation of a transaction. */
 export interface DecodedOperation {
+  /** The operation type, as the Stellar SDK names it, such as `'payment'` or `'invokeHostFunction'`. */
   readonly type: string;
+  /** The operation's own source account, or `null` when it uses the transaction's. */
   readonly source: string | null;
+  /**
+   * The operation's fields, named as in the Stellar SDK. Assets are written
+   * `'native'` or `'CODE:ISSUER'`, and amounts are `bigint` stroops.
+   */
   readonly body: Readonly<Record<string, unknown>>;
 }
 
+/** A contract call. */
 export interface Invocation {
+  /** The contract called, `C...`. */
   readonly contract: string;
+  /** The function called. */
   readonly fn: string;
+  /** The arguments in order, converted from XDR. Integers are `bigint`, addresses are strings. */
   readonly args: readonly unknown[];
+  /** The arguments by name, from the contract's spec, or `null` when the spec can't be read. */
   readonly namedArgs: Readonly<Record<string, unknown>> | null;
+  /** How deep the call is: `0` for the top-level call. */
   readonly depth: number;
 }
 
+/** An authorization entry attached to a transaction, decoded. */
 export interface DecodedAuthEntry {
+  /** The entry, base64 XDR. */
   readonly xdr: string;
+  /** Who must authorize it. */
   readonly address: string;
+  /** The last ledger in which the authorization is valid. */
   readonly expirationLedger: number;
+  /** The calls it authorizes, flattened in order. */
   readonly invocations: readonly Invocation[];
 }
 
+/** An authorization entry preimage the app asked the wallet to sign, decoded. */
 export interface DecodedAuthPreimage {
+  /** The preimage as the app sent it, base64 XDR. */
   readonly xdr: string;
+  /** The network the preimage is for, matched from its network ID, or `null` when it's not a known network. */
   readonly networkPassphrase: string | null;
+  /** The preimage's nonce. */
   readonly nonce: bigint;
+  /** The last ledger in which the authorization is valid. */
   readonly expirationLedger: number;
+  /** The calls it authorizes, flattened in order. */
   readonly invocations: readonly Invocation[];
 }
 

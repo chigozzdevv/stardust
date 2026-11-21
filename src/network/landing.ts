@@ -15,28 +15,49 @@ import type {
 import type { Rpc } from '@/network/network';
 import type { TransactionInfo } from '@/network/schema';
 
+/**
+ * A transaction's outcome once it's in a ledger. A transaction that doesn't
+ * appear in time throws `OUTCOME_UNKNOWN` instead.
+ */
 export type Landed =
   | {
+      /** The transaction succeeded. */
       readonly status: 'success';
+      /** The transaction hash, hex. */
       readonly hash: string;
+      /** The ledger the transaction is in. */
       readonly ledger: number;
+      /** The fee charged, in stroops. */
       readonly feeCharged: bigint;
+      /** Whether the transaction landed inside a fee bump. */
       readonly feeBump: boolean;
+      /** A contract call's return value, converted from XDR, or `undefined`. */
       readonly returnValue: unknown;
+      /** The contract events the transaction emitted. */
       readonly events: readonly ContractEvent[];
+      /** Every balance the transaction changed, read from its events. Fees aren't included. */
       readonly balanceChanges: readonly BalanceChange[];
     }
   | {
+      /** The transaction failed. */
       readonly status: 'failed';
+      /** The transaction hash, hex. */
       readonly hash: string;
+      /** The ledger the transaction is in. */
       readonly ledger: number;
+      /** The transaction's result code, such as `'txFAILED'`. */
       readonly resultCode: string;
+      /** The contract error that made it fail, when a contract call failed with one. */
       readonly contractError: ContractError | null;
     };
 
+/** An error a contract returned. */
 export interface ContractError {
+  /** The contract that returned the error, `C...`. */
   readonly contract: string;
+  /** The error's number. */
   readonly code: number;
+  /** The error's name from the contract's spec, or `null` when the spec can't be read. */
   readonly name: string | null;
 }
 
