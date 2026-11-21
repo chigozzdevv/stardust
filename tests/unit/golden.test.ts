@@ -5,6 +5,7 @@ import { ContractSpecs } from '@/contracts/spec';
 import type { Account } from '@/funding/accounts';
 import { Rpc, networkName } from '@/network/network';
 import type { NetworkInfo } from '@/network/network';
+import { varialVersion } from '@/protocols/varial/varial';
 import { EmulatedWallet } from '@/wallet/wallet';
 import type { GoldenEntry, Step } from '@conformance/conformance';
 import type { Exchange, Message } from '@conformance/test-page/page';
@@ -174,17 +175,30 @@ describe('golden Varial replies', () => {
     );
     for (const file of files) expect(recorders).toContain(file);
   });
+
+  it(`come from Varial ${varialVersion}, the release Stardust says it matches`, () => {
+    const others = files.flatMap((file) =>
+      Object.entries(golden(file))
+        .filter(([, entry]) => entry.varial !== varialVersion)
+        .map(([title, entry]) => `${file} > ${title}: Varial ${entry.varial}`),
+    );
+    expect(others).toEqual([]);
+  });
 });
 
 for (const file of files) {
-  const golden = JSON.parse(
-    readFileSync(new URL(file, folder), 'utf8'),
-  ) as Record<string, GoldenEntry>;
   describe(file, () => {
-    for (const [title, entry] of Object.entries(golden)) {
+    for (const [title, entry] of Object.entries(golden(file))) {
       it(title, ({ skip }) => new Replay(entry, skip).run(), 30_000);
     }
   });
+}
+
+function golden(file: string): Record<string, GoldenEntry> {
+  return JSON.parse(readFileSync(new URL(file, folder), 'utf8')) as Record<
+    string,
+    GoldenEntry
+  >;
 }
 
 function startingNetwork(network: GoldenEntry['network']): NetworkInfo {
