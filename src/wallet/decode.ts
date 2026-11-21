@@ -25,14 +25,12 @@ export interface DecodedTransaction {
   readonly source: string;
   /** The declared maximum fee, in stroops. */
   readonly fee: bigint;
-  /** The sequence number. */
   readonly sequence: bigint;
   /** The memo. `value` is `null` for `'none'`, and hex for `'hash'` and `'return'`. */
   readonly memo: {
     type: 'none' | 'text' | 'id' | 'hash' | 'return';
     value: string | null;
   };
-  /** The operations, in order. */
   readonly operations: readonly DecodedOperation[];
   /** The contract call and every sub-call it authorizes, flattened in order. Empty for a classic transaction. */
   readonly invocations: readonly Invocation[];
@@ -57,7 +55,6 @@ export interface DecodedOperation {
 export interface Invocation {
   /** The contract called, `C...`. */
   readonly contract: string;
-  /** The function called. */
   readonly fn: string;
   /** The arguments in order, converted from XDR. Integers are `bigint`, addresses are strings. */
   readonly args: readonly unknown[];
@@ -85,7 +82,6 @@ export interface DecodedAuthPreimage {
   readonly xdr: string;
   /** The network the preimage is for, matched from its network ID, or `null` when it's not a known network. */
   readonly networkPassphrase: string | null;
-  /** The preimage's nonce. */
   readonly nonce: bigint;
   /** The last ledger in which the authorization is valid. */
   readonly expirationLedger: number;

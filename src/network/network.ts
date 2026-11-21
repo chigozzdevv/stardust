@@ -20,13 +20,10 @@ export interface NetworkInfo {
    * `wallet.network`, after `switchNetwork('mainnet')`.
    */
   readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
-  /** The RPC endpoint. */
   readonly rpcUrl: string;
-  /** The network passphrase. */
   readonly networkPassphrase: string;
   /** The network's Friendbot, or `null` when it has none. */
   readonly friendbotUrl: string | null;
-  /** The ledger protocol version. */
   readonly protocolVersion: number;
 }
 

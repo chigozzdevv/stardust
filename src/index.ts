@@ -49,7 +49,6 @@ export interface Stardust {
   readonly network: NetworkInfo;
   /** Creates throwaway accounts, funded from the machine's testnet funder. */
   readonly accounts: {
-    /** Creates one account. */
     create(options?: AccountOptions): Promise<Account>;
     /** Creates several accounts in one transaction. */
     createMany(options: readonly AccountOptions[]): Promise<Account[]>;

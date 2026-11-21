@@ -18,9 +18,7 @@ export interface MatcherState {
 
 /** A matcher's verdict, as Playwright's `expect` reads it. */
 export interface MatcherResult {
-  /** Whether the check passed. */
   readonly pass: boolean;
-  /** The failure message. */
   readonly message: () => string;
 }
 
@@ -28,7 +26,6 @@ export interface MatcherResult {
 export interface InvokeExpectation {
   /** The contract, `C...`. */
   readonly contract: string;
-  /** The function name. */
   readonly fn: string;
   /** Arguments by name, from the contract's spec. Only listed arguments are compared. */
   readonly args?: Readonly<Record<string, unknown>>;

@@ -15,7 +15,6 @@ export interface StardustConfig {
    * network itself, and refuses mainnet.
    */
   network: 'testnet' | { rpcUrl: string };
-  /** The app under test. */
   app: {
     /** Where the app runs. `page.goto('/swap')` opens this URL plus `/swap`. */
     url: string;

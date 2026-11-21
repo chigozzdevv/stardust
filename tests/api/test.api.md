@@ -35,12 +35,14 @@ type Asset = 'native' | `${string}:${string}` | `C${string}`;
 // @public
 interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
     landed(options?: WaitOptions): Promise<Landed>;
+    // (undocumented)
     readonly preimage: DecodedAuthPreimage;
 }
 
 // @public
 interface BalanceChange {
     readonly address: string;
+    // (undocumented)
     readonly asset: Asset;
     readonly change: bigint;
 }
@@ -58,6 +60,7 @@ interface BasePrompt<K extends PromptKind> {
     fail(error: Failure): Promise<void>;
     hang(): void;
     readonly id: string;
+    // (undocumented)
     readonly kind: K;
     readonly networkPassphrase: string | null;
     readonly origin: string;
@@ -73,6 +76,7 @@ type ConnectPrompt = BasePrompt<'connect'>;
 
 // @public
 interface ContractError {
+    // (undocumented)
     readonly code: number;
     readonly contract: string;
     readonly name: string | null;
@@ -111,6 +115,7 @@ interface DecodedAuthPreimage {
     readonly expirationLedger: number;
     readonly invocations: readonly Invocation[];
     readonly networkPassphrase: string | null;
+    // (undocumented)
     readonly nonce: bigint;
     readonly xdr: string;
 }
@@ -132,7 +137,9 @@ interface DecodedTransaction {
         type: 'none' | 'text' | 'id' | 'hash' | 'return';
         value: string | null;
     };
+    // (undocumented)
     readonly operations: readonly DecodedOperation[];
+    // (undocumented)
     readonly sequence: bigint;
     readonly source: string;
     readonly xdr: string;
@@ -170,6 +177,7 @@ interface Invocation {
     readonly args: readonly unknown[];
     readonly contract: string;
     readonly depth: number;
+    // (undocumented)
     readonly fn: string;
     readonly namedArgs: Readonly<Record<string, unknown>> | null;
 }
@@ -178,6 +186,7 @@ interface Invocation {
 interface InvokeExpectation {
     readonly args?: Readonly<Record<string, unknown>>;
     readonly contract: string;
+    // (undocumented)
     readonly fn: string;
 }
 
@@ -201,7 +210,9 @@ type Landed = {
 
 // @public
 interface MatcherResult {
+    // (undocumented)
     readonly message: () => string;
+    // (undocumented)
     readonly pass: boolean;
 }
 
@@ -219,8 +230,11 @@ interface MessagePrompt extends BasePrompt<'signMessage'> {
 interface NetworkInfo {
     readonly friendbotUrl: string | null;
     readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
+    // (undocumented)
     readonly networkPassphrase: string;
+    // (undocumented)
     readonly protocolVersion: number;
+    // (undocumented)
     readonly rpcUrl: string;
 }
 
@@ -280,6 +294,7 @@ export const test: StardustTest;
 // @public
 interface TransactionPrompt extends BasePrompt<'signTransaction'> {
     landed(options?: WaitOptions): Promise<Landed>;
+    // (undocumented)
     readonly transaction: DecodedTransaction;
 }
 

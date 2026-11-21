@@ -28,12 +28,14 @@ export type Asset = 'native' | `${string}:${string}` | `C${string}`;
 // @public
 export interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
     landed(options?: WaitOptions): Promise<Landed>;
+    // (undocumented)
     readonly preimage: DecodedAuthPreimage;
 }
 
 // @public
 export interface BalanceChange {
     readonly address: string;
+    // (undocumented)
     readonly asset: Asset;
     readonly change: bigint;
 }
@@ -45,6 +47,7 @@ interface BasePrompt<K extends PromptKind> {
     fail(error: Failure): Promise<void>;
     hang(): void;
     readonly id: string;
+    // (undocumented)
     readonly kind: K;
     readonly networkPassphrase: string | null;
     readonly origin: string;
@@ -60,6 +63,7 @@ export type ConnectPrompt = BasePrompt<'connect'>;
 
 // @public
 export interface ContractError {
+    // (undocumented)
     readonly code: number;
     readonly contract: string;
     readonly name: string | null;
@@ -109,6 +113,7 @@ export interface DecodedAuthPreimage {
     readonly expirationLedger: number;
     readonly invocations: readonly Invocation[];
     readonly networkPassphrase: string | null;
+    // (undocumented)
     readonly nonce: bigint;
     readonly xdr: string;
 }
@@ -130,7 +135,9 @@ export interface DecodedTransaction {
         type: 'none' | 'text' | 'id' | 'hash' | 'return';
         value: string | null;
     };
+    // (undocumented)
     readonly operations: readonly DecodedOperation[];
+    // (undocumented)
     readonly sequence: bigint;
     readonly source: string;
     readonly xdr: string;
@@ -150,6 +157,7 @@ export interface Invocation {
     readonly args: readonly unknown[];
     readonly contract: string;
     readonly depth: number;
+    // (undocumented)
     readonly fn: string;
     readonly namedArgs: Readonly<Record<string, unknown>> | null;
 }
@@ -181,8 +189,11 @@ export interface MessagePrompt extends BasePrompt<'signMessage'> {
 export interface NetworkInfo {
     readonly friendbotUrl: string | null;
     readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
+    // (undocumented)
     readonly networkPassphrase: string;
+    // (undocumented)
     readonly protocolVersion: number;
+    // (undocumented)
     readonly rpcUrl: string;
 }
 
@@ -224,6 +235,7 @@ export interface Stardust {
 
 // @public
 export interface StardustConfig {
+    // (undocumented)
     app: {
         url: string;
         start?: string;
@@ -237,6 +249,7 @@ export interface StardustConfig {
 // @public
 export class StardustError extends Error {
     constructor(code: StardustErrorCode, message: string, options?: ErrorOptions);
+    // (undocumented)
     readonly code: StardustErrorCode;
     readonly retryable: boolean;
 }
@@ -247,6 +260,7 @@ export type StardustErrorCode = 'CONFIG_NOT_FOUND' | 'CONFIG_INVALID' | 'NETWORK
 // @public
 export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
     landed(options?: WaitOptions): Promise<Landed>;
+    // (undocumented)
     readonly transaction: DecodedTransaction;
 }
 

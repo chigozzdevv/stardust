@@ -26,7 +26,6 @@ export interface ContractEvent {
 export interface BalanceChange {
   /** The account or contract whose balance changed. */
   readonly address: string;
-  /** The asset. */
   readonly asset: Asset;
   /** The change in the asset's smallest units: stroops for XLM. Negative when the balance went down. */
   readonly change: bigint;

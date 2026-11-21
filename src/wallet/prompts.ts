@@ -63,7 +63,6 @@ interface Failure {
 interface BasePrompt<K extends PromptKind> {
   /** `'p1'`, `'p2'`, … in arrival order within a test. */
   readonly id: string;
-  /** What the prompt asks for. */
   readonly kind: K;
   /** The site that sent it, taken from the browser, never from the page's message. */
   readonly origin: string;
@@ -94,7 +93,6 @@ export type ConnectPrompt = BasePrompt<'connect'>;
 
 /** The app asks for a whole transaction to be signed. */
 export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
-  /** The transaction, decoded. */
   readonly transaction: DecodedTransaction;
   /**
    * Waits for the signed transaction to land and returns its outcome. Throws
@@ -105,7 +103,6 @@ export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
 
 /** The app asks for one contract call to be authorized, while someone else sends the transaction. */
 export interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
-  /** The authorization entry's preimage, decoded. */
   readonly preimage: DecodedAuthPreimage;
   /**
    * Waits for a transaction that uses this authorization to land, and returns

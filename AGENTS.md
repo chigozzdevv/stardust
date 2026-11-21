@@ -76,7 +76,7 @@ Never publish from a local machine, and never move or reuse a version tag.
 - Amounts are `bigint` stroops or token units, parsed from decimal strings with `xlm` and `units`. Never use floating point for amounts or fees.
 - No top-level `await` in `src`. CommonJS projects load `stardust-stellar/test` with `require()`, which can't load a module that has one.
 - Comment only when the code can't explain itself. No large comment blocks or banners.
-- Every type, function and member in the public API has a short TSDoc comment, worded from the spec. It's what users see when they hover in their editor. Keep it in step with the code; `pnpm api:check` shows any item without one as `(undocumented)` in the report diff.
+- Public API types, functions and members get a short TSDoc comment, worded from the spec, when it says something the name and type don't: units, formats, defaults, behaviour, errors thrown. It's what users see when they hover in their editor. Don't add one that only repeats the name; the API report then shows the item as `(undocumented)`, which is fine.
 - Unit tests go in `tests/unit`, fixtures in `tests/fixtures`. Never hand-write data that claims to be recorded: golden Varial replies come from the conformance suite, RPC responses from real testnet calls.
 - Commit messages use a type prefix: `feat:`, `fix:`, `refactor:`, `test:`, `doc:`, `chore:`.
 

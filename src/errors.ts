@@ -48,7 +48,6 @@ const retryableCodes: ReadonlySet<StardustErrorCode> = new Set([
  * says what happened and what to do next.
  */
 export class StardustError extends Error {
-  /** What went wrong. */
   readonly code: StardustErrorCode;
   /** Whether the same step can succeed if run again, such as after a network problem. */
   readonly retryable: boolean;
