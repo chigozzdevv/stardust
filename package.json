@@ -29,7 +29,7 @@
     "node": "^22.18.0 || >=23.6.0"
   },
   "bin": {
-    "stardust": "./dist/cli/index.js"
+    "stardust": "dist/cli/index.js"
   },
   "types": "./dist/index.d.ts",
   "typesVersions": {
