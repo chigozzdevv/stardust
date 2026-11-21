@@ -14,8 +14,8 @@ import { StardustError } from '@/errors';
 import { loadAccount } from '@/funding/funder';
 import { landed, resultCode } from '@/network/landing';
 import type { LandingContext, LandingOptions } from '@/network/landing';
-import { networkId, refuseMainnet } from '@/network/network';
-import type { Rpc } from '@/network/network';
+import { networkId, refuseMainnet } from '@/network/rpc';
+import type { Rpc } from '@/network/rpc';
 import { readPreimage } from '@/wallet/decode';
 
 export type TokenCase =

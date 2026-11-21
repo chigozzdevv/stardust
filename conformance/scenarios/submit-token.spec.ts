@@ -1,5 +1,5 @@
 import { Asset, Networks } from '@stellar/stellar-sdk';
-import { connect, packages, test } from '@conformance/conformance';
+import { connect, packages, test } from '@conformance/fixture';
 import { varialTestToken } from '@conformance/setup';
 import { nativeSac } from '@tests/helpers/envelopes';
 

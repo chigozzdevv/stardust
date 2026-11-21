@@ -12,7 +12,7 @@ import {
 } from '@stellar/stellar-sdk';
 import { describe, expect, it, vi } from 'vitest';
 import { ContractSpecs } from '@/contracts/spec';
-import { Rpc } from '@/network/network';
+import { Rpc } from '@/network/rpc';
 import {
   decodeAuthPreimage,
   decodeTransaction,

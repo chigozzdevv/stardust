@@ -3,12 +3,12 @@ import { constants } from 'node:os';
 import { startApp } from '@/cli/app';
 import type { StartedApp } from '@/cli/app';
 import { parseArgs } from '@/cli/args';
-import { ensureChromium } from '@/cli/browser';
+import { ensureChromium } from '@/cli/chromium';
 import { runTests } from '@/cli/runner';
-import { loadConfig } from '@/config/config';
-import { Rpc, checkNetwork, resolveNetwork } from '@/network/network';
-import { sep43Version, sep60Version } from '@/protocols/sep60/sep60';
-import { varialVersion } from '@/protocols/varial/varial';
+import { loadConfig } from '@/config/load';
+import { Rpc, checkNetwork, resolveNetwork } from '@/network/rpc';
+import { sep43Version, sep60Version } from '@/protocols/sep60/provider';
+import { varialVersion } from '@/protocols/varial/handler';
 
 type Area = 'command' | 'config' | 'network' | 'browser' | 'app' | 'wallets';
 

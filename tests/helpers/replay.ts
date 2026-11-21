@@ -14,7 +14,7 @@ export interface RpcRequest {
 }
 
 export function recording(name: string): readonly RecordedCall[] {
-  const file = new URL(`../fixtures/rpc/${name}.json`, import.meta.url);
+  const file = new URL(`../data/rpc/${name}.json`, import.meta.url);
   return (JSON.parse(readFileSync(file, 'utf8')) as { calls: RecordedCall[] })
     .calls;
 }

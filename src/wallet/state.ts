@@ -1,8 +1,8 @@
 import { Networks } from '@stellar/stellar-sdk';
 import { StardustError } from '@/errors';
 import type { Account } from '@/funding/accounts';
-import { refuseMainnet, resolveNetwork } from '@/network/network';
-import type { NetworkInfo } from '@/network/network';
+import { refuseMainnet, resolveNetwork } from '@/network/rpc';
+import type { NetworkInfo } from '@/network/rpc';
 
 export type NetworkName = 'testnet' | 'futurenet' | 'mainnet';
 

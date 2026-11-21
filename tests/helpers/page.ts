@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createContext, runInContext } from 'node:vm';
 import type * as varialSdk from '@stellar/varial-sdk';
-import type { PageHost } from '@/wallet/wallet';
+import type { PageHost } from '@/wallet/emulated';
 
 export type Binding = (origin: string, payload: unknown) => Promise<unknown>;
 

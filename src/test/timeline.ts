@@ -12,7 +12,7 @@ import type {
   PromptStatus,
 } from '@/wallet/prompts';
 import type { ViolationKind } from '@/wallet/strict';
-import type { Wallet } from '@/wallet/wallet';
+import type { Wallet } from '@/wallet/emulated';
 
 export interface PageRequest {
   url(): string;

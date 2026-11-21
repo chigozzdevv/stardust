@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ContractSpecs } from '@/contracts/spec';
 import { authEntryLanded, landed } from '@/network/landing';
 import type { LandingContext } from '@/network/landing';
-import { Rpc } from '@/network/network';
+import { Rpc } from '@/network/rpc';
 import {
   answer,
   recordedResult,

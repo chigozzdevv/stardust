@@ -1,4 +1,4 @@
-import { connect, packages, test } from '@conformance/conformance';
+import { connect, packages, test } from '@conformance/fixture';
 
 for (const name of packages) {
   test(`${name}: requestAccess() approved`, async ({ compare }) => {

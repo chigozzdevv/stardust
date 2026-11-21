@@ -10,7 +10,7 @@ import {
   loadConfig,
   parseConfig,
   parseTestOptions,
-} from '@/config/config';
+} from '@/config/load';
 import { StardustError } from '@/errors';
 
 const cwd = resolve('/projects/dapp');

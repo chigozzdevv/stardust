@@ -25,7 +25,7 @@ This is a single TypeScript ESM package with two entries, `stardust-stellar` and
 | `src/test`       | The `stardust-stellar/test` entry: `test`, `expect`, user fixtures, matchers, page host.  |
 | `conformance`    | Comparison against the real Varial extension (spec section 11).                           |
 | `tests/unit`     | Vitest unit tests, `*.test.ts`.                                                           |
-| `tests/fixtures` | Golden Varial replies, SEP-53 vectors, recorded testnet responses.                        |
+| `tests/data`     | Golden Varial replies, SEP-53 vectors, recorded testnet responses.                        |
 | `tests/helpers`  | Shared test code: fake ledger, RPC replay, fake page, envelopes, test benches.            |
 | `tests/e2e`      | Stardust against the test app on testnet.                                                 |
 | `tests/test-app` | The small test app.                                                                       |
@@ -45,7 +45,7 @@ pnpm test                 # unit tests (Vitest)
 pnpm test:e2e             # build, then stardust test in tests/test-app on testnet
 pnpm test:apps            # build, then stardust test in each real app in tests/apps/ on testnet
 pnpm test:conformance     # the scenarios against real Varial and against Stardust
-pnpm conformance:record   # the same, and writes Varial's replies to tests/fixtures/varial/
+pnpm conformance:record   # the same, and writes Varial's replies to tests/data/varial/
 pnpm api:check            # build, then fail if the public API differs from the reports in tests/api/
 pnpm api:update           # build, then rewrite the reports in tests/api/
 ```
@@ -55,7 +55,7 @@ pnpm api:update           # build, then rewrite the reports in tests/api/
 - `pnpm test:e2e` sends real testnet transactions and funds every test's accounts through the machine funder in `~/.stardust/funders/`, which calls Friendbot when it's created or refilled. Pass a file to run only that one, for example `pnpm test:e2e pay.spec.ts`. Results, with screenshots and traces of failed tests, go to `tests/test-app/stardust-results/`.
 - `pnpm test:apps` packs Stardust, then for each folder in `tests/apps/`: checks out the app's repository at the commit in `app.json` into `tests/apps/.checkouts/<app>`, runs its `install`, installs the tarball with its `add`, runs its `build` if set, copies in `stardust.config.ts` and `stardust-e2e/`, and runs the app's own `stardust` command. Name apps to run only those (`pnpm test:apps blend-ui`); other arguments go to `stardust test`. Run it on Node 22, as CI does. It funds accounts through the machine funder like `test:e2e`, and the nightly `apps.yml` runs it. To move an app to a newer commit, change `commit` and check its specs still pass. Results go to `tests/apps/.checkouts/<app>/stardust-results/`.
 - `pnpm test:conformance` clones `stellar/freighter` at its latest release into `conformance/.varial/<tag>` and builds it with Yarn 4 (run `corepack enable yarn` once on Node 22). Set `VARIAL_TAG` to pin a release, and `INDEXER_URL` and `INDEXER_V2_URL` to use Varial's backend instead of the stub. The two Stellar Asset Contract `addToken` scenarios fund accounts through the machine funder. Results go to `conformance/stardust-results/`, and the nightly `conformance.yml` runs it in record mode.
-- `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/fixtures/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences. When the replies come from a new Varial release, change `varialVersion` in `src/protocols/varial/varial.ts` in the same commit; `golden.test.ts` fails while the two differ.
+- `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/data/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences. When the replies come from a new Varial release, change `varialVersion` in `src/protocols/varial/varial.ts` in the same commit; `golden.test.ts` fails while the two differ.
 - `pnpm api:check` compares the public API of both entries with `tests/api/index.api.md` and `tests/api/test.api.md`, and on any difference prints it and fails. CI runs it. When you change the public API on purpose, run `pnpm api:update`, review the reports' diff, and commit the reports with the change.
 
 ## Releasing
@@ -68,7 +68,7 @@ Never publish from a local machine, and never move or reuse a version tag.
 
 ## Conventions
 
-- File names are kebab-case with at most 2 hyphens. A domain folder's main file is named after the folder (`network/network.ts`, `protocols/varial/varial.ts`), and its Zod schemas go in `schema.ts` in the same folder.
+- File names are kebab-case with at most 2 hyphens. Name a file after what it does (`network/rpc.ts`, `protocols/varial/handler.ts`), not after its folder. A folder's Zod schemas go in `schema.ts` in the same folder.
 - Imports use the aliases `@/` (`src`) and `@tests/` (`tests`). ESLint rejects relative imports.
 - Use `import type` for type-only imports.
 - Identifiers are camelCase, matching the API in the spec.
@@ -77,7 +77,7 @@ Never publish from a local machine, and never move or reuse a version tag.
 - No top-level `await` in `src`. CommonJS projects load `stardust-stellar/test` with `require()`, which can't load a module that has one.
 - Comment only when the code can't explain itself. No large comment blocks or banners.
 - Public API types, functions and members get a short TSDoc comment, worded from the spec, when it says something the name and type don't: units, formats, defaults, behaviour, errors thrown. It's what users see when they hover in their editor. Don't add one that only repeats the name; the API report then shows the item as `(undocumented)`, which is fine.
-- Unit tests go in `tests/unit`, fixtures in `tests/fixtures`. Never hand-write data that claims to be recorded: golden Varial replies come from the conformance suite, RPC responses from real testnet calls.
+- Unit tests go in `tests/unit`, test data in `tests/data`. Never hand-write data that claims to be recorded: golden Varial replies come from the conformance suite, RPC responses from real testnet calls.
 - Commit messages use a type prefix: `feat:`, `fix:`, `refactor:`, `test:`, `doc:`, `chore:`.
 
 ## Safety rules

@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parseTestOptions } from '@/config/config';
+import { parseTestOptions } from '@/config/load';
 import { specFile, usersView } from '@/test/fixtures';
 import type { User, Users } from '@/test/fixtures';
 

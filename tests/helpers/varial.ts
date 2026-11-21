@@ -1,5 +1,5 @@
 import type { Account } from '@/funding/accounts';
-import { Varial } from '@/protocols/varial/varial';
+import { Varial } from '@/protocols/varial/handler';
 import type { Policy } from '@/wallet/policy';
 import type { WalletError } from '@/wallet/prompts';
 import { Violations } from '@/wallet/strict';

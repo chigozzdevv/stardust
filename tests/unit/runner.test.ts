@@ -12,7 +12,7 @@ import {
   testArgs,
   writeSettings,
 } from '@/cli/runner';
-import type { LoadedConfig } from '@/config/config';
+import type { LoadedConfig } from '@/config/load';
 
 const repo = fileURLToPath(new URL('../..', import.meta.url));
 const playwrightTest = createRequire(import.meta.url).resolve(

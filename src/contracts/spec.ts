@@ -1,6 +1,6 @@
 import { Contract, contract, xdr } from '@stellar/stellar-sdk';
 import { assetSpec } from '@/contracts/asset-spec';
-import type { Rpc } from '@/network/network';
+import type { Rpc } from '@/network/rpc';
 
 export interface ContractSpec {
   readonly functions: ReadonlyMap<string, readonly string[]>;

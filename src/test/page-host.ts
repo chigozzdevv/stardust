@@ -1,5 +1,5 @@
 import type { BrowserContext } from '@playwright/test';
-import type { PageHost } from '@/wallet/wallet';
+import type { PageHost } from '@/wallet/emulated';
 
 export type CallObserver = (payload: unknown) => void;
 

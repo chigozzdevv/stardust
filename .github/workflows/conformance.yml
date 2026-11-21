@@ -67,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: varial-replies
-          path: tests/fixtures/varial/
+          path: tests/data/varial/
 
       - name: Upload conformance results
         if: ${{ !cancelled() }}

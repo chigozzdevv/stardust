@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { constants } from 'node:os';
 import { dirname, join } from 'node:path';
 import type { CommandArgs } from '@/cli/args';
-import type { LoadedConfig } from '@/config/config';
+import type { LoadedConfig } from '@/config/load';
 
 const require = createRequire(import.meta.url);
 

@@ -3,11 +3,11 @@ import { Keypair, StrKey, xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 import { ContractSpecs } from '@/contracts/spec';
 import type { Account } from '@/funding/accounts';
-import { Rpc, networkName } from '@/network/network';
-import type { NetworkInfo } from '@/network/network';
-import { varialVersion } from '@/protocols/varial/varial';
-import { EmulatedWallet } from '@/wallet/wallet';
-import type { GoldenEntry, Step } from '@conformance/conformance';
+import { Rpc, networkName } from '@/network/rpc';
+import type { NetworkInfo } from '@/network/rpc';
+import { varialVersion } from '@/protocols/varial/handler';
+import { EmulatedWallet } from '@/wallet/emulated';
+import type { GoldenEntry, Step } from '@conformance/fixture';
 import type { Exchange, Message } from '@conformance/test-page/page';
 import { FakeHost } from '@tests/helpers/page';
 import type { FakeWindow } from '@tests/helpers/page';
@@ -18,7 +18,7 @@ type Action = Exclude<Step, Call>;
 type Valid = (signature: Uint8Array, hint?: Uint8Array) => boolean;
 type Skip = (note: string) => never;
 
-const folder = new URL('../fixtures/varial/', import.meta.url);
+const folder = new URL('../data/varial/', import.meta.url);
 const scenarios = new URL('../../conformance/scenarios/', import.meta.url);
 const files = existsSync(folder)
   ? readdirSync(folder).filter((file) => file.endsWith('.json'))

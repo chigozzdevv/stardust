@@ -7,7 +7,7 @@ import {
   refuseMainnet,
   resolveNetwork,
   waitForHealth,
-} from '@/network/network';
+} from '@/network/rpc';
 
 const testnet = 'https://soroban-testnet.stellar.org';
 const mainnetPassphrase = 'Public Global Stellar Network ; September 2015';

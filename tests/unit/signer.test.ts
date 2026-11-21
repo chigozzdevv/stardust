@@ -14,7 +14,7 @@ import {
 } from '@stellar/stellar-sdk';
 import { describe, expect, it } from 'vitest';
 import { xlm } from '@/amounts';
-import { Rpc } from '@/network/network';
+import { Rpc } from '@/network/rpc';
 import { decodeTransaction } from '@/wallet/decode';
 import {
   addTrustline,
@@ -23,7 +23,7 @@ import {
   signMessage,
   signTransaction,
 } from '@/wallet/signer';
-import sep53 from '@tests/fixtures/sep53-vectors.json';
+import sep53 from '@tests/data/sep53-vectors.json';
 import { FakeLedger, sacInstance, trustlineEntry } from '@tests/helpers/ledger';
 import { answer, recording, replay } from '@tests/helpers/replay';
 

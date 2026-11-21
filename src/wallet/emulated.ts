@@ -3,11 +3,11 @@ import { ContractSpecs } from '@/contracts/spec';
 import { StardustError } from '@/errors';
 import type { Account } from '@/funding/accounts';
 import type { LandingContext } from '@/network/landing';
-import { Rpc } from '@/network/network';
-import type { NetworkInfo } from '@/network/network';
+import { Rpc } from '@/network/rpc';
+import type { NetworkInfo } from '@/network/rpc';
 import { pageScript } from '@/protocols/page-script';
-import { Sep60, providerInfo } from '@/protocols/sep60/sep60';
-import { Varial } from '@/protocols/varial/varial';
+import { Sep60, providerInfo } from '@/protocols/sep60/provider';
+import { Varial } from '@/protocols/varial/handler';
 import type { Policy } from '@/wallet/policy';
 import type {
   Prompt,

@@ -1,5 +1,5 @@
 import { Keypair, Networks } from '@stellar/stellar-sdk';
-import { connect, packages, test } from '@conformance/conformance';
+import { connect, packages, test } from '@conformance/fixture';
 
 const message = 'Stardust conformance';
 const testnet = { networkPassphrase: Networks.TESTNET };

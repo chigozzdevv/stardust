@@ -2,7 +2,7 @@ import { Address, xdr } from '@stellar/stellar-sdk';
 import { describe, expect, it, vi } from 'vitest';
 import { assetSpec } from '@/contracts/asset-spec';
 import { ContractSpecs } from '@/contracts/spec';
-import { Rpc } from '@/network/network';
+import { Rpc } from '@/network/rpc';
 import { answer, recording, replay } from '@tests/helpers/replay';
 
 const testnet = 'https://soroban-testnet.stellar.org';

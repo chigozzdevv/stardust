@@ -1,8 +1,8 @@
 import { Keypair, Networks } from '@stellar/stellar-sdk';
 import { ContractSpecs } from '@/contracts/spec';
 import type { Account } from '@/funding/accounts';
-import { Rpc } from '@/network/network';
-import type { NetworkInfo } from '@/network/network';
+import { Rpc } from '@/network/rpc';
+import type { NetworkInfo } from '@/network/rpc';
 import type { Policy } from '@/wallet/policy';
 import type {
   PromptFields,

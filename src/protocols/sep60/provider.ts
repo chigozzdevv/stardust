@@ -3,7 +3,7 @@ import manifest from '@/../package.json' with { type: 'json' };
 import type { Account } from '@/funding/accounts';
 import { resultCode } from '@/network/landing';
 import type { LandingContext } from '@/network/landing';
-import { Rpc } from '@/network/network';
+import { Rpc } from '@/network/rpc';
 import {
   horizonProblem,
   sep43Failure,

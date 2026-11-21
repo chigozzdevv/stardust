@@ -1,4 +1,4 @@
-import { connect, packages, test } from '@conformance/conformance';
+import { connect, packages, test } from '@conformance/fixture';
 
 const status = { type: 'REQUEST_CONNECTION_STATUS' };
 

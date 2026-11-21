@@ -13,7 +13,7 @@ import {
 import type { Memo, Operation, OperationRecord } from '@stellar/stellar-sdk';
 import { units } from '@/amounts';
 import type { ContractSpecs, SpecLookup } from '@/contracts/spec';
-import { networkId } from '@/network/network';
+import { networkId } from '@/network/rpc';
 
 /** A transaction the app asked the wallet to sign, decoded. */
 export interface DecodedTransaction {

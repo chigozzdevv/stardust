@@ -1,4 +1,4 @@
-import { connect, test } from '@conformance/conformance';
+import { connect, test } from '@conformance/fixture';
 
 const legacy = { type: 'REQUEST_USER_INFO' };
 

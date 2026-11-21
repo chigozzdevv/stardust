@@ -1,7 +1,7 @@
 import { Networks, TransactionBuilder } from '@stellar/stellar-sdk';
 import { xlm } from '@/amounts';
 import type { Account } from '@/funding/accounts';
-import { Sep60 } from '@/protocols/sep60/sep60';
+import { Sep60 } from '@/protocols/sep60/provider';
 import type { Policy } from '@/wallet/policy';
 import { Violations } from '@/wallet/strict';
 import { FakeLedger } from '@tests/helpers/ledger';

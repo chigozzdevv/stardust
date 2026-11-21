@@ -1,5 +1,5 @@
-import { packages, test } from '@conformance/conformance';
-import type { CustomNetwork } from '@conformance/setup';
+import { packages, test } from '@conformance/fixture';
+import type { CustomNetwork } from '@conformance/varial-extension';
 
 const standalone: CustomNetwork = {
   name: 'Custom Network',

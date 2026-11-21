@@ -1,4 +1,4 @@
-import { connect, test } from '@conformance/conformance';
+import { connect, test } from '@conformance/fixture';
 
 test('on a connected site', async ({ compare }) => {
   await compare(async (wallet) => {

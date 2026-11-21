@@ -13,8 +13,8 @@ import type {
   TestInfo,
   TestType,
 } from '@playwright/test';
-import { loadConfig, parseTestOptions } from '@/config/config';
-import type { LoadedConfig } from '@/config/config';
+import { loadConfig, parseTestOptions } from '@/config/load';
+import type { LoadedConfig } from '@/config/load';
 import type { TestOptions } from '@/config/schema';
 import { ContractSpecs } from '@/contracts/spec';
 import { StardustError } from '@/errors';
@@ -22,15 +22,15 @@ import { createAccounts, mergeAccounts } from '@/funding/accounts';
 import type { Account, AccountOptions } from '@/funding/accounts';
 import { Funder } from '@/funding/funder';
 import type { FundingContext, SubFunder } from '@/funding/funder';
-import { Rpc, checkNetwork, resolveNetwork } from '@/network/network';
+import { Rpc, checkNetwork, resolveNetwork } from '@/network/rpc';
 import { findWalletsKit, kitSession } from '@/protocols/wallets-kit';
 import type { WalletsKit } from '@/protocols/wallets-kit';
-import { pageHost } from '@/test/host';
+import { pageHost } from '@/test/page-host';
 import { Timeline, renderTimeline, short, timelineJson } from '@/test/timeline';
 import type { Policy } from '@/wallet/policy';
 import type { PromptKind, WaitOptions } from '@/wallet/prompts';
-import { EmulatedWallet } from '@/wallet/wallet';
-import type { Wallet } from '@/wallet/wallet';
+import { EmulatedWallet } from '@/wallet/emulated';
+import type { Wallet } from '@/wallet/emulated';
 
 /** Stardust's option for `test.use`: the users each test in the file gets. */
 export interface StardustTestOptions {

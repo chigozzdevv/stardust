@@ -6,8 +6,8 @@ import {
   providerInfo,
   sep43Version,
   sep60Version,
-} from '@/protocols/sep60/sep60';
-import type { ProviderInfo } from '@/protocols/sep60/sep60';
+} from '@/protocols/sep60/provider';
+import type { ProviderInfo } from '@/protocols/sep60/provider';
 import { FakeWindow } from '@tests/helpers/page';
 import { sep60, site } from '@tests/helpers/sep60';
 import type { Signed } from '@tests/helpers/sep60';

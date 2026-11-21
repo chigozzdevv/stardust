@@ -1,4 +1,4 @@
-import { test } from '@conformance/conformance';
+import { test } from '@conformance/fixture';
 
 const legacy = { type: 'REQUEST_NETWORK' };
 

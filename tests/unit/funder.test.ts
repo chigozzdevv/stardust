@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { xlm } from '@/amounts';
 import { Funder, topUpAmount } from '@/funding/funder';
 import type { FundingContext } from '@/funding/funder';
-import { networkId } from '@/network/network';
+import { networkId } from '@/network/rpc';
 import { FakeLedger } from '@tests/helpers/ledger';
 
 const fee = 100n;

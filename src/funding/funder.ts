@@ -18,8 +18,8 @@ import { withLock } from '@/funding/lock-file';
 import type { LockOptions } from '@/funding/lock-file';
 import { landed, resultCode } from '@/network/landing';
 import type { LandingContext, LandingOptions } from '@/network/landing';
-import { networkId, refuseMainnet } from '@/network/network';
-import type { NetworkInfo, Rpc } from '@/network/network';
+import { networkId, refuseMainnet } from '@/network/rpc';
+import type { NetworkInfo, Rpc } from '@/network/rpc';
 
 export interface FundingContext extends LandingContext {
   readonly network: NetworkInfo;

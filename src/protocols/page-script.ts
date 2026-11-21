@@ -1,4 +1,4 @@
-import type { ProviderInfo } from '@/protocols/sep60/sep60';
+import type { ProviderInfo } from '@/protocols/sep60/provider';
 
 export type PageScriptOptions =
   | { readonly wallet: 'varial'; readonly binding: string }

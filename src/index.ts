@@ -1,23 +1,23 @@
-import { checkAccountOptions } from '@/config/config';
+import { checkAccountOptions } from '@/config/load';
 import { ContractSpecs } from '@/contracts/spec';
 import { createAccounts } from '@/funding/accounts';
 import type { Account, AccountOptions } from '@/funding/accounts';
 import { Funder } from '@/funding/funder';
 import type { SubFunder } from '@/funding/funder';
-import { Rpc, checkNetwork, resolveNetwork } from '@/network/network';
-import type { CoreConfig, NetworkInfo } from '@/network/network';
-import { EmulatedWallet } from '@/wallet/wallet';
-import type { Wallet, WalletOptions } from '@/wallet/wallet';
+import { Rpc, checkNetwork, resolveNetwork } from '@/network/rpc';
+import type { CoreConfig, NetworkInfo } from '@/network/rpc';
+import { EmulatedWallet } from '@/wallet/emulated';
+import type { Wallet, WalletOptions } from '@/wallet/emulated';
 
 export { units, xlm } from '@/amounts';
-export { defineConfig } from '@/config/config';
-export type { StardustConfig } from '@/config/config';
+export { defineConfig } from '@/config/load';
+export type { StardustConfig } from '@/config/load';
 export { StardustError } from '@/errors';
 export type { StardustErrorCode } from '@/errors';
 export type { Account, AccountOptions } from '@/funding/accounts';
 export type { Asset, BalanceChange, ContractEvent } from '@/network/events';
 export type { ContractError, Landed } from '@/network/landing';
-export type { CoreConfig, NetworkInfo } from '@/network/network';
+export type { CoreConfig, NetworkInfo } from '@/network/rpc';
 export type {
   DecodedAuthEntry,
   DecodedAuthPreimage,
@@ -41,7 +41,7 @@ export type {
   WaitOptions,
 } from '@/wallet/prompts';
 export type { Violation } from '@/wallet/strict';
-export type { PageHost, Wallet, WalletOptions } from '@/wallet/wallet';
+export type { PageHost, Wallet, WalletOptions } from '@/wallet/emulated';
 
 /** Stardust's core, for setups that don't use `stardust-stellar/test`. */
 export interface Stardust {

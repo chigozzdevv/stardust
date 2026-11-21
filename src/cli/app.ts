@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import type { LoadedConfig } from '@/config/config';
+import type { LoadedConfig } from '@/config/load';
 import { StardustError } from '@/errors';
 
 export interface AppOptions {

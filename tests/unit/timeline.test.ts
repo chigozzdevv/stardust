@@ -11,8 +11,8 @@ import { xlm } from '@/amounts';
 import { ContractSpecs } from '@/contracts/spec';
 import type { Account } from '@/funding/accounts';
 import type { Landed } from '@/network/landing';
-import { Rpc } from '@/network/network';
-import { pageHost } from '@/test/host';
+import { Rpc } from '@/network/rpc';
+import { pageHost } from '@/test/page-host';
 import { expect as check } from '@/test/index';
 import {
   Timeline,
@@ -23,7 +23,7 @@ import {
 } from '@/test/timeline';
 import type { PageRequest } from '@/test/timeline';
 import type { Policy } from '@/wallet/policy';
-import { EmulatedWallet } from '@/wallet/wallet';
+import { EmulatedWallet } from '@/wallet/emulated';
 import { account, testnet } from '@tests/helpers/prompt-queue';
 import { answer, recordedResult } from '@tests/helpers/replay';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { installArgs } from '@/cli/browser';
+import { installArgs } from '@/cli/chromium';
 
 describe('installArgs', () => {
   it('installs Chromium only', () => {

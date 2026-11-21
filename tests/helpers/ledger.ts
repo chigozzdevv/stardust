@@ -11,8 +11,8 @@ import type { Transaction } from '@stellar/stellar-sdk';
 import { xlm } from '@/amounts';
 import { ContractSpecs } from '@/contracts/spec';
 import type { FundingContext } from '@/funding/funder';
-import { Rpc } from '@/network/network';
-import type { NetworkInfo } from '@/network/network';
+import { Rpc } from '@/network/rpc';
+import type { NetworkInfo } from '@/network/rpc';
 import { answer } from '@tests/helpers/replay';
 import type { RpcRequest } from '@tests/helpers/replay';
 

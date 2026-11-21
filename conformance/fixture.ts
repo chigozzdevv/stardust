@@ -15,13 +15,16 @@ import { ContractSpecs } from '@/contracts/spec';
 import type { Account } from '@/funding/accounts';
 import { createStardust } from '@/index';
 import type { Stardust } from '@/index';
-import { Rpc, resolveNetwork } from '@/network/network';
-import { pageHost } from '@/test/host';
-import type { Wallet } from '@/wallet/wallet';
+import { Rpc, resolveNetwork } from '@/network/rpc';
+import { pageHost } from '@/test/page-host';
+import type { Wallet } from '@/wallet/emulated';
 import { addTrustline } from '@/wallet/signer';
-import { testnet } from '@conformance/indexer';
-import { VarialExtension } from '@conformance/setup';
-import type { CustomNetwork, NetworkLabel } from '@conformance/setup';
+import { testnet } from '@conformance/indexer-stub';
+import { VarialExtension } from '@conformance/varial-extension';
+import type {
+  CustomNetwork,
+  NetworkLabel,
+} from '@conformance/varial-extension';
 import type {
   Exchange,
   Message,
@@ -93,7 +96,7 @@ interface WorkerFixtures {
 const promptTimeoutMs = 20_000;
 const replyTimeoutMs = 30_000;
 const trustlineFee = '10000';
-const goldenFolder = join(import.meta.dirname, '../tests/fixtures/varial');
+const goldenFolder = join(import.meta.dirname, '../tests/data/varial');
 const labels: Record<Network, NetworkLabel> = {
   testnet: 'Test Net',
   futurenet: 'Future Net',

@@ -12,7 +12,7 @@ import type {
   ContractEvent,
   ContractFailure,
 } from '@/network/events';
-import type { Rpc } from '@/network/network';
+import type { Rpc } from '@/network/rpc';
 import type { TransactionInfo } from '@/network/schema';
 
 /**

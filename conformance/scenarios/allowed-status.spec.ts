@@ -1,4 +1,4 @@
-import { connect, packages, test } from '@conformance/conformance';
+import { connect, packages, test } from '@conformance/fixture';
 
 for (const name of packages) {
   test(`${name}: isAllowed() on a site that is not connected`, async ({
