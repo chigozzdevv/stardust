@@ -6,7 +6,7 @@ Instructions for coding agents working in this repository.
 
 Stardust (npm package `stardust-stellar`) is an end-to-end testing toolkit for Stellar dapps. A test drives the dapp in Chromium through Playwright, and Stardust plays the wallet: it puts an emulated Varial (formerly Freighter) or SEP-60/SEP-43 wallet in the page, creates funded throwaway accounts on testnet, answers wallet prompts through policies or the test, signs in Node, and checks what landed on the network.
 
-[stardust.md](stardust.md) is the specification and the source of truth. Behaviour, API names, types, error codes, CLI output and safety rules come from it. When the code and the spec disagree, fix the code or ask the user; don't change the spec on your own.
+The specification, `stardust.md`, is kept out of git: it's in `.gitignore`, so only some copies of the repository have it. Never commit it. Where it exists, it's the source of truth. Behaviour, API names, types, error codes, CLI output and safety rules come from it. When the code and the spec disagree, fix the code or ask the user; don't change the spec on your own.
 
 This is a single TypeScript ESM package with two entries, `stardust-stellar` and `stardust-stellar/test`, and the `stardust` command.
 

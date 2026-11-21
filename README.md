@@ -6,7 +6,7 @@ Stardust runs your dapp in Chromium through Playwright and plays the wallet. It 
 
 You install it in your own project and run it on your machine or in CI. There are no servers, accounts or dashboards.
 
-[Specification](stardust.md) · [Agent guide](AGENTS.md)
+[Changelog](CHANGELOG.md) · [Contributing](AGENTS.md)
 
 ## Install
 
@@ -190,7 +190,7 @@ jobs:
 
 ## Reference
 
-[stardust.md](stardust.md) is the full reference: every option, prompt, check, error code and wallet behaviour. To work on Stardust itself, read [AGENTS.md](AGENTS.md).
+Every exported function, type and option has a doc comment, so your editor explains it on hover. What changed in each release is in [CHANGELOG.md](CHANGELOG.md). To work on Stardust itself, read [AGENTS.md](AGENTS.md).
 
 ## License
 
