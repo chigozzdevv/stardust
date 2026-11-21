@@ -19,5 +19,5 @@
     }
   },
   "include": ["src", "tests", "conformance", "*.config.ts"],
-  "exclude": ["tests/e2e", "conformance/.varial"]
+  "exclude": ["tests/e2e", "tests/apps", "conformance/.varial"]
 }

@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/stellar/laboratory.git",
+  "commit": "6087cd0bb2f9a78b02996ec097849c7888df478e",
+  "install": "pnpm install --frozen-lockfile",
+  "add": "pnpm add -D"
+}

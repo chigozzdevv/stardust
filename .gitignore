@@ -4,6 +4,7 @@ coverage/
 stardust-results/
 .agents/
 conformance/.varial/
+tests/apps/.checkouts/
 .env
 .env.*
 .DS_Store

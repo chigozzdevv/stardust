@@ -9,6 +9,7 @@ export default tseslint.config(
       '**/stardust-results/**',
       '.agents/**',
       'conformance/.varial/**',
+      'tests/apps/.checkouts/**',
     ],
   },
   js.configs.recommended,

@@ -64,6 +64,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:e2e": "pnpm build && cd tests/test-app && node ../../dist/cli/index.js test",
+    "test:apps": "pnpm build && node tests/apps/run.ts",
     "test:conformance": "playwright test -c conformance",
     "conformance:record": "CONFORMANCE_RECORD=1 playwright test -c conformance",
     "api:check": "pnpm build && api-extractor run --print-api-report-diff -c tests/api/index.json && api-extractor run --print-api-report-diff -c tests/api/test.json",

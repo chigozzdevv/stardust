@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/blend-capital/blend-ui.git",
+  "commit": "6aa28273640a86d62cb07680cdf482d9c88d69f9",
+  "install": "npm install --no-audit --no-fund",
+  "add": "npm install -D --no-audit --no-fund",
+  "build": "npm run build:testnet"
+}

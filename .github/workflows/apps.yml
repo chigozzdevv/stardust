@@ -1,0 +1,58 @@
+name: Real apps
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: Apps to run, separated by spaces, for example "blend-ui". Empty runs every app in tests/apps/.
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apps-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apps:
+    name: Stardust on real apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: 'true'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Stardust on the apps
+        env:
+          APPS: ${{ inputs.apps }}
+        run: |
+          read -ra apps <<< "$APPS"
+          pnpm test:apps "${apps[@]}"
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: apps-results
+          path: tests/apps/.checkouts/*/stardust-results/
+          include-hidden-files: true
+          if-no-files-found: ignore
