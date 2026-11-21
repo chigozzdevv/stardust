@@ -1,6 +1,6 @@
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ZodError } from 'zod';
 import { accountOptions, stardustConfig, testOptions } from '@/config/schema';
@@ -46,14 +46,27 @@ export async function loadConfig(cwd: string): Promise<LoadedConfig> {
 
 // In a test worker of a project without "type": "module", Playwright compiles
 // the config to CommonJS, and on Node 22 import() then fails as soon as the
-// config imports stardust-stellar. require() works there, and everywhere else
-// except a config with top-level await.
+// config imports stardust-stellar, while require() works. A config with
+// top-level await can't be required, so it falls back to import().
 async function load(file: string): Promise<{ default?: unknown }> {
+  const url = pathToFileURL(file).href;
+  if ((await packageType(dirname(file))) === 'module') return import(url);
   try {
     return createRequire(file)(file) as { default?: unknown };
   } catch (error) {
     if (codeOf(error) !== 'ERR_REQUIRE_ASYNC_MODULE') throw error;
-    return import(pathToFileURL(file).href) as Promise<{ default?: unknown }>;
+    return import(url) as Promise<{ default?: unknown }>;
+  }
+}
+
+async function packageType(dir: string): Promise<unknown> {
+  for (let at = dir; ; at = dirname(at)) {
+    const manifest = await readFile(join(at, 'package.json'), 'utf8').then(
+      (text) => JSON.parse(text) as { type?: unknown },
+      () => null,
+    );
+    if (manifest) return manifest.type;
+    if (dirname(at) === at) return undefined;
   }
 }
 
