@@ -63,12 +63,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:e2e": "pnpm build && cd tests/test-app && node ../../dist/cli/index.js test",
-    "test:apps": "pnpm build && node tests/apps/run.ts",
+    "test:e2e": "pnpm build && cd tests/e2e/app && node ../../../dist/cli/index.js test",
+    "test:dapps": "pnpm build && node tests/dapps/run.ts",
     "test:conformance": "playwright test -c conformance",
     "conformance:record": "CONFORMANCE_RECORD=1 playwright test -c conformance",
-    "api:check": "pnpm build && api-extractor run --print-api-report-diff -c tests/api/index.json && api-extractor run --print-api-report-diff -c tests/api/test.json",
-    "api:update": "pnpm build && api-extractor run --local -c tests/api/index.json && api-extractor run --local -c tests/api/test.json"
+    "api:check": "pnpm build && api-extractor run --print-api-report-diff -c tests/api-report/index.json && api-extractor run --print-api-report-diff -c tests/api-report/test.json",
+    "api:update": "pnpm build && api-extractor run --local -c tests/api-report/index.json && api-extractor run --local -c tests/api-report/test.json"
   },
   "dependencies": {
     "@playwright/test": "^1.65.0",

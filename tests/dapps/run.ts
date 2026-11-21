@@ -11,7 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-interface App {
+interface Dapp {
   readonly repository: string;
   readonly commit: string;
   readonly install: string;
@@ -51,35 +51,38 @@ function pack(): string {
 }
 
 function test(name: string): boolean {
-  const app = JSON.parse(
-    readFileSync(join(folder, name, 'app.json'), 'utf8'),
-  ) as App;
+  const dapp = JSON.parse(
+    readFileSync(join(folder, name, 'dapp.json'), 'utf8'),
+  ) as Dapp;
   const dir = join(checkouts, name);
-  console.log(`\n${name}: ${app.repository} at ${app.commit.slice(0, 7)}`);
+  console.log(`\n${name}: ${dapp.repository} at ${dapp.commit.slice(0, 7)}`);
 
-  checkout(app, dir);
-  shell(app.install, dir);
-  shell(`${app.add} ${tarball}`, dir);
-  if (app.build) shell(app.build, dir);
+  checkout(dapp, dir);
+  if (existsSync(join(dir, 'e2e'))) {
+    throw new Error(
+      `${name} has its own e2e folder at ${dapp.commit.slice(0, 7)}, so its Stardust specs can't be copied there.`,
+    );
+  }
+  shell(dapp.install, dir);
+  shell(`${dapp.add} ${tarball}`, dir);
+  if (dapp.build) shell(dapp.build, dir);
   cpSync(
     join(folder, name, 'stardust.config.ts'),
     join(dir, 'stardust.config.ts'),
   );
-  cpSync(join(folder, name, 'stardust-e2e'), join(dir, 'stardust-e2e'), {
-    recursive: true,
-  });
+  cpSync(join(folder, name, 'e2e'), join(dir, 'e2e'), { recursive: true });
 
   const stardust = join(dir, 'node_modules', '.bin', 'stardust');
   return attempt(stardust, ['test', ...forwarded], { cwd: dir });
 }
 
-function checkout(app: App, dir: string): void {
+function checkout(dapp: Dapp, dir: string): void {
   if (!existsSync(join(dir, '.git'))) {
     mkdirSync(dir, { recursive: true });
     run('git', ['init', '-q'], { cwd: dir });
-    run('git', ['remote', 'add', 'origin', app.repository], { cwd: dir });
+    run('git', ['remote', 'add', 'origin', dapp.repository], { cwd: dir });
   }
-  run('git', ['fetch', '-q', '--depth', '1', 'origin', app.commit], {
+  run('git', ['fetch', '-q', '--depth', '1', 'origin', dapp.commit], {
     cwd: dir,
   });
   run('git', ['checkout', '-q', '--force', '--detach', 'FETCH_HEAD'], {

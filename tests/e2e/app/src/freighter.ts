@@ -8,15 +8,15 @@ import {
   signMessage,
   signTransaction,
 } from '@stellar/freighter-api';
-import { CONTRACTS } from '@tests/test-app/src/contracts';
-import { byId, onClick, run, say } from '@tests/test-app/src/dom';
+import { CONTRACTS } from '@tests/e2e/app/src/contracts';
+import { byId, onClick, run, say } from '@tests/e2e/app/src/dom';
 import {
   network,
   payment,
   send,
   transfer,
   verified,
-} from '@tests/test-app/src/stellar';
+} from '@tests/e2e/app/src/stellar';
 
 type Build = (from: string, to: string, amount: string) => Promise<string>;
 type SignOptions = Parameters<typeof signTransaction>[1];

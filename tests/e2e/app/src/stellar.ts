@@ -11,7 +11,7 @@ import {
   rpc,
 } from '@stellar/stellar-sdk';
 import type { Transaction, xdr } from '@stellar/stellar-sdk';
-import { CONTRACTS } from '@tests/test-app/src/contracts';
+import { CONTRACTS } from '@tests/e2e/app/src/contracts';
 
 export const network = {
   name: 'Testnet',

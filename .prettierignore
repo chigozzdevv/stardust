@@ -4,6 +4,6 @@ node_modules
 stardust-results
 .agents
 conformance/.varial
-tests/apps/.checkouts
+tests/dapps/.checkouts
 stardust.md
-tests/api/*.api.md
+tests/api-report/*.api.md

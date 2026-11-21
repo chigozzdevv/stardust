@@ -12,51 +12,50 @@ This is a single TypeScript ESM package with two entries, `stardust-stellar` and
 
 ## Layout
 
-| Path             | Contents                                                                                  |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| `src`            | `index.ts` (the `stardust-stellar` entry), `errors.ts`, `amounts.ts`.                     |
-| `src/config`     | `defineConfig`, `StardustConfig`, loading and validating `stardust.config.ts`.            |
-| `src/cli`        | The `stardust test` command: arguments, Chromium install, app start and stop, Playwright. |
-| `src/network`    | RPC, health checks and the mainnet guard, transaction landing, events to balance changes. |
-| `src/funding`    | Test accounts, the machine's funder and sub-funders, the funder's lock file.              |
-| `src/contracts`  | Contract spec fetch and cache, the built-in Stellar Asset Contract spec.                  |
-| `src/wallet`     | The emulated wallet: state, prompts, policies, signer, decoder, strict mode.              |
-| `src/protocols`  | In-page script, Wallets Kit session, Varial and SEP-60/SEP-43 message handling.           |
-| `src/test`       | The `stardust-stellar/test` entry: `test`, `expect`, user fixtures, matchers, page host.  |
-| `conformance`    | Comparison against the real Varial extension (spec section 11).                           |
-| `tests/unit`     | Vitest unit tests, `*.test.ts`.                                                           |
-| `tests/data`     | Golden Varial replies, SEP-53 vectors, recorded testnet responses.                        |
-| `tests/helpers`  | Shared test code: fake ledger, RPC replay, fake page, envelopes, test benches.            |
-| `tests/e2e`      | Stardust against the test app on testnet.                                                 |
-| `tests/test-app` | The small test app.                                                                       |
-| `tests/apps`     | Real apps: each app's pinned commit (`app.json`), config and specs, and `run.ts`.         |
-| `tests/api`      | API Extractor configs and the public API reports of both entries, checked in CI.          |
+| Path               | Contents                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| `src`              | `index.ts` (the `stardust-stellar` entry), `errors.ts`, `amounts.ts`.                     |
+| `src/config`       | `defineConfig`, `StardustConfig`, loading and validating `stardust.config.ts`.            |
+| `src/cli`          | The `stardust test` command: arguments, Chromium install, app start and stop, Playwright. |
+| `src/network`      | RPC, health checks and the mainnet guard, transaction landing, events to balance changes. |
+| `src/funding`      | Test accounts, the machine's funder and sub-funders, the funder's lock file.              |
+| `src/contracts`    | Contract spec fetch and cache, the built-in Stellar Asset Contract spec.                  |
+| `src/wallet`       | The emulated wallet: state, prompts, policies, signer, decoder, strict mode.              |
+| `src/protocols`    | In-page script, Wallets Kit session, Varial and SEP-60/SEP-43 message handling.           |
+| `src/test`         | The `stardust-stellar/test` entry: `test`, `expect`, user fixtures, matchers, page host.  |
+| `conformance`      | Comparison against the real Varial extension (spec section 11).                           |
+| `tests/unit`       | Vitest unit tests, `*.test.ts`.                                                           |
+| `tests/data`       | Golden Varial replies, SEP-53 vectors, recorded testnet responses.                        |
+| `tests/helpers`    | Shared test code: fake ledger, RPC replay, fake page, envelopes, test benches.            |
+| `tests/e2e`        | Stardust against a small dapp of our own on testnet: the specs, and the dapp in `app/`.   |
+| `tests/dapps`      | Stardust on real dapps: each one's pinned commit (`dapp.json`), config and `e2e/` specs.  |
+| `tests/api-report` | API Extractor configs and the public API reports of both entries, checked in CI.          |
 
 ## Commands
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm build                # tsup, writes dist/
-pnpm typecheck            # src and unit tests, then tests/e2e and tests/apps against dist's types
+pnpm typecheck            # src and unit tests, then tests/e2e and tests/dapps against dist's types
 pnpm lint                 # ESLint, zero warnings allowed
 pnpm format               # Prettier, rewrites files
 pnpm format:check         # Prettier
 pnpm test                 # unit tests (Vitest)
-pnpm test:e2e             # build, then stardust test in tests/test-app on testnet
-pnpm test:apps            # build, then stardust test in each real app in tests/apps/ on testnet
+pnpm test:e2e             # build, then stardust test on the dapp in tests/e2e/app on testnet
+pnpm test:dapps           # build, then stardust test on each real dapp in tests/dapps/ on testnet
 pnpm test:conformance     # the scenarios against real Varial and against Stardust
 pnpm conformance:record   # the same, and writes Varial's replies to tests/data/varial/
-pnpm api:check            # build, then fail if the public API differs from the reports in tests/api/
-pnpm api:update           # build, then rewrite the reports in tests/api/
+pnpm api:check            # build, then fail if the public API differs from the reports in tests/api-report/
+pnpm api:update           # build, then rewrite the reports in tests/api-report/
 ```
 
-- Run `pnpm build` before `pnpm typecheck`. The e2e and real-app specs and their `stardust.config.ts` files import `stardust-stellar` from `dist`, so typecheck reads its type files.
+- Run `pnpm build` before `pnpm typecheck`. The e2e and dapp specs and their `stardust.config.ts` files import `stardust-stellar` from `dist`, so typecheck reads its type files.
 - Some unit tests run in Chromium. Install it once with `pnpm exec playwright install chromium`.
-- `pnpm test:e2e` sends real testnet transactions and funds every test's accounts through the machine funder in `~/.stardust/funders/`, which calls Friendbot when it's created or refilled. Pass a file to run only that one, for example `pnpm test:e2e pay.spec.ts`. Results, with screenshots and traces of failed tests, go to `tests/test-app/stardust-results/`.
-- `pnpm test:apps` packs Stardust, then for each folder in `tests/apps/`: checks out the app's repository at the commit in `app.json` into `tests/apps/.checkouts/<app>`, runs its `install`, installs the tarball with its `add`, runs its `build` if set, copies in `stardust.config.ts` and `stardust-e2e/`, and runs the app's own `stardust` command. Name apps to run only those (`pnpm test:apps blend-ui`); other arguments go to `stardust test`. Run it on Node 22, as CI does. It funds accounts through the machine funder like `test:e2e`, and the nightly `apps.yml` runs it. To move an app to a newer commit, change `commit` and check its specs still pass. Results go to `tests/apps/.checkouts/<app>/stardust-results/`.
+- `pnpm test:e2e` sends real testnet transactions and funds every test's accounts through the machine funder in `~/.stardust/funders/`, which calls Friendbot when it's created or refilled. Pass a file to run only that one, for example `pnpm test:e2e pay.spec.ts`. Results, with screenshots and traces of failed tests, go to `tests/e2e/app/stardust-results/`.
+- `pnpm test:dapps` packs Stardust, then for each folder in `tests/dapps/`: checks out the dapp's repository at the commit in `dapp.json` into `tests/dapps/.checkouts/<dapp>`, runs its `install`, installs the tarball with its `add`, runs its `build` if set, copies in `stardust.config.ts` and `e2e/`, and runs the dapp's own `stardust` command. Name dapps to run only those (`pnpm test:dapps blend`); other arguments go to `stardust test`. Run it on Node 22, as CI does. It funds accounts through the machine funder like `test:e2e`, and the nightly `dapps.yml` runs it. To move a dapp to a newer commit, change `commit` and check its specs still pass. Results go to `tests/dapps/.checkouts/<dapp>/stardust-results/`.
 - `pnpm test:conformance` clones `stellar/freighter` at its latest release into `conformance/.varial/<tag>` and builds it with Yarn 4 (run `corepack enable yarn` once on Node 22). Set `VARIAL_TAG` to pin a release, and `INDEXER_URL` and `INDEXER_V2_URL` to use Varial's backend instead of the stub. The two Stellar Asset Contract `addToken` scenarios fund accounts through the machine funder. Results go to `conformance/stardust-results/`, and the nightly `conformance.yml` runs it in record mode.
 - `pnpm conformance:record` (or `CONFORMANCE_RECORD=1`) writes Varial's replies to `tests/data/varial/<scenario>.json`, which `tests/unit/golden.test.ts` replays through Stardust. Commit only files a run recorded, after checking the run's differences. When the replies come from a new Varial release, change `varialVersion` in `src/protocols/varial/varial.ts` in the same commit; `golden.test.ts` fails while the two differ.
-- `pnpm api:check` compares the public API of both entries with `tests/api/index.api.md` and `tests/api/test.api.md`, and on any difference prints it and fails. CI runs it. When you change the public API on purpose, run `pnpm api:update`, review the reports' diff, and commit the reports with the change.
+- `pnpm api:check` compares the public API of both entries with `tests/api-report/index.api.md` and `tests/api-report/test.api.md`, and on any difference prints it and fails. CI runs it. When you change the public API on purpose, run `pnpm api:update`, review the reports' diff, and commit the reports with the change.
 
 ## Releasing
 

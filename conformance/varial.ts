@@ -4,7 +4,7 @@ import { chromium, expect } from '@playwright/test';
 import type { BrowserContext, Locator, Page } from '@playwright/test';
 import type { Account } from '@/funding/accounts';
 import type { PromptKind } from '@/wallet/prompts';
-import { standInIndexer } from '@conformance/indexer-stub';
+import { standInIndexer } from '@conformance/indexer';
 import { varialFolder } from '@conformance/setup';
 
 export type NetworkLabel = 'Test Net' | 'Future Net' | 'Main Net';

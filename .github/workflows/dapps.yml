@@ -1,12 +1,12 @@
-name: Real apps
+name: Dapps
 
 on:
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
-      apps:
-        description: Apps to run, separated by spaces, for example "blend-ui". Empty runs every app in tests/apps/.
+      dapps:
+        description: Dapps to run, separated by spaces, for example "blend". Empty runs every dapp in tests/dapps/.
         type: string
         default: ''
 
@@ -14,12 +14,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: apps-${{ github.ref }}
+  group: dapps-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  apps:
-    name: Stardust on real apps
+  dapps:
+    name: Stardust on real dapps
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -41,18 +41,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Stardust on the apps
+      - name: Run Stardust on the dapps
         env:
-          APPS: ${{ inputs.apps }}
+          DAPPS: ${{ inputs.dapps }}
         run: |
-          read -ra apps <<< "$APPS"
-          pnpm test:apps "${apps[@]}"
+          read -ra dapps <<< "$DAPPS"
+          pnpm test:dapps "${dapps[@]}"
 
       - name: Upload test results
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: apps-results
-          path: tests/apps/.checkouts/*/stardust-results/
+          name: dapps-results
+          path: tests/dapps/.checkouts/*/stardust-results/
           include-hidden-files: true
           if-no-files-found: ignore

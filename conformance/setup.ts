@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { noIndexer } from '@conformance/indexer-stub';
+import { noIndexer } from '@conformance/indexer';
 
 const repository = 'https://github.com/stellar/freighter.git';
 const clones = join(import.meta.dirname, '.varial');

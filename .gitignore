@@ -5,7 +5,7 @@ stardust-results/
 .agents/
 stardust.md
 conformance/.varial/
-tests/apps/.checkouts/
+tests/dapps/.checkouts/
 .env
 .env.*
 .DS_Store

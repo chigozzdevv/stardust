@@ -1,5 +1,5 @@
-import { byId, onClick, run, say } from '@tests/test-app/src/dom';
-import { network, verified } from '@tests/test-app/src/stellar';
+import { byId, onClick, run, say } from '@tests/e2e/app/src/dom';
+import { network, verified } from '@tests/e2e/app/src/stellar';
 
 type Reply<T> = T | { error: { code: number; message: string } };
 

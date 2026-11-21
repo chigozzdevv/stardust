@@ -19,12 +19,9 @@ import { Rpc, resolveNetwork } from '@/network/rpc';
 import { pageHost } from '@/test/page-host';
 import type { Wallet } from '@/wallet/emulated';
 import { addTrustline } from '@/wallet/signer';
-import { testnet } from '@conformance/indexer-stub';
-import { VarialExtension } from '@conformance/varial-extension';
-import type {
-  CustomNetwork,
-  NetworkLabel,
-} from '@conformance/varial-extension';
+import { testnet } from '@conformance/indexer';
+import { VarialExtension } from '@conformance/varial';
+import type { CustomNetwork, NetworkLabel } from '@conformance/varial';
 import type {
   Exchange,
   Message,

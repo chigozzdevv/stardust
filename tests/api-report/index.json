@@ -6,7 +6,7 @@
   "apiReport": {
     "enabled": true,
     "reportFileName": "index",
-    "reportFolder": "<projectFolder>/tests/api/",
+    "reportFolder": "<projectFolder>/tests/api-report/",
     "reportTempFolder": "<projectFolder>/node_modules/.cache/api-extractor/",
     "includeForgottenExports": true
   },

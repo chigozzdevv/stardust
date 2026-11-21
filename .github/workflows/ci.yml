@@ -89,4 +89,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: stardust-results
-          path: tests/test-app/stardust-results/
+          path: tests/e2e/app/stardust-results/

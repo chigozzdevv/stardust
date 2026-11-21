@@ -1,6 +1,6 @@
 import { expect, test, xlm } from 'stardust-stellar/test';
 import type { User } from 'stardust-stellar/test';
-import { CONTRACTS } from '@tests/test-app/src/contracts';
+import { CONTRACTS } from '@tests/e2e/app/src/contracts';
 
 const { xlmToken } = CONTRACTS.testnet;
 

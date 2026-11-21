@@ -6,6 +6,6 @@
       "@tests/*": ["../*"]
     }
   },
-  "include": [".", "../apps"],
-  "exclude": ["../apps/.checkouts"]
+  "include": [".", "../dapps"],
+  "exclude": ["../dapps/.checkouts"]
 }
