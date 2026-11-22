@@ -1,127 +1,46 @@
 # Stardust
 
-**End-to-end tests for Stellar dapps, with a wallet the test controls.**
+Browser automation for testing Stellar dapps, with a wallet your test controls.
 
-Stardust runs your dapp in Chromium through Playwright and plays the wallet. It puts an emulated Varial (formerly Freighter) or SEP-60/SEP-43 wallet in the page, creates funded throwaway accounts on testnet for every test, answers wallet prompts the way the test says, and checks what landed on the network.
+Set up the wallet and its state: installed or not, connected or not, and the accounts it holds. Your test then drives the app the way a user would, against a wallet that answers like the real one. Every test gets fresh, funded testnet accounts. Varial and SEP-60 wallets are supported, and Stardust is checked nightly against the real Varial extension.
 
-You install it in your own project and run it on your machine or in CI. There are no servers, accounts or dashboards.
+So you can test what users actually do:
 
-[Changelog](CHANGELOG.md) · [Contributing](AGENTS.md)
+- open the app with no wallet installed
+- connect, or reject the connection
+- switch account or network, or lock the wallet
+- sign transactions, messages and auth entries
+- call contracts and check the result on chain
+- add tokens and trustlines
 
-## Install
+## Quick start
+
+**1. Install**
 
 ```sh
 pnpm add -D stardust-stellar
 ```
 
-```json
-{
-  "scripts": {
-    "test:e2e": "stardust test"
-  }
-}
-```
-
-Stardust needs Node.js 22.18 or later, or 23.6 or later on Node 23. Playwright comes with it, and Chromium downloads the first time `stardust test` runs. A project that has its own `@playwright/test` keeps it; Stardust runs its own copy.
-
-## Config
+**2. Add `stardust.config.ts` to your project root**
 
 ```ts
-// stardust.config.ts (project root)
 import { defineConfig } from 'stardust-stellar';
 
 export default defineConfig({
   network: 'testnet',
   app: { url: 'http://localhost:3000', start: 'pnpm dev' },
-  tests: './e2e',
 });
 ```
 
-| Field       | Required | Meaning                                                                                             |
-| ----------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `network`   | Yes      | `'testnet'`, or `{ rpcUrl }` for another RPC endpoint                                               |
-| `app.url`   | Yes      | Where the app runs. `page.goto('/swap')` opens `app.url + '/swap'`                                  |
-| `app.start` | No       | The command that starts the app. If something already answers at `app.url`, Stardust starts nothing |
-| `tests`     | No       | The folder with test files, relative to the project folder. Default `./e2e`                         |
-
-Stardust reads the passphrase and Friendbot URL from the network itself. The config is loaded with Node's built-in TypeScript support, so it can't use `enum` or `namespace`.
-
-## A test
+**3. Write a test in `e2e/pay.spec.ts`**
 
 ```ts
-// e2e/swap.spec.ts
-import { test, expect, xlm } from 'stardust-stellar/test';
-import { CONTRACTS } from '../src/lib/contracts';
+import { expect, test, xlm } from 'stardust-stellar/test';
 
 test.use({
   stardust: {
     users: {
-      trader: { wallet: 'varial', connected: true },
-    },
-  },
-});
-
-test('swaps 10 XLM', async ({ users: { trader } }) => {
-  await trader.page.goto('/swap');
-  await trader.page.getByLabel('You pay').fill('10');
-  await trader.page.getByRole('button', { name: 'Swap' }).click();
-
-  const prompt = await trader.wallet.nextPrompt('signTransaction');
-  expect(prompt).toInvoke({
-    contract: CONTRACTS.testnet.router,
-    fn: 'swap_exact_in',
-    args: { amount_in: xlm('10') },
-  });
-  await expect(prompt).toLand();
-  await expect(prompt).toChangeBalance(
-    trader.account.address,
-    'native',
-    -xlm('10'),
-  );
-});
-```
-
-Everything comes from `stardust-stellar/test`: Playwright's `test` and `expect` with Stardust's options and checks, the amount helpers `xlm` and `units`, and the `User` type. Don't import `@playwright/test` in test files. Page steps are plain Playwright, and labels, routes and contract addresses belong to your app. Stardust never deploys contracts, so tests import the addresses the app already uses.
-
-The wallet answers prompts through the user's `policy`: `'approve'` (the default), `'reject'`, or `'manual'`, where the test calls `prompt.approve()` or `prompt.reject()`. The wallet also acts like a person would, with `switchAccount`, `switchNetwork`, `lock`, `unlock` and `disconnect`. The checks are `toInvoke`, `toHaveOperation`, `toLand`, `toFail`, `toChangeBalance` and `toEmit`.
-
-## Run
-
-```sh
-stardust test                      # every test, browser hidden
-stardust test e2e/swap.spec.ts     # one file
-stardust test --show               # with the browser visible
-stardust test -- --grep swap       # anything after -- goes to Playwright
-```
-
-```text
-stardust  network  testnet (https://soroban-testnet.stellar.org, protocol 30) ready
-stardust  browser  chromium ready
-stardust  app      pnpm dev -> http://localhost:3000 ready
-stardust  wallets  Varial 5.53.0, SEP-43 1.2.1, SEP-60 0.1.0
-
-Running 1 test using 1 worker
-
-  ✓  1 e2e/swap.spec.ts:13:1 › swaps 10 XLM (14.8s)
-
-  1 passed (19.6s)
-
-stardust  app      stopped
-```
-
-`--show` is Stardust's only flag. Any other flag before `--` stops the run and names the fix. When Stardust starts the app through `app.start`, it stops it at the end.
-
-When a test fails, the terminal shows the failed check and the test's wallet timeline. `stardust-results/` keeps a screenshot, a trace and `stardust-timeline.json` for each failed test. Add it to `.gitignore`.
-
-## Users and accounts
-
-A user is one person: a browser tab (`page`), a `wallet` in it and the accounts in that wallet. A file declares its users once, and every test gets fresh ones, with new keys, new balances and new tabs. Every person in a test is a user, including someone who never opens the app:
-
-```ts
-test.use({
-  stardust: {
-    users: {
-      payer: { wallet: 'varial', connected: true },
+      payer: { connected: true },
       friend: {},
     },
   },
@@ -134,6 +53,7 @@ test('sends 5 XLM to a friend', async ({ users: { payer, friend } }) => {
   await payer.page.getByRole('button', { name: 'Send' }).click();
 
   const prompt = await payer.wallet.nextPrompt('signTransaction');
+  await expect(prompt).toLand();
   await expect(prompt).toChangeBalance(
     friend.account.address,
     'native',
@@ -142,55 +62,103 @@ test('sends 5 XLM to a friend', async ({ users: { payer, friend } }) => {
 });
 ```
 
-| Setting     | Default                    | Meaning                                                                                                       |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `wallet`    | `'varial'`                 | `'varial'`, `'sep60'`, or `'none'` for a browser without a wallet                                             |
-| `connected` | `false`                    | Start as if the user already connected the site                                                               |
-| `policy`    | `'approve'`                | `'approve'`, `'reject'`, `'manual'`, one of those per prompt kind, or a function                              |
-| `accounts`  | `{ main: { fund: true } }` | The wallet's accounts by name. `fund` is `true` (100 XLM), an amount up to `'1000'`, or `false` (not created) |
-| `allowHttp` | `true`                     | Whether the wallet signs on `http://` pages                                                                   |
-| `strict`    | `true`                     | Fail the test when the app breaks wallet rules, such as leaving out the network passphrase                    |
+**4. Run it**
 
-The first account is active when the test starts, as `trader.account`. Every account is also reachable by name, for example `trader.accounts.savings`.
+```sh
+npx stardust test                  # every test
+npx stardust test e2e/pay.spec.ts  # one file
+npx stardust test --show           # with the browser visible
+npx stardust test -- --grep pay    # only tests whose name matches "pay"
+```
 
-Accounts are funded from a testnet funder key that Stardust keeps in `~/.stardust/funders/`, readable only by you. Stardust creates it with Friendbot the first time a run needs it, and merges each test's accounts back afterwards to return their XLM.
+```text
+stardust  network  testnet (https://soroban-testnet.stellar.org, protocol 30) ready
+stardust  browser  chromium ready
+stardust  app      pnpm dev -> http://localhost:3000 ready
+stardust  wallets  Varial 5.53.0, SEP-43 1.2.1, SEP-60 0.1.0
+
+  ✓  1 e2e/pay.spec.ts:12:1 › sends 5 XLM to a friend (16.2s)
+
+  1 passed (21.4s)
+
+stardust  app      stopped
+```
+
+## Concepts
+
+### Users
+
+A user is one person: a browser tab (`page`), the wallet in it, and that wallet's accounts. Declare users once per file with `test.use`, and every test gets fresh ones.
+
+| Option      | Default                    | Meaning                                                                       |
+| ----------- | -------------------------- | ----------------------------------------------------------------------------- |
+| `wallet`    | `'varial'`                 | `'varial'`, `'sep60'`, or `'none'` for no wallet                              |
+| `connected` | `false`                    | Start as if the user had already connected the site                           |
+| `policy`    | `'approve'`                | How the wallet answers prompts: `'approve'`, `'reject'` or `'manual'`         |
+| `accounts`  | `{ main: { fund: true } }` | The wallet's accounts. `fund` is `true` (100 XLM), up to `'1000'`, or `false` |
+| `strict`    | `true`                     | Fail the test when the app breaks wallet rules                                |
+
+### Prompts
+
+A prompt is anything a real wallet shows as a popup: `connect`, `signTransaction`, `signAuthEntry`, `signMessage` and `addToken`. `wallet.nextPrompt(kind)` returns the next one. Under the `'manual'` policy, the test answers it with `approve()`, `reject()`, `fail()` or `hang()`.
+
+### Checks
+
+| Check                                     | Passes when                                       |
+| ----------------------------------------- | ------------------------------------------------- |
+| `toInvoke({ contract, fn, args })`        | The transaction calls this contract function      |
+| `toHaveOperation({ type, ...fields })`    | The transaction contains this classic operation   |
+| `toLand()`                                | The transaction succeeds on chain                 |
+| `toFail({ resultCode, contractError })`   | The transaction fails, optionally with this error |
+| `toChangeBalance(address, asset, change)` | A balance moved by this amount, fees excluded     |
+| `toEmit({ contract, topic })`             | The contract emitted this event                   |
+
+### Wallet actions
+
+`wallet.switchAccount()`, `switchNetwork()`, `lock()`, `unlock()` and `disconnect()` act as the user would in the real wallet.
+
+## When a test fails
+
+The output shows the failed check and the wallet's timeline: each prompt and its answer, the app's RPC calls, and what landed on chain. `stardust-results/` keeps a screenshot, a trace and the timeline for each failed test.
 
 ## CI
 
 ```yaml
-name: e2e
-on: [pull_request]
-
-jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test:e2e
-      - uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: stardust-results
-          path: stardust-results/
+- uses: actions/checkout@v7
+- uses: pnpm/action-setup@v6
+- uses: actions/setup-node@v7
+  with:
+    node-version: 22
+    cache: pnpm
+- run: pnpm install --frozen-lockfile
+- run: pnpm exec stardust test
+- uses: actions/upload-artifact@v7
+  if: failure()
+  with:
+    name: stardust-results
+    path: stardust-results/
 ```
 
-`pnpm/action-setup` takes the pnpm version from `packageManager` in package.json. With `CI=true`, which GitHub Actions sets, Stardust also installs Chromium's system libraries. A CI machine starts without a funder, so each run makes one Friendbot call.
+## Compatibility
+
+|                          | Version                       |
+| ------------------------ | ----------------------------- |
+| Node.js                  | 22.18 or later, 23.6 or later |
+| Varial                   | 5.53.0                        |
+| `@stellar/freighter-api` | 6.x                           |
+| `@stellar/varial-sdk`    | 7.x                           |
+| Stellar Wallets Kit      | 2.7, 2.8                      |
+| SEP-43, SEP-60           | 1.2.1, 0.1.0                  |
 
 ## Safety
 
-- Stardust never runs on mainnet. It refuses any network that reports the mainnet passphrase, and no setting turns this off.
+- Stardust never runs on mainnet. It refuses any network that reports the mainnet passphrase.
 - Secret keys stay in Node and never enter the page.
-- Every account is a throwaway key generated for one test. Stardust never asks for a real key.
+- Every account is a throwaway testnet key created for one test.
 
-## Reference
+## Learn more
 
-Every exported function, type and option has a doc comment, so your editor explains it on hover. What changed in each release is in [CHANGELOG.md](CHANGELOG.md). To work on Stardust itself, read [AGENTS.md](AGENTS.md).
+[Examples on real dapps](tests/dapps) · [Changelog](CHANGELOG.md) · [Contributing](AGENTS.md)
 
 ## License
 
