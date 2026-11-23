@@ -10,3 +10,4 @@ tests/dapps/.checkouts/
 .env.*
 .DS_Store
 *.tsbuildinfo
+.kiro/
