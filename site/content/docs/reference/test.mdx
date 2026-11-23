@@ -10,10 +10,10 @@ import { expect, test, units, xlm } from 'stardust-stellar/test';
 import type { User, UserOptions } from 'stardust-stellar/test';
 ```
 
-| Import from             | Names                                                                                               |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| `stardust-stellar/test` | `test`, `expect`, `xlm`, `units`, and the types `StardustTestOptions`, `UserOptions` and `User`     |
-| `stardust-stellar`      | The other types on this page, such as `Wallet`, `TransactionPrompt` and `Landed`. Use `import type` |
+| Import from             | Names                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stardust-stellar/test` | `test`, `expect`, `xlm`, `units`, and the types `StardustTestOptions`, `UserOptions`, `User`, `UserWallet`, `StardustMatchers` and the expectation types |
+| `stardust-stellar`      | The other types on this page, such as `Wallet`, `TransactionPrompt` and `Landed`. Use `import type`                                                      |
 
 ## Test and options
 
@@ -125,19 +125,21 @@ export interface User {
   readonly accounts: Readonly<Record<string, Account>>;
   readonly name: string;
   readonly page: Page;
-  readonly wallet: Wallet;
+  readonly wallet: UserWallet;
 }
+
+type UserWallet = Omit<Wallet, 'attach'>;
 ```
 
 One person in a test: a browser tab, the wallet in it, and the wallet's accounts.
 
-| Field      | Type                                | Description                                                                       |
-| ---------- | ----------------------------------- | --------------------------------------------------------------------------------- |
-| `name`     | `string`                            | The user's name in `test.use`                                                     |
-| `page`     | `Page`                              | The user's browser tab, a [`Page`](https://playwright.dev/docs/api/class-page)    |
-| `wallet`   | [`Wallet`](#wallet)                 | The emulated wallet in the user's tab                                             |
-| `account`  | [`Account`](#account)               | The account active when the test started. It doesn't change after `switchAccount` |
-| `accounts` | `Readonly<Record<string, Account>>` | Every account in the user's wallet, by name, such as `accounts.main`              |
+| Field      | Type                                | Description                                                                                                               |
+| ---------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `name`     | `string`                            | The user's name in `test.use`                                                                                             |
+| `page`     | `Page`                              | The user's browser tab, a [`Page`](https://playwright.dev/docs/api/class-page)                                            |
+| `wallet`   | `UserWallet`                        | The emulated wallet in the user's tab: a [`Wallet`](#wallet) without `attach`, since Stardust puts it in the page for you |
+| `account`  | [`Account`](#account)               | The account active when the test started. It doesn't change after `switchAccount`                                         |
+| `accounts` | `Readonly<Record<string, Account>>` | Every account in the user's wallet, by name, such as `accounts.main`                                                      |
 
 With `wallet: 'none'`, `user.wallet` exists but isn't in the page, so the app sees no wallet.
 
@@ -211,7 +213,7 @@ The emulated wallet in a user's page. It answers the app as the real wallet does
 | `lock()`                      | Locks the wallet. Prompts wait until `unlock()`                                                                                                                  |
 | `unlock()`                    | Unlocks the wallet. Waiting prompts go ahead under the policy                                                                                                    |
 | `disconnect()`                | Removes the site from the wallet's connected sites                                                                                                               |
-| `attach(host, options)`       | Puts the wallet in a page. The fixtures do this for every user. Call it only in a [custom setup](/docs/reference/stardust-stellar#core-api)                      |
+| `attach(host, options)`       | Puts the wallet in a page. Only on wallets from a [custom setup](/docs/reference/stardust-stellar#core-api); a user's wallet doesn't have it                     |
 
 `nextPrompt` and `prompts` return a prompt once it's decoded. Under `'manual'` the test answers it. Under the other policies it's already answered, and the test inspects it.
 

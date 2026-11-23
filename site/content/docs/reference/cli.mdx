@@ -103,9 +103,9 @@ GitHub Actions sets `CI=true`. See [CI](/docs/run/ci).
 Before any test runs, Stardust checks the command, the config, the network, the browser and the app, in that order. The first problem stops it with exit code 1. Each line names the step that failed:
 
 ```text
-stardust  command  missing command. Run: stardust test [files] [--show] [-- playwright flags]
-stardust  command  unknown command run. Run: stardust test [files] [--show] [-- playwright flags]
-stardust  command  unknown flag --grep. Put Playwright flags after --, for example: stardust test -- --grep swap
+stardust  command  missing command. Run: stardust test [files] [--show] [-- flags]
+stardust  command  unknown command run. Run: stardust test [files] [--show] [-- flags]
+stardust  command  unknown flag --grep. Put other flags after --, for example: stardust test -- --grep swap
 stardust  config   no stardust.config.ts in /Users/you/Desktop. Run this from your project folder.
 stardust  config   app.url is missing in stardust.config.ts
 stardust  config   network 'local' isn't available in v1. Use 'testnet' or { rpcUrl }.
