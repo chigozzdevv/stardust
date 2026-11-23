@@ -1,0 +1,82 @@
+---
+title: The stardust command
+description: Run your tests with stardust test, add flags, and read what it prints.
+---
+
+`stardust test` checks the network, installs Chromium if it's missing, starts your app, and runs your tests. Run it from your project folder, the one with `stardust.config.ts`.
+
+```sh
+npx stardust test                   # every test, browser hidden
+npx stardust test e2e/swap.spec.ts  # one file
+npx stardust test --show            # with the browser visible
+npx stardust test -- --grep swap    # extra flags go after --
+```
+
+Most projects add it as a script:
+
+```json title="package.json"
+{
+  "scripts": {
+    "test:e2e": "stardust test"
+  }
+}
+```
+
+## More flags
+
+`--show` is the command's only flag of its own. Put any other flag after `--`:
+
+| Flag            | Effect                                           |
+| --------------- | ------------------------------------------------ |
+| `--grep swap`   | Run only tests whose title matches `swap`        |
+| `--debug`       | Step through the tests one action at a time      |
+| `--ui`          | Run and watch the tests in an interactive window |
+| `--last-failed` | Run only the tests that failed last time         |
+| `--retries 2`   | Retry a failed test up to 2 times                |
+| `--workers 2`   | Run 2 tests at a time                            |
+| `--shard 1/4`   | Run the first quarter of the tests               |
+
+See the [full list of flags](https://playwright.dev/docs/test-cli). Tests run in parallel, each with 120 seconds, and `expect` assertions retry for 15 seconds, since apps often refresh balances a few seconds after a transaction lands.
+
+## Output
+
+```text
+stardust  network  testnet (https://soroban-testnet.stellar.org, protocol 30) ready
+stardust  browser  chromium ready
+stardust  app      pnpm dev -> http://localhost:3000 ready
+stardust  wallets  Varial 5.53.0, SEP-43 1.2.1, SEP-60 0.1.0
+
+  ✓  1 e2e/pay.spec.ts:12:1 › sends 5 XLM to a friend (16.2s)
+
+  1 passed (21.4s)
+
+stardust  app      stopped
+```
+
+The first lines say the network is reachable and isn't mainnet, Chromium is ready, and your app answers. `wallets` names the Varial (formerly Freighter), SEP-43 and SEP-60 versions this release matches. If your app was already running, Stardust leaves it running. Otherwise it stops it at the end.
+
+When a test fails, the output also shows the wallet's timeline. See [When a test fails](/docs/run/failed-tests).
+
+## When it can't start
+
+Stardust stops before running any test, and names the step that failed:
+
+```text
+stardust  command  unknown flag --grep. Put Playwright flags after --, for example: stardust test -- --grep swap
+stardust  config   no stardust.config.ts in /Users/you/Desktop. Run this from your project folder.
+stardust  network  https://soroban-testnet.stellar.org not reachable after 60s
+stardust  app      http://localhost:3000 did not respond within 60s after "pnpm dev"
+stardust  app      nothing answers at http://localhost:3000 and app.start is not set. Start your app, or set app.start.
+```
+
+If the app doesn't respond, run `app.start` yourself and check that it serves `app.url`, port included. Its errors are printed above that line.
+
+## Testing another network
+
+Change these together:
+
+1. `network` in `stardust.config.ts`, for example `{ rpcUrl: 'https://rpc-futurenet.stellar.org' }`.
+2. Your app's network setting.
+3. The contract addresses in your app, which your tests import.
+
+The network needs a Friendbot to fund test accounts. Stardust always refuses mainnet.

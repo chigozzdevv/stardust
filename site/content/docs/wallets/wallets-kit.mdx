@@ -1,0 +1,42 @@
+---
+title: Stellar Wallets Kit
+description: Testing apps built on Stellar Wallets Kit, and starting them connected.
+---
+
+Apps built on Stellar Wallets Kit (`@creit.tech/stellar-wallets-kit`) 2.7.x and 2.8.x work with `wallet: 'varial'`. The kit's Varial (formerly Freighter) module talks to Stardust as it talks to the real extension.
+
+```ts title="e2e/kit.spec.ts"
+import { expect, test } from 'stardust-stellar/test';
+
+test.use({
+  stardust: { users: { trader: { wallet: 'varial', connected: true } } },
+});
+
+test('starts connected from the saved kit session', async ({
+  users: { trader },
+}) => {
+  await trader.page.goto('/');
+
+  await expect(trader.page.getByTestId('address')).toHaveText(
+    trader.account.address,
+  );
+  expect(trader.wallet.prompts('connect')).toHaveLength(0);
+});
+```
+
+| Kit module                                        | `wallet` setting |
+| ------------------------------------------------- | ---------------- |
+| Varial (`'freighter'` in 2.7.x, `'varial'` after) | `'varial'`       |
+| Hana, Rabet, xBull, Albedo, LOBSTR, WalletConnect | Not supported    |
+
+To test a kit-based app with no wallet installed, use `wallet: 'none'`.
+
+## Starting connected
+
+The kit restores its last session from local storage on load. With `connected: true`, Stardust saves that session for the user before the tab opens, so the app starts connected and no `connect` prompt appears. After the app disconnects, a reload stays disconnected, as in a real browser.
+
+Stardust reads the kit version from your project's `node_modules`, so it saves the right module ID. In a monorepo, run `stardust test` in the app's package, where the kit is installed. See [Config](/docs/set-up/config#monorepo).
+
+## The kit doesn't notice switches
+
+The kit never asks the wallet again after connecting, so a kit-based app doesn't notice [`wallet.switchAccount()`](/docs/drive/wallet-actions). Real Varial behaves the same.

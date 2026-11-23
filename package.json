@@ -1,7 +1,7 @@
 {
   "name": "stardust-stellar",
   "version": "0.1.0",
-  "description": "End-to-end testing for Stellar dapps",
+  "description": "Automated browser tests for Stellar apps",
   "keywords": [
     "stellar",
     "soroban",
@@ -68,7 +68,9 @@
     "test:conformance": "playwright test -c conformance",
     "conformance:record": "CONFORMANCE_RECORD=1 playwright test -c conformance",
     "api:check": "pnpm build && api-extractor run --print-api-report-diff -c tests/api-report/index.json && api-extractor run --print-api-report-diff -c tests/api-report/test.json",
-    "api:update": "pnpm build && api-extractor run --local -c tests/api-report/index.json && api-extractor run --local -c tests/api-report/test.json"
+    "api:update": "pnpm build && api-extractor run --local -c tests/api-report/index.json && api-extractor run --local -c tests/api-report/test.json",
+    "site:dev": "pnpm --filter stardust-site dev",
+    "site:build": "pnpm --filter stardust-site build"
   },
   "dependencies": {
     "@playwright/test": "^1.65.0",

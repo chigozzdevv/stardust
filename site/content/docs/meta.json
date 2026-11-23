@@ -1,0 +1,21 @@
+{
+  "pages": [
+    "---Get started---",
+    "index",
+    "quickstart",
+    "---Set up---",
+    "...set-up",
+    "---Drive---",
+    "...drive",
+    "---Check---",
+    "...check",
+    "---Run---",
+    "...run",
+    "---Examples---",
+    "...examples",
+    "---Wallets---",
+    "...wallets",
+    "---Reference---",
+    "...reference"
+  ]
+}

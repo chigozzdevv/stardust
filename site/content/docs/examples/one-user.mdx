@@ -1,0 +1,125 @@
+---
+title: One user
+description: A complete test file for a swap page, with one user who connects, signs, rejects and switches network.
+---
+
+One user, a trader, uses a swap page with Varial (formerly Freighter): connecting, a swap that lands, a rejected signature, a swap the app blocks, and a wallet on the wrong network. The routes, labels and contracts belong to an example app.
+
+```ts title="e2e/swap.spec.ts"
+import { test, expect, xlm, units, type User } from 'stardust-stellar/test';
+import { CONTRACTS } from '../src/lib/contracts';
+
+const { router, token } = CONTRACTS.testnet;
+const short = (address: string) =>
+  `${address.slice(0, 4)}…${address.slice(-4)}`;
+
+test.use({
+  stardust: {
+    users: {
+      trader: {
+        wallet: 'varial',
+        policy: { connect: 'approve', signTransaction: 'manual' },
+      },
+    },
+  },
+});
+
+async function connect(user: User) {
+  await user.page.getByRole('button', { name: 'Connect wallet' }).click();
+  await user.page.getByRole('button', { name: 'Varial' }).click();
+}
+
+async function swap(user: User, amount: string) {
+  await user.page.getByLabel('You pay').fill(amount);
+  await user.page.getByRole('button', { name: 'Swap' }).click();
+}
+
+test.beforeEach(async ({ users: { trader } }) => {
+  await trader.page.goto('/swap');
+});
+
+test('connects and shows the address', async ({ users: { trader } }) => {
+  await connect(trader);
+
+  const prompt = await trader.wallet.nextPrompt('connect');
+  expect(prompt.origin).toBe('http://localhost:3000');
+  await expect(trader.page.getByTestId('address')).toHaveText(
+    short(trader.account.address),
+  );
+});
+
+test('swaps 10 XLM for the test token', async ({ users: { trader } }) => {
+  await connect(trader);
+  await swap(trader, '10');
+
+  const prompt = await trader.wallet.nextPrompt('signTransaction');
+  expect(prompt).toInvoke({
+    contract: router,
+    fn: 'swap_exact_in',
+    args: { amount_in: xlm('10') },
+  });
+  await prompt.approve();
+
+  await expect(prompt).toLand();
+  await expect(prompt).toChangeBalance(
+    trader.account.address,
+    'native',
+    -xlm('10'),
+  );
+  await expect(prompt).toChangeBalance(trader.account.address, token, {
+    min: units('9', 7),
+  });
+  await expect(trader.page.getByText('Swap complete')).toBeVisible();
+});
+
+test('handles the user rejecting', async ({ users: { trader } }) => {
+  await connect(trader);
+  await swap(trader, '10');
+
+  const prompt = await trader.wallet.nextPrompt('signTransaction');
+  await prompt.reject();
+
+  await expect(trader.page.getByText('Transaction cancelled')).toBeVisible();
+  await expect(trader.page.getByRole('button', { name: 'Swap' })).toBeEnabled();
+});
+
+test('blocks a swap larger than the balance', async ({ users: { trader } }) => {
+  await connect(trader);
+  await swap(trader, '500'); // the account holds 100 XLM
+
+  await expect(trader.page.getByText('Not enough XLM')).toBeVisible();
+  expect(trader.wallet.prompts('signTransaction')).toHaveLength(0);
+});
+
+test('asks the user to switch network', async ({ users: { trader } }) => {
+  await trader.wallet.switchNetwork('futurenet');
+  await connect(trader);
+
+  await expect(
+    trader.page.getByText('Switch your wallet to Testnet'),
+  ).toBeVisible();
+});
+```
+
+- The [policy](/docs/drive/policies) approves `connect` and leaves each `signTransaction` for the test to answer with `approve()` or `reject()`.
+- `toInvoke` checks the contract call before the test approves it. `toLand` and `toChangeBalance` then wait for the ledger. See [Transactions](/docs/check/transactions).
+- `{ min: units('9', 7) }` checks a token amount the test can't know exactly, the swap's output.
+- An empty `prompts('signTransaction')` shows the app stopped before asking the wallet.
+
+## A second file for a user without a wallet
+
+Each file declares one set of users, so a visitor with no wallet gets a file of their own:
+
+```ts title="e2e/no-wallet.spec.ts"
+import { test, expect } from 'stardust-stellar/test';
+
+test.use({ stardust: { users: { visitor: { wallet: 'none' } } } });
+
+test('offers to install one', async ({ users: { visitor } }) => {
+  await visitor.page.goto('/swap');
+  await visitor.page.getByRole('button', { name: 'Connect wallet' }).click();
+  await expect(
+    visitor.page.getByRole('link', { name: 'Install Varial' }),
+  ).toBeVisible();
+});
+```

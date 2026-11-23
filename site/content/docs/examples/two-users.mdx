@@ -1,0 +1,80 @@
+---
+title: Two users
+description: A complete test file where a maker places an order and a trader fills it, each in their own tab and wallet.
+---
+
+Two users trade with each other: a maker places an order, and a trader fills it. Each has their own tab and Varial (formerly Freighter) wallet, as two people with two browsers would. The routes and labels belong to an example app.
+
+```ts title="e2e/orders.spec.ts"
+import { test, expect, type User } from 'stardust-stellar/test';
+
+const short = (address: string) =>
+  `${address.slice(0, 4)}…${address.slice(-4)}`;
+
+test.use({
+  stardust: {
+    users: {
+      maker: {
+        wallet: 'varial',
+        connected: true,
+        accounts: { main: { fund: '1000' } },
+      },
+      trader: {
+        wallet: 'varial',
+        connected: true,
+        accounts: { main: { fund: '1000' } },
+      },
+    },
+  },
+});
+
+// The orderbook is shared with every test and developer on testnet,
+// so each test finds its own maker's order.
+const orderOf = (maker: User, viewer: User) =>
+  viewer.page
+    .getByRole('row')
+    .filter({ hasText: short(maker.account.address) });
+
+test('a trader fills a maker order', async ({ users: { maker, trader } }) => {
+  // The maker places an order.
+  await maker.page.goto('/orders/new');
+  await maker.page.getByLabel('Amount (XLM)').fill('500');
+  await maker.page.getByRole('button', { name: 'Place order' }).click();
+  const placed = await maker.wallet.nextPrompt('signTransaction');
+  await expect(placed).toLand();
+
+  // The trader fills it.
+  await trader.page.goto('/orders');
+  await orderOf(maker, trader).getByRole('button', { name: 'Fill' }).click();
+  const filled = await trader.wallet.nextPrompt('signTransaction');
+  await expect(filled).toLand();
+
+  // Both see the result.
+  await expect(trader.page.getByText('Order filled')).toBeVisible();
+  await expect(maker.page.getByText('Your order was filled')).toBeVisible();
+});
+
+test('the order stays open when the trader rejects', async ({
+  users: { maker, trader },
+}) => {
+  trader.wallet.setPolicy('reject'); // this trader rejects every request
+
+  await maker.page.goto('/orders/new');
+  await maker.page.getByLabel('Amount (XLM)').fill('500');
+  await maker.page.getByRole('button', { name: 'Place order' }).click();
+  const placed = await maker.wallet.nextPrompt('signTransaction');
+  await expect(placed).toLand();
+
+  await trader.page.goto('/orders');
+  await orderOf(maker, trader).getByRole('button', { name: 'Fill' }).click();
+  await expect(trader.page.getByText('Transaction cancelled')).toBeVisible();
+
+  await maker.page.goto('/orders');
+  await expect(orderOf(maker, maker)).toContainText('Open');
+});
+```
+
+- `maker.wallet` sees only the maker's prompts, and `trader.wallet` only the trader's.
+- The default `'approve'` [policy](/docs/drive/policies) signs both transactions, so `nextPrompt` returns them already approved.
+- `setPolicy('reject')` changes the trader's policy for the rest of the test. With `connected: true`, only signatures are rejected.
+- Testnet is shared with everyone, so `orderOf` finds the order by the maker's address instead of taking the first row.

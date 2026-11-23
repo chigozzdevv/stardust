@@ -1,0 +1,194 @@
+---
+title: Stellar Lab
+description: Stardust tests on Stellar Lab, signing a message and signing an imported payment that Lab submits.
+---
+
+These tests run on Stellar Lab, SDF's web tool for building, signing and submitting transactions. One file signs a message, the other signs a payment that Lab then submits to testnet.
+
+Stardust runs them every night. The files are in [tests/dapps/stellar-lab](https://github.com/chigozzdevv/stardust/tree/main/tests/dapps/stellar-lab).
+
+- App: [stellar/laboratory](https://github.com/stellar/laboratory) at commit [`6087cd0`](https://github.com/stellar/laboratory/tree/6087cd0bb2f9a78b02996ec097849c7888df478e).
+- Wallet library: Stellar Wallets Kit 2.7.1.
+
+The config starts Lab's dev server:
+
+```ts title="stardust.config.ts"
+import { defineConfig } from 'stardust-stellar';
+
+export default defineConfig({
+  network: 'testnet',
+  app: { url: 'http://localhost:3000', start: 'pnpm dev' },
+});
+```
+
+## Sign a message
+
+```ts title="e2e/sign-message.spec.ts"
+import { Keypair, hash } from '@stellar/stellar-sdk';
+import { expect, test } from 'stardust-stellar/test';
+import type { User } from 'stardust-stellar/test';
+
+const message = 'Hello from Stardust';
+
+test.use({
+  stardust: {
+    users: {
+      dev: { wallet: 'varial', accounts: { main: { fund: false } } },
+    },
+  },
+});
+
+const short = (address: string) =>
+  `${address.slice(0, 4)}...${address.slice(-4)}`;
+
+async function connect({ page, account }: User) {
+  await page.getByRole('button', { name: 'Connect wallet' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Freighter' }).click();
+  await expect(
+    page
+      .getByRole('banner')
+      .getByRole('button', { name: short(account.address) }),
+  ).toBeVisible();
+}
+
+test('connects through Wallets Kit', async ({ users: { dev } }) => {
+  await dev.page.goto('/sign-message');
+  await connect(dev);
+
+  const [prompt] = dev.wallet.prompts('connect');
+  expect(prompt?.status).toBe('approved');
+  expect(prompt?.origin).toBe('http://localhost:3000');
+});
+
+test('signs a message with the wallet extension', async ({
+  users: { dev },
+}) => {
+  const { page, account } = dev;
+  await page.goto('/sign-message');
+  await connect(dev);
+  await page.getByRole('textbox', { name: 'Message' }).fill(message);
+  await page.getByRole('button', { name: /^Wallet extension/ }).click();
+  await page
+    .getByRole('button', { name: `Sign with ${short(account.address)}` })
+    .click();
+
+  const prompt = await dev.wallet.nextPrompt('signMessage');
+  expect(prompt.message).toBe(message);
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Message signed' }),
+  ).toBeVisible();
+
+  const signature = await page
+    .getByText('Signature (base64):', { exact: true })
+    .locator('xpath=following-sibling::div[1]')
+    .textContent();
+  const signed = hash(Buffer.from(`Stellar Signed Message:\n${message}`));
+  expect(
+    Keypair.fromPublicKey(account.address).verify(
+      Buffer.from(signed),
+      Buffer.from(signature ?? '', 'base64'),
+    ),
+  ).toBe(true);
+});
+```
+
+- Signing a message needs no account on chain, so `fund: false` skips funding.
+- Lab's Stellar Wallets Kit 2.7 still lists Varial (formerly Freighter) as "Freighter", so `connect` clicks that.
+- The signature is real, so the test verifies it with the account's public key, as SEP-53 defines.
+
+## Sign an imported payment
+
+```ts title="e2e/transaction.spec.ts"
+import {
+  Asset,
+  BASE_FEE,
+  Networks,
+  Operation,
+  TransactionBuilder,
+  rpc,
+} from '@stellar/stellar-sdk';
+import { expect, test, xlm } from 'stardust-stellar/test';
+import type { User } from 'stardust-stellar/test';
+
+test.use({
+  stardust: {
+    users: {
+      dev: { wallet: 'varial' },
+      friend: {},
+    },
+  },
+});
+
+const short = (address: string) =>
+  `${address.slice(0, 4)}...${address.slice(-4)}`;
+
+async function payment(from: User, to: User, amount: string): Promise<string> {
+  const server = new rpc.Server('https://soroban-testnet.stellar.org');
+  const source = await server.getAccount(from.account.address);
+  return new TransactionBuilder(source, {
+    fee: BASE_FEE,
+    networkPassphrase: Networks.TESTNET,
+  })
+    .addOperation(
+      Operation.payment({
+        destination: to.account.address,
+        asset: Asset.native(),
+        amount,
+      }),
+    )
+    .setTimeout(300)
+    .build()
+    .toXDR();
+}
+
+test('signs and submits an imported payment', async ({
+  users: { dev, friend },
+}) => {
+  const { page, account } = dev;
+  await page.goto('/transaction/import');
+  await page.getByRole('button', { name: 'Connect wallet' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Freighter' }).click();
+  await page
+    .getByRole('textbox', { name: 'Transaction envelope in XDR' })
+    .fill(await payment(dev, friend, '5'));
+  await page
+    .getByRole('button', { name: 'Sign transaction', exact: true })
+    .click();
+  await page.getByText('Wallet extension', { exact: true }).click();
+  await page
+    .getByRole('button', { name: `Sign with ${short(account.address)}` })
+    .click();
+
+  const prompt = await dev.wallet.nextPrompt('signTransaction');
+  expect(prompt).toHaveOperation({
+    type: 'payment',
+    destination: friend.account.address,
+    asset: 'native',
+    amount: xlm('5'),
+  });
+
+  await page
+    .getByRole('button', { name: 'Submit transaction', exact: true })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Submit transaction', level: 1 }),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Submit transaction', exact: true })
+    .click();
+
+  await expect(prompt).toLand();
+  await expect(prompt).toChangeBalance(
+    friend.account.address,
+    'native',
+    xlm('5'),
+  );
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Transaction submitted!' }),
+  ).toBeVisible();
+});
+```
+
+- Lab's import page takes a transaction envelope, so `payment` builds one with the Stellar SDK.
+- `toHaveOperation` checks the payment before anything is submitted. Lab then submits it from another page, and `toLand` finds it by its hash.
+- `friend` only receives the payment and never opens Lab, but every person in a test is a user.

@@ -1,0 +1,89 @@
+---
+title: Transactions
+description: Check what a transaction calls or contains, and whether it landed or failed on the network.
+---
+
+These checks run on `signTransaction` and `signAuthEntry` prompts. `toInvoke` and `toHaveOperation` check what the app asked the wallet to sign. `toLand` and `toFail` wait for the result on the network.
+
+```ts title="e2e/pay.spec.ts"
+const prompt = await payer.wallet.nextPrompt('signTransaction');
+expect(prompt).toHaveOperation({
+  type: 'payment',
+  destination: friend.account.address,
+  asset: 'native',
+  amount: xlm('5'),
+});
+await expect(prompt).toLand();
+```
+
+| Check                                   | Passes when                                        | Waits |
+| --------------------------------------- | -------------------------------------------------- | ----- |
+| `toInvoke({ contract, fn, args })`      | The transaction calls this contract function       | No    |
+| `toHaveOperation({ type, ...fields })`  | The transaction contains this classic operation    | No    |
+| `toLand()`                              | The transaction succeeded on chain                 | Yes   |
+| `toFail({ resultCode, contractError })` | The transaction failed, optionally with this error | Yes   |
+
+Checks that wait return a promise, so write `await expect(prompt)`. Import `expect` from `stardust-stellar/test`.
+
+## Check a contract call
+
+From the [Blend example](/docs/examples/blend), where `pool` is the pool's contract and `xlmToken` is the XLM contract:
+
+```ts title="e2e/supply.spec.ts"
+const { address } = lender.account;
+const prompt = await lender.wallet.nextPrompt('signTransaction');
+expect(prompt).toInvoke({
+  contract: pool,
+  fn: 'submit',
+  args: { from: address, spender: address, to: address },
+});
+expect(prompt).toInvoke({
+  contract: xlmToken,
+  fn: 'transfer',
+  args: { from: address, to: pool, amount: xlm('10') },
+});
+```
+
+- `args` is optional and matched by name. Only the arguments you list are compared. Integers are `bigint` and addresses are strings.
+- It matches the top-level call or any sub-call the user authorizes, such as the token `transfer` above. Sub-calls that need no authorization aren't in the transaction, so `toInvoke` can't see them.
+- Argument names come from the contract's spec, which Stardust reads from the network. If it can't be read, `toInvoke` with `args` throws `UNSUPPORTED`.
+
+## Check a classic operation
+
+```ts
+expect(prompt).toHaveOperation({ type: 'changeTrust', asset: 'USDC:GA5Z...' });
+```
+
+- `type` and the field names are those of `@stellar/stellar-sdk`, such as `destination`, `asset` and `amount` for a `payment`.
+- Assets are `'native'` or `'CODE:ISSUER'`. Amounts are `bigint` stroops, written with [`xlm()` or `units()`](/docs/check/balances-events#amounts).
+- Only the fields you list are compared. It works on `signTransaction` prompts only.
+
+## Check that it landed or failed
+
+```ts
+await expect(prompt).toLand();
+
+await expect(prompt).toFail();
+await expect(prompt).toFail({ resultCode: 'txFAILED' });
+await expect(prompt).toFail({ contractError: 'SlippageExceeded' });
+```
+
+- `toFail()` with no options passes on any failure. `contractError` takes the error's name from the contract's spec, or its number.
+- When `toLand()` fails, the message shows the result code and the contract error.
+- To test that the app handles a failed transaction, use `toFail()`, not `.not.toLand()`.
+
+## Waiting
+
+The checks that wait give up after 30 seconds. Pass `{ timeoutMs }` as the last argument for a slow network:
+
+```ts
+await expect(prompt).toLand({ timeoutMs: 60_000 });
+await expect(prompt).toFail({}, { timeoutMs: 60_000 });
+```
+
+- If the prompt was rejected, failed or hung, nothing was signed, so the check fails at once.
+- If the prompt is still pending under `'manual'`, the check waits for your answer within the same time.
+
+A transaction that doesn't appear on the network in time fails with `OUTCOME_UNKNOWN`, never as "failed". See [failed or unknown](/docs/run/failed-tests#failed-or-unknown).
+
+To read the result yourself, `await prompt.landed()` returns it: the status, hash, ledger, fee, return value, events and balance changes. See [`Landed`](/docs/reference/test#landed).

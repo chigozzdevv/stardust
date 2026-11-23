@@ -10,12 +10,16 @@ export default tseslint.config(
       '.agents/**',
       'conformance/.varial/**',
       'tests/dapps/.checkouts/**',
+      'site/.next/**',
+      'site/.source/**',
+      'site/out/**',
+      'site/next-env.d.ts',
     ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.tsx'],
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       'no-restricted-imports': ['error', { patterns: ['./*', '../*'] }],

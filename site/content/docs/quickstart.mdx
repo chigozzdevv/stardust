@@ -1,0 +1,130 @@
+---
+title: Quickstart
+description: Install Stardust, add a config, write a first test and run it.
+---
+
+This page gets one test running against your app. You need Node.js 22.18 or later, or 23.6 or later on Node 23, and an app that runs on testnet.
+
+<Steps>
+<Step>
+
+### Install
+
+```npm
+npm i -D stardust-stellar
+```
+
+</Step>
+<Step>
+
+### Add `stardust.config.ts`
+
+Put it in your project root.
+
+```ts title="stardust.config.ts"
+import { defineConfig } from 'stardust-stellar';
+
+export default defineConfig({
+  network: 'testnet',
+  app: { url: 'http://localhost:3000', start: 'pnpm dev' },
+});
+```
+
+`app.start` is the command that starts your app. If something already answers at `app.url`, Stardust starts nothing. Tests go in `./e2e` by default. See [Config](/docs/set-up/config) for every field.
+
+</Step>
+<Step>
+
+### Write a test
+
+```ts title="e2e/pay.spec.ts"
+import { expect, test, xlm } from 'stardust-stellar/test';
+
+test.use({
+  stardust: {
+    users: {
+      payer: { connected: true },
+      friend: {},
+    },
+  },
+});
+
+test('sends 5 XLM to a friend', async ({ users: { payer, friend } }) => {
+  await payer.page.goto('/send');
+  await payer.page.getByLabel('To').fill(friend.account.address);
+  await payer.page.getByLabel('Amount').fill('5');
+  await payer.page.getByRole('button', { name: 'Send' }).click();
+
+  const prompt = await payer.wallet.nextPrompt('signTransaction');
+  await expect(prompt).toLand();
+  await expect(prompt).toChangeBalance(
+    friend.account.address,
+    'native',
+    xlm('5'),
+  );
+});
+```
+
+- `test.use` declares two [users](/docs/set-up/users). Each gets a browser tab, a Varial (formerly Freighter) wallet and a fresh testnet account with 100 XLM.
+- `payer` starts connected to the app. `friend` never opens the app; the test only needs their address.
+- `nextPrompt('signTransaction')` returns the signing request the app sent to the wallet. The default [policy](/docs/drive/policies) approves it.
+- `toLand()` waits until the transaction succeeds on chain. `toChangeBalance` checks that the friend received exactly 5 XLM. See [Checks](/docs/check/transactions).
+
+</Step>
+<Step>
+
+### Run it
+
+```sh
+npx stardust test                  # every test
+npx stardust test e2e/pay.spec.ts  # one file
+npx stardust test --show           # with the browser visible
+npx stardust test -- --grep pay    # only tests whose name matches "pay"
+```
+
+Stardust checks the network, downloads Chromium on the first run, starts your app and runs the tests.
+
+```text
+stardust  network  testnet (https://soroban-testnet.stellar.org, protocol 30) ready
+stardust  browser  chromium ready
+stardust  app      pnpm dev -> http://localhost:3000 ready
+stardust  wallets  Varial 5.53.0, SEP-43 1.2.1, SEP-60 0.1.0
+
+Running 1 test using 1 worker
+
+  ✓  1 e2e/pay.spec.ts:12:1 › sends 5 XLM to a friend (16.2s)
+
+  1 passed (21.4s)
+
+stardust  app      stopped
+```
+
+A failed test leaves a screenshot, a trace and the wallet's timeline in `stardust-results/`. Add that folder to `.gitignore`.
+
+</Step>
+</Steps>
+
+## Next
+
+<Cards>
+  <Card
+    title="Examples"
+    href="/docs/examples/one-user"
+    description="Complete test files for one user, two users, Blend and Stellar Lab."
+  />
+  <Card
+    title="Users and wallet state"
+    href="/docs/set-up/users"
+    description="Declare users, their wallet, policy and accounts."
+  />
+  <Card
+    title="Prompts"
+    href="/docs/drive/prompts"
+    description="Read the wallet's prompts and answer them from the test."
+  />
+  <Card
+    title="When a test fails"
+    href="/docs/run/failed-tests"
+    description="Read the timeline, screenshot and trace of a failed test."
+  />
+</Cards>

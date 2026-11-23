@@ -1,0 +1,69 @@
+---
+title: Strict mode
+description: Fail the test when the app breaks a wallet rule or leaves a prompt unanswered.
+---
+
+Strict mode is on by default. When the app does something a real wallet would refuse, or that is almost certainly a bug, the wallet answers as the real one would and records it. At the end of the test, the test fails with `PROTOCOL_VIOLATION` and lists what it recorded.
+
+```text
+Stardust: 1 protocol violation in this test
+  p2 signTransaction  networkMismatch
+  The app asked to sign for "Test SDF Future Network ; October 2022",
+  but the wallet is on "Test SDF Network ; September 2015".
+  Varial refuses this, so Stardust refused it too.
+```
+
+## What it catches
+
+| Violation                  | The app                                                                                          | Wallet     |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| `missingNetworkPassphrase` | Sends `signTransaction` or `addToken` without `networkPassphrase`, which Varial reads as mainnet | `'varial'` |
+| `networkMismatch`          | Asks to sign for a different network than the wallet's                                           | Both       |
+| `invalidXdr`               | Sends something that isn't valid XDR                                                             | Both       |
+| `signerMismatch`           | Names a signer that isn't the wallet's account                                                   | Both       |
+| `unknownMessage`           | Sends a message type Varial (formerly Freighter) doesn't know                                    | `'varial'` |
+
+`wallet.violations()` returns what was recorded so far.
+
+## Test that the app breaks a rule
+
+Mark the test with `test.fail()`, since strict mode fails it at the end:
+
+```ts title="e2e/strict.spec.ts"
+test.fail(
+  'a transaction without networkPassphrase fails the test',
+  async ({ users: { trader } }) => {
+    await trader.page.goto('/');
+    await trader.page.getByLabel('Recipient').fill(trader.account.address);
+    await trader.page.getByLabel('Amount (XLM)').fill('1');
+    await trader.page
+      .getByRole('button', { name: 'Send without network passphrase' })
+      .click();
+
+    const prompt = await trader.wallet.nextPrompt('signTransaction');
+    expect(trader.wallet.violations()).toMatchObject([
+      { promptId: prompt.id, kind: 'missingNetworkPassphrase' },
+    ]);
+  },
+);
+```
+
+## Turn it off
+
+Set `strict: false` on a user. The wallet still refuses what the real wallet refuses and still records violations, but they don't fail the test.
+
+```ts
+users: { trader: { connected: true, strict: false } },
+```
+
+## Unanswered prompts
+
+Whatever `strict` is, a test that ends with a prompt still pending fails with `PROMPTS_PENDING`:
+
+```text
+Stardust: test ended with 1 unanswered prompt
+  p2 signTransaction (pending)
+  Call approve(), reject(), fail() or hang() before the test ends.
+```
+
+This happens when a `'manual'` prompt is never answered, or when the wallet is locked and never unlocked. A test also fails at its end if a [policy function](/docs/drive/policies#a-function) threw.

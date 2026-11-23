@@ -7,3 +7,7 @@ conformance/.varial
 tests/dapps/.checkouts
 stardust.md
 tests/api-report/*.api.md
+site/.next
+site/.source
+site/out
+site/next-env.d.ts

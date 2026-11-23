@@ -1,0 +1,71 @@
+---
+title: Errors
+description: Every StardustError code, when it happens, and what to do about it.
+---
+
+Errors reach two places, and never mix. The app gets wallet errors, exactly as the real wallet sends them. Your test gets a `StardustError` when the test or its setup is wrong.
+
+| Who sees it | What it is                                  | Example                                                    |
+| ----------- | ------------------------------------------- | ---------------------------------------------------------- |
+| The app     | A wallet error, as the real wallet sends it | `{ code: -4, message: 'The user rejected this request.' }` |
+| Your test   | A `StardustError`                           | `NO_PROMPT: no signTransaction prompt within 10s`          |
+
+Every message says what happened and what to do next. A `CONFIG_INVALID` from `test.use` names the file, the setting with the value it got, and what's allowed:
+
+```text
+StardustError CONFIG_INVALID: e2e/orders.spec.ts
+  users.maker.accounts.main.fund is '5000', but the maximum per account is '1000'.
+  Use '1000' or less, or spread the amount over several accounts.
+```
+
+The error's `code` holds the code. Its `retryable` is `true` for `NETWORK_UNREACHABLE`, `FUNDING_FAILED` and `OUTCOME_UNKNOWN`, where the same step can succeed when run again. See [`StardustError`](/docs/reference/stardust-stellar#stardusterror).
+
+## Setup
+
+These come from the config, the network, the app and funding. The [CLI](/docs/reference/cli#when-it-cant-start) shows the config, network and app errors before any test runs.
+
+| Code                    | When it happens                                                                                                                                                                                        | What to do                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CONFIG_NOT_FOUND`      | There's no `stardust.config.ts` in the folder `stardust test` runs in                                                                                                                                  | Run it from the project folder. In a monorepo, run the app package's script, such as `pnpm --filter web test:e2e`                                      |
+| `CONFIG_INVALID`        | A setting in `stardust.config.ts` or `test.use` is missing or wrong, or the config file couldn't be loaded. `test.use` is checked before the test touches the network                                  | Fix the setting the message names. The config can only use TypeScript that Node can strip, so no `enum` or `namespace`                                 |
+| `NETWORK_NOT_SUPPORTED` | The config sets `network: 'local'`                                                                                                                                                                     | Use `'testnet'` or `{ rpcUrl }`                                                                                                                        |
+| `NETWORK_UNREACHABLE`   | The RPC didn't report healthy within 60 s, didn't answer, answered with an HTTP error, or sent a response that isn't from a Stellar RPC                                                                | Check the RPC URL and your connection, then run again                                                                                                  |
+| `MAINNET_REFUSED`       | The RPC reports the mainnet passphrase. A test also gets it from `approve()` on any prompt but `connect` after `switchNetwork('mainnet')`, and when an auth entry to sign is for mainnet               | Use a test network. No setting turns this off. In a test, answer with `reject()`, or switch back with `switchNetwork('testnet')`                       |
+| `APP_NOT_REACHABLE`     | Nothing answers at `app.url` and `app.start` isn't set, `app.start` exited before the app answered, or the app didn't respond within 60 s                                                              | Start the app, or set `app.start`. Check that `app.url` is where the command serves the app                                                            |
+| `FUNDING_FAILED`        | The funder couldn't create or refill accounts. Friendbot refused or didn't answer, the network has no Friendbot, another Stardust run held the funder's lock too long, or a funding transaction failed | Friendbot is rate limited, so wait a few minutes, then run again. Use `'testnet'` or a network with a Friendbot. See [Accounts](/docs/set-up/accounts) |
+
+## During a test
+
+| Code               | When it happens                                                                                                                                                                                                                           | What to do                                                                                                                                                                                            |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NO_PROMPT`        | `nextPrompt()` waited 10 s, or `timeoutMs`, and no prompt of that kind arrived. The message lists the prompts that did                                                                                                                    | Check that the test makes the app ask the wallet. With `connected: true`, no `connect` prompt appears. A prompt an earlier `nextPrompt()` returned isn't returned again. Or pass a longer `timeoutMs` |
+| `ALREADY_ANSWERED` | A prompt was answered twice, often because the policy answered it and then the test called `approve()`                                                                                                                                    | Set the policy to `'manual'` for that kind, such as `{ signTransaction: 'manual' }`, and answer it in the test. See [Policies](/docs/drive/policies)                                                  |
+| `PROMPT_BLOCKED`   | `approve()` on a prompt the real wallet would refuse. The message names the reason: `notConnected`, `networkMismatch`, `insecureOrigin` or `alreadyAdded`                                                                                 | Connect first or use `connected: true`, use the wallet's network in the app, or serve the app over `https` or use `allowHttp: true`. Or answer with `reject()`. See [Prompts](/docs/drive/prompts)    |
+| `WALLET_LOCKED`    | `approve()` while the wallet is locked                                                                                                                                                                                                    | Call `wallet.unlock()` first, or answer with `reject()`                                                                                                                                               |
+| `OUTCOME_UNKNOWN`  | The transaction didn't appear on the network in time, 30 s by default. `prompt.landed()` also throws it when the prompt is still pending at the timeout                                                                                   | Check the RPC, then run again, or pass a longer `timeoutMs`. Stardust never reports this as a failed transaction                                                                                      |
+| `UNKNOWN_ACCOUNT`  | `switchAccount()` got an account that isn't in this user's wallet, such as another user's                                                                                                                                                 | Pass one of this user's `accounts`, declared in `test.use`. See [Wallet actions](/docs/drive/wallet-actions)                                                                                          |
+| `UNSUPPORTED`      | A feature isn't available here. For example: `toInvoke` with `args` when the contract's spec can't be read, `.not` on a check that waits, a check on a prompt kind it doesn't support, or `landed()` on a rejected, failed or hung prompt | Follow the message. Leave out `args`, or compare the prompt's `invocations`. Use `toFail` instead of `.not.toLand()`                                                                                  |
+
+A test also gets `CONFIG_INVALID` when it reads a user the file doesn't declare. By then the declared users are set up and funded:
+
+```text
+StardustError CONFIG_INVALID: e2e/orders.spec.ts
+  The test uses users.taker, but this file declares only maker and trader.
+```
+
+## At the end of a test
+
+These fail a test after its last step.
+
+| Code                 | When it happens                                                                   | What to do                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `PROMPTS_PENDING`    | A prompt was still pending when the test ended. Checked whatever `strict` is      | Answer every prompt with `approve()`, `reject()`, `fail()` or `hang()` before the test ends   |
+| `PROTOCOL_VIOLATION` | With `strict: true`, the app broke wallet rules. The message lists each violation | Fix the app, or set `strict: false` for that user. See [Strict mode](/docs/check/strict-mode) |
+
+```text
+StardustError PROMPTS_PENDING: Stardust: test ended with 1 unanswered prompt
+  p2 signTransaction (pending)
+  Call approve(), reject(), fail() or hang() before the test ends.
+```
+
+Errors with no test call to throw from also fail the test at its end. For example, a policy function that throws, or returns something that isn't a [`Decision`](/docs/reference/test#decision), gives `CONFIG_INVALID` there.

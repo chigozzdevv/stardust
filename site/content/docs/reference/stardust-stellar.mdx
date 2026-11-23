@@ -1,0 +1,292 @@
+---
+title: stardust-stellar
+description: Every export of the main entry, with defineConfig, the amount helpers, StardustError and the core API.
+---
+
+`stardust-stellar` is the entry `stardust.config.ts` imports. It also exports the amount helpers, `StardustError`, the core API that [`stardust-stellar/test`](/docs/reference/test) is built on, and the types of wallets, prompts and outcomes.
+
+```ts
+import { defineConfig, StardustError, units, xlm } from 'stardust-stellar';
+import type { TransactionPrompt } from 'stardust-stellar';
+```
+
+Test files import `test` and `expect` from `stardust-stellar/test`. They import from here only the types `stardust-stellar/test` doesn't export, such as `TransactionPrompt`.
+
+## Config
+
+### `defineConfig`
+
+```ts
+export function defineConfig(config: StardustConfig): StardustConfig;
+```
+
+Types the default export of `stardust.config.ts`. It returns the config unchanged.
+
+```ts title="stardust.config.ts"
+import { defineConfig } from 'stardust-stellar';
+
+export default defineConfig({
+  network: 'testnet',
+  app: { url: 'http://localhost:3000', start: 'pnpm dev' },
+  tests: './e2e',
+});
+```
+
+### `StardustConfig`
+
+```ts
+export interface StardustConfig {
+  app: {
+    url: string;
+    start?: string;
+  };
+  network:
+    | 'testnet'
+    | {
+        rpcUrl: string;
+      };
+  tests?: string;
+}
+```
+
+The settings in `stardust.config.ts`. See [Config](/docs/set-up/config).
+
+| Field       | Type                              | Default   | Description                                                                                                                                                                |
+| ----------- | --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `network`   | `'testnet' \| { rpcUrl: string }` | required  | The network the tests run on: `'testnet'`, or `{ rpcUrl }` for another RPC endpoint. Stardust reads the passphrase and Friendbot URL from the network, and refuses mainnet |
+| `app.url`   | `string`                          | required  | Where the app runs. `page.goto('/swap')` opens this URL plus `/swap`                                                                                                       |
+| `app.start` | `string`                          | none      | The command that starts the app, such as `'pnpm dev'`. Stardust runs it only when nothing answers at `app.url`, and stops it after the run                                 |
+| `tests`     | `string`                          | `'./e2e'` | The folder with the test files, relative to the project folder                                                                                                             |
+
+Node loads the config with its built-in TypeScript support, so the file can't use `enum` or `namespace`.
+
+## Amount helpers
+
+`stardust-stellar/test` exports the same two functions.
+
+### `xlm`
+
+```ts
+export function xlm(amount: string): bigint;
+```
+
+Converts an XLM amount, written as a decimal string, to stroops. `xlm('10')` is `100_000_000n`. Throws a `RangeError` when `amount` isn't a decimal amount or has more than 7 decimal places.
+
+### `units`
+
+```ts
+export function units(amount: string, decimals: number): bigint;
+```
+
+Converts a token amount, written as a decimal string, to the token's smallest units. `units('9.8', 7)` is `98_000_000n`. Throws a `RangeError` when `amount` isn't a decimal amount or has more decimal places than `decimals`, and when `decimals` isn't a whole number of 0 or more.
+
+## Errors
+
+### `StardustError`
+
+```ts
+export class StardustError extends Error {
+  constructor(code: StardustErrorCode, message: string, options?: ErrorOptions);
+  readonly code: StardustErrorCode;
+  readonly retryable: boolean;
+}
+```
+
+The error Stardust throws when the test or its setup is wrong. The message says what happened and what to do next. Wallet errors the app receives are never `StardustError`s.
+
+| Member      | Description                                                                                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`      | What went wrong, a [`StardustErrorCode`](#stardusterrorcode)                                                                                              |
+| `retryable` | Whether the same step can succeed if run again, such as after a network problem. `true` for `NETWORK_UNREACHABLE`, `FUNDING_FAILED` and `OUTCOME_UNKNOWN` |
+
+The error's `name` is `StardustError` followed by the code, so output reads `StardustError NO_PROMPT: ...`.
+
+### `StardustErrorCode`
+
+```ts
+export type StardustErrorCode =
+  | 'CONFIG_NOT_FOUND'
+  | 'CONFIG_INVALID'
+  | 'NETWORK_NOT_SUPPORTED'
+  | 'NETWORK_UNREACHABLE'
+  | 'MAINNET_REFUSED'
+  | 'APP_NOT_REACHABLE'
+  | 'FUNDING_FAILED'
+  | 'NO_PROMPT'
+  | 'ALREADY_ANSWERED'
+  | 'PROMPT_BLOCKED'
+  | 'WALLET_LOCKED'
+  | 'OUTCOME_UNKNOWN'
+  | 'UNKNOWN_ACCOUNT'
+  | 'UNSUPPORTED'
+  | 'PROTOCOL_VIOLATION'
+  | 'PROMPTS_PENDING';
+```
+
+[Errors](/docs/reference/errors) lists when each code happens and what to do.
+
+## Core API
+
+`stardust-stellar/test` builds its users from these. Use them directly only for a custom setup that doesn't use `stardust-stellar/test`.
+
+```ts
+import { createStardust } from 'stardust-stellar';
+import type { PageHost } from 'stardust-stellar';
+
+const stardust = await createStardust({ network: 'testnet' });
+const account = await stardust.accounts.create({ fund: '50' });
+const wallet = stardust.wallet({ accounts: [account], policy: 'manual' });
+
+// context is a BrowserContext.
+const host: PageHost = {
+  exposeBinding: (name, handler) =>
+    context.exposeBinding(name, ({ page, frame }, payload) => {
+      if (frame !== page.mainFrame()) throw new Error('top frame only');
+      return handler(new URL(frame.url()).origin, payload);
+    }),
+  addInitScript: (source) => context.addInitScript(source),
+};
+await wallet.attach(host, { wallet: 'varial' });
+const page = await context.newPage();
+```
+
+The end-of-test checks for unanswered prompts and [strict mode](/docs/check/strict-mode) run only in `stardust-stellar/test`. In a custom setup, read `wallet.prompts()` and `wallet.violations()` yourself.
+
+### `createStardust`
+
+```ts
+export function createStardust(input: CoreConfig): Promise<Stardust>;
+```
+
+Checks the network and returns Stardust's core: accounts and wallets. It waits up to 60 s for the RPC to report healthy. Throws `NETWORK_UNREACHABLE` when the RPC isn't healthy and `MAINNET_REFUSED` on mainnet.
+
+### `CoreConfig`
+
+```ts
+export interface CoreConfig {
+  fetch?: typeof fetch;
+  network:
+    | 'testnet'
+    | {
+        rpcUrl: string;
+      };
+}
+```
+
+The settings for `createStardust`.
+
+| Field     | Type                              | Default            | Description                                                                             |
+| --------- | --------------------------------- | ------------------ | --------------------------------------------------------------------------------------- |
+| `network` | `'testnet' \| { rpcUrl: string }` | required           | The network. `'testnet'` uses `https://soroban-testnet.stellar.org`. Mainnet is refused |
+| `fetch`   | `typeof fetch`                    | `globalThis.fetch` | The `fetch` used for RPC and Friendbot requests                                         |
+
+### `Stardust`
+
+```ts
+export interface Stardust {
+  readonly accounts: {
+    create(options?: AccountOptions): Promise<Account>;
+    createMany(options: readonly AccountOptions[]): Promise<Account[]>;
+  };
+  readonly network: NetworkInfo;
+  wallet(options: WalletOptions): Wallet;
+}
+```
+
+Stardust's core, as `createStardust` returns it.
+
+| Member                         | Description                                                                                                                                                                                   |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `network`                      | The network, as checked by `createStardust`, a [`NetworkInfo`](/docs/reference/test#networkinfo)                                                                                              |
+| `accounts.create(options?)`    | Creates a throwaway [account](/docs/reference/test#account), funded from the machine's testnet [funder](/docs/set-up/accounts). Takes [`AccountOptions`](/docs/reference/test#accountoptions) |
+| `accounts.createMany(options)` | Creates several accounts in one transaction                                                                                                                                                   |
+| `wallet(options)`              | Creates an emulated [`Wallet`](/docs/reference/test#wallet). Call `attach` on it to put it in a page                                                                                          |
+
+`accounts.create` and `accounts.createMany` throw `CONFIG_INVALID` for wrong options and `FUNDING_FAILED` when the funder can't fund the accounts.
+
+### `WalletOptions`
+
+```ts
+export interface WalletOptions {
+  accounts: readonly Account[];
+  allowHttp?: boolean;
+  connected?: boolean;
+  policy?: Policy;
+  strict?: boolean;
+}
+```
+
+The settings for one emulated wallet. In tests, [`UserOptions`](/docs/reference/test#useroptions) sets them.
+
+| Field       | Type                                    | Default     | Description                                                                    |
+| ----------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------ |
+| `accounts`  | `readonly Account[]`                    | required    | The accounts in the wallet. The first is active. Empty throws `CONFIG_INVALID` |
+| `connected` | `boolean`                               | `false`     | Start as if the user had already connected the site, for every account         |
+| `policy`    | [`Policy`](/docs/reference/test#policy) | `'approve'` | How the wallet answers prompts                                                 |
+| `strict`    | `boolean`                               | `true`      | Fail the test at its end when the app broke wallet rules                       |
+| `allowHttp` | `boolean`                               | `true`      | Whether the wallet signs on `http://` pages                                    |
+
+In `stardust-stellar/test`, `connected: true` also saves the Stellar Wallets Kit session in the user's browser. The core API doesn't.
+
+### `PageHost`
+
+```ts
+export interface PageHost {
+  addInitScript(source: string): Promise<void>;
+  exposeBinding(
+    name: string,
+    handler: (origin: string, payload: unknown) => Promise<unknown>,
+  ): Promise<void>;
+}
+```
+
+Where a wallet lives: a browser page, or a stand-in for one. `stardust-stellar/test` builds one on each user's `BrowserContext`.
+
+| Member                         | Description                                               |
+| ------------------------------ | --------------------------------------------------------- |
+| `exposeBinding(name, handler)` | Makes `handler` callable from the page as `window[name]`  |
+| `addInitScript(source)`        | Runs `source` in every page before the page's own scripts |
+
+<Callout type="warn">
+  Pass `handler` the origin of the calling frame, taken from the browser. Never
+  read it from the page's message. The wallet uses it to decide which site is
+  connected.
+</Callout>
+
+## Types shared with `stardust-stellar/test`
+
+These types describe accounts, wallets, prompts and outcomes. Tests reach them through `users`, so they're documented in [stardust-stellar/test](/docs/reference/test). `stardust-stellar` exports them by name.
+
+| Export                                                            | Description                                                               |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`Account`](/docs/reference/test#account)                         | A throwaway testnet account Stardust created for one test                 |
+| [`AccountOptions`](/docs/reference/test#accountoptions)           | How an account is created                                                 |
+| [`AddTokenPrompt`](/docs/reference/test#addtokenprompt)           | The app asks the wallet to add a token                                    |
+| [`Asset`](/docs/reference/test#asset)                             | `'native'`, `'CODE:ISSUER'` or a token contract, `C...`                   |
+| [`AuthEntryPrompt`](/docs/reference/test#authentryprompt)         | The app asks for one contract call to be authorized                       |
+| [`BalanceChange`](/docs/reference/test#balancechange)             | How much one address's balance of one asset changed                       |
+| [`BlockedReason`](/docs/reference/test#blockedreason)             | Why the real wallet would refuse a prompt                                 |
+| [`ConnectPrompt`](/docs/reference/test#connectprompt)             | The app asks for the user's address                                       |
+| [`ContractError`](/docs/reference/test#contracterror)             | An error a contract returned                                              |
+| [`ContractEvent`](/docs/reference/test#contractevent)             | An event a contract emitted                                               |
+| [`Decision`](/docs/reference/test#decision)                       | How a policy function answers a prompt                                    |
+| [`DecodedAuthEntry`](/docs/reference/test#decodedauthentry)       | An authorization entry attached to a transaction, decoded                 |
+| [`DecodedAuthPreimage`](/docs/reference/test#decodedauthpreimage) | An authorization entry preimage the app asked the wallet to sign, decoded |
+| [`DecodedOperation`](/docs/reference/test#decodedoperation)       | One operation of a transaction                                            |
+| [`DecodedTransaction`](/docs/reference/test#decodedtransaction)   | A transaction the app asked the wallet to sign, decoded                   |
+| [`Invocation`](/docs/reference/test#invocation)                   | A contract call                                                           |
+| [`Landed`](/docs/reference/test#landed)                           | A transaction's outcome once it's in a ledger                             |
+| [`MessagePrompt`](/docs/reference/test#messageprompt)             | The app asks for a message to be signed                                   |
+| [`NetworkInfo`](/docs/reference/test#networkinfo)                 | A network, as Stardust read it from its RPC                               |
+| [`Policy`](/docs/reference/test#policy)                           | How the wallet answers prompts                                            |
+| [`PolicyMode`](/docs/reference/test#policy)                       | `'approve'`, `'reject'` or `'manual'`                                     |
+| [`Prompt`](/docs/reference/test#prompt)                           | Any of the five prompt types                                              |
+| [`PromptKind`](/docs/reference/test#promptkind)                   | What a prompt asks for, such as `'signTransaction'`                       |
+| [`PromptOf`](/docs/reference/test#prompt)                         | The prompt type for one kind                                              |
+| [`PromptStatus`](/docs/reference/test#promptstatus)               | `'pending'` until a prompt is answered, then the answer                   |
+| [`TransactionPrompt`](/docs/reference/test#transactionprompt)     | The app asks for a whole transaction to be signed                         |
+| [`Violation`](/docs/reference/test#violation)                     | A wallet rule the app broke                                               |
+| [`WaitOptions`](/docs/reference/test#waitoptions)                 | How long to wait                                                          |
+| [`Wallet`](/docs/reference/test#wallet)                           | An emulated wallet, with the accounts of one user                         |
+
+`BasePrompt`, `Failure` and `ViolationKind` appear in these types, but aren't exported by name.

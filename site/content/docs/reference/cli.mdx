@@ -1,0 +1,128 @@
+---
+title: CLI
+description: The stardust test command, with its arguments, output, exit codes and the errors it shows before tests start.
+---
+
+`stardust test` checks the network, installs Chromium, starts your app and runs your tests. Run it from the project folder, the one with `stardust.config.ts`.
+
+```text
+stardust test [file...] [--show] [-- flags]
+```
+
+```sh
+npx stardust test                  # every test, browser hidden
+npx stardust test e2e/pay.spec.ts  # one file
+npx stardust test --show           # with the browser visible
+npx stardust test -- --grep pay    # only tests whose name matches "pay"
+```
+
+It needs Node.js 22.18 or later, or 23.6 or later on Node 23. [The stardust command](/docs/run/command) walks through a run.
+
+## Arguments
+
+| Argument  | Description                                                                                |
+| --------- | ------------------------------------------------------------------------------------------ |
+| `test`    | The command. It's the only one                                                             |
+| `file...` | Run only the test files whose path matches. Default: every test file in the `tests` folder |
+| `--show`  | Show the browser window                                                                    |
+| `--`      | Everything after it is passed on unchanged                                                 |
+
+`--show` is Stardust's only flag. Any other flag before `--`, such as `stardust test --grep swap`, stops the command before any test runs.
+
+After `--`, [any test runner flag](https://playwright.dev/docs/test-cli) works, such as `--grep`, `--debug`, `--ui`, `--last-failed`, `--retries 2`, `--workers 2` or `--shard 1/4`. These flags override the settings below.
+
+## What it does
+
+1. Loads `stardust.config.ts` from the current folder and checks every field.
+2. Waits up to 60 s for the RPC to report healthy, reads the network's passphrase, Friendbot URL and protocol version, and refuses mainnet.
+3. Installs Chromium if it's missing.
+4. Starts the app with `app.start` if nothing answers at `app.url`, then waits up to 60 s for `app.url` to respond.
+5. Runs the tests with the settings below.
+6. Stops the app, with every process its command started, if Stardust started it. It does this even when tests fail or the run is interrupted.
+7. Exits with the code from the [exit codes](#exit-codes) table.
+
+### Settings
+
+| Setting          | Value                                     |
+| ---------------- | ----------------------------------------- |
+| Test folder      | The `tests` folder from the config        |
+| Base URL         | `app.url`, so `page.goto('/swap')` works  |
+| Browser          | Chromium, hidden unless `--show`          |
+| Parallel         | Every test can run in parallel            |
+| Test timeout     | 120 s per test                            |
+| `expect` timeout | 15 s                                      |
+| Results          | `stardust-results/` in the project folder |
+| On failure       | Keeps a screenshot and a trace            |
+| Report           | One line per test                         |
+
+To change one, pass the matching flag after `--`, for example `npx stardust test -- --workers 2`.
+
+## Output
+
+```text
+stardust  network  testnet (https://soroban-testnet.stellar.org, protocol 30) ready
+stardust  browser  chromium ready
+stardust  app      pnpm dev -> http://localhost:3000 ready
+stardust  wallets  Varial 5.53.0, SEP-43 1.2.1, SEP-60 0.1.0
+
+  ✓  1 e2e/pay.spec.ts:12:1 › sends 5 XLM to a friend (16.2s)
+
+  1 passed (21.4s)
+
+stardust  app      stopped
+```
+
+| Line      | Meaning                                                                                                                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `network` | The network's name (`testnet`, `futurenet` or `custom`), RPC URL and protocol version                                                                                   |
+| `browser` | Chromium is installed                                                                                                                                                   |
+| `app`     | `<command> -> <url> ready` when Stardust started the app, or `<url> already running` when something already answered. `stopped` at the end, only if Stardust started it |
+| `wallets` | The Varial (formerly Freighter), SEP-43 and SEP-60 versions this release matches                                                                                        |
+
+The lines between list each test and its result. When a test fails, the output also shows the failed check and the wallet's timeline. See [When a test fails](/docs/run/failed-tests).
+
+## Exit codes
+
+| Code  | When                                      |
+| ----- | ----------------------------------------- |
+| `0`   | Every test passed                         |
+| `1`   | A test failed, or Stardust couldn't start |
+| `130` | Stopped with Ctrl-C (`SIGINT`)            |
+| `143` | Stopped with `SIGTERM`                    |
+
+## Environment variables
+
+| Variable | Effect                                                                                                    |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| `CI`     | With `CI=true`, Stardust installs Chromium with its system libraries. Other values, such as `CI=1`, don't |
+
+GitHub Actions sets `CI=true`. See [CI](/docs/run/ci).
+
+## When it can't start
+
+Before any test runs, Stardust checks the command, the config, the network, the browser and the app, in that order. The first problem stops it with exit code 1. Each line names the step that failed:
+
+```text
+stardust  command  missing command. Run: stardust test [files] [--show] [-- playwright flags]
+stardust  command  unknown command run. Run: stardust test [files] [--show] [-- playwright flags]
+stardust  command  unknown flag --grep. Put Playwright flags after --, for example: stardust test -- --grep swap
+stardust  config   no stardust.config.ts in /Users/you/Desktop. Run this from your project folder.
+stardust  config   app.url is missing in stardust.config.ts
+stardust  config   network 'local' isn't available in v1. Use 'testnet' or { rpcUrl }.
+stardust  network  https://soroban-testnet.stellar.org not reachable after 60s
+stardust  network  refused: this network reports the mainnet passphrase. Stardust never runs on mainnet.
+stardust  browser  playwright install chromium exited with code 1. Check your connection and run stardust test again.
+stardust  app      nothing answers at http://localhost:3000 and app.start is not set. Start your app, or set app.start.
+stardust  app      http://localhost:3000 did not respond within 60s after "pnpm dev"
+stardust  app      "pnpm dev" exited with code 1 before http://localhost:3000 responded
+```
+
+| Step      | Error codes                                                   | What to do                                                                                  |
+| --------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `command` | none                                                          | Run `stardust test`, with other flags after `--`                                            |
+| `config`  | `CONFIG_NOT_FOUND`, `CONFIG_INVALID`, `NETWORK_NOT_SUPPORTED` | Run from the project folder, and fix the setting the line names                             |
+| `network` | `NETWORK_UNREACHABLE`, `MAINNET_REFUSED`                      | Check the RPC URL and your connection. Use a test network                                   |
+| `browser` | none                                                          | Check your connection, then run again                                                       |
+| `app`     | `APP_NOT_REACHABLE`                                           | Start the app, or set `app.start`. Check that `app.url` is where the command serves the app |
+
+A config with several problems prints a line for each. See [Errors](/docs/reference/errors) for every code.

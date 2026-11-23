@@ -1,0 +1,66 @@
+---
+title: Policies
+description: Choose how a user's wallet answers prompts, and change it during a test.
+---
+
+A policy decides how a user's wallet answers [prompts](/docs/drive/prompts). Set it per user in `test.use`. The default is `'approve'`.
+
+```ts title="e2e/orders.spec.ts"
+test.use({
+  stardust: {
+    users: {
+      maker: { connected: true, policy: 'manual' },
+      taker: { connected: true, policy: 'reject' },
+    },
+  },
+});
+```
+
+| Policy                | What the wallet does                       | Use it to                                                         |
+| --------------------- | ------------------------------------------ | ----------------------------------------------------------------- |
+| `'approve'` (default) | Approves every prompt                      | Test the normal path                                              |
+| `'reject'`            | Rejects every prompt, `connect` included   | Test a user who says no                                           |
+| `'manual'`            | Leaves every prompt for the test to answer | Check the app while it waits, or answer with `fail()` or `hang()` |
+| Per kind              | One policy per prompt kind                 | Let `connect` through and answer signatures yourself              |
+| A function            | Decides each prompt                        | Answer by what the prompt contains                                |
+
+Under every policy, `wallet.nextPrompt()` returns the prompts. Under `'manual'` you answer them; under the others they're already answered.
+
+To reject only signatures, combine `'reject'` with `connected: true`.
+
+## Per kind
+
+Kinds you leave out are approved.
+
+```ts
+policy: { signTransaction: 'manual' },
+```
+
+## A function
+
+The function returns `{ action }` with `'approve'`, `'reject'`, `'fail'` or `'hang'`, or a promise of one. For `'fail'`, add `code` (-1, -2 or -3) and an optional `message`.
+
+```ts
+policy: (prompt) =>
+  prompt.kind === 'signTransaction' && prompt.transaction.fee > xlm('1')
+    ? { action: 'reject' }
+    : { action: 'approve' },
+```
+
+## Change it during a test
+
+`wallet.setPolicy(policy)` applies to prompts from then on:
+
+```ts title="e2e/supply.spec.ts"
+test('shows the error when the lender rejects', async ({
+  users: { lender },
+}) => {
+  lender.wallet.setPolicy({ signTransaction: 'reject' });
+  await supply(lender, '10'); // fills in the form and clicks Supply
+
+  const prompt = await lender.wallet.nextPrompt('signTransaction');
+  expect(prompt.status).toBe('rejected');
+});
+```
+
+A policy never approves a [blocked prompt](/docs/drive/prompts#blocked-prompts).

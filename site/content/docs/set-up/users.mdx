@@ -1,0 +1,116 @@
+---
+title: Users and wallet state
+description: Declare the people in a test, the wallet each one has, and the state it starts in.
+---
+
+A user is one person in a test: a browser tab, the wallet in it, and the accounts in that wallet. Declare users once per file with `test.use`. Every test gets fresh ones, with new keys, new balances and new tabs.
+
+```ts title="e2e/swap.spec.ts"
+import { test, expect } from 'stardust-stellar/test';
+
+test.use({
+  stardust: {
+    users: {
+      trader: { wallet: 'varial', connected: true },
+    },
+  },
+});
+
+test('shows the address', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await expect(trader.page.getByTestId('address')).toHaveText(
+    trader.account.address,
+  );
+});
+```
+
+- Every person in a test is a user, including someone who never opens the app, such as the recipient of a payment.
+- Each user has their own tab, and the app in it talks only to that user's wallet.
+
+## Settings
+
+Every setting is optional.
+
+| Setting     | Values                                                       | Default                    | Meaning                                                                                                                    |
+| ----------- | ------------------------------------------------------------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `wallet`    | `'varial'`, `'sep60'`, `'none'`                              | `'varial'`                 | The wallet in this user's tab: [Varial (formerly Freighter)](/docs/wallets/varial), [SEP-60](/docs/wallets/sep60), or none |
+| `connected` | `true`, `false`                                              | `false`                    | Start as if the user had already connected the site                                                                        |
+| `policy`    | `'approve'`, `'reject'`, `'manual'`, per kind, or a function | `'approve'`                | How the wallet answers prompts. See [policies](/docs/drive/policies)                                                       |
+| `accounts`  | `{ name: { fund } }`                                         | `{ main: { fund: true } }` | The accounts in the wallet. See [accounts](/docs/set-up/accounts)                                                          |
+| `allowHttp` | `true`, `false`                                              | `true`                     | Whether the wallet signs on `http://` pages                                                                                |
+| `strict`    | `true`, `false`                                              | `true`                     | Fail the test when the app breaks wallet rules. See [strict mode](/docs/check/strict-mode)                                 |
+
+```ts
+test.use({
+  stardust: {
+    users: {
+      maker: { connected: true, accounts: { main: { fund: '1000' } } },
+      trader: { wallet: 'sep60', connected: true, policy: 'manual' },
+      visitor: { wallet: 'none' },
+      friend: {},
+    },
+  },
+});
+```
+
+A wrong setting fails the test with `CONFIG_INVALID` and names it.
+
+## Start connected or not
+
+- `connected: true` is a returning user: the site is already in the wallet's connected sites, so no `connect` prompt appears. Kit-based apps start connected too. See [Stellar Wallets Kit](/docs/wallets/wallets-kit).
+- `connected: false` is a first-time visitor. The test clicks the app's connect button, and the policy answers the `connect` prompt.
+
+## No wallet installed
+
+With `wallet: 'none'`, the app sees a browser with no wallet.
+
+```ts title="e2e/no-wallet.spec.ts"
+test.use({
+  stardust: {
+    users: {
+      visitor: { wallet: 'none', accounts: { main: { fund: false } } },
+    },
+  },
+});
+
+test('offers to install Varial', async ({ users: { visitor } }) => {
+  await visitor.page.goto('/');
+  await visitor.page.getByRole('button', { name: 'Connect wallet' }).click();
+
+  await expect(
+    visitor.page.getByRole('link', { name: 'Install Varial' }),
+  ).toBeVisible();
+});
+```
+
+`fund: false` skips funding an account this user never uses.
+
+## Pages on `http://`
+
+Real Varial refuses to sign on pages that aren't `https`, unless the user turned on "allow non-SSL". Local dev servers run on `http://localhost`, so by default Stardust acts like a developer who turned it on. Set `allowHttp: false` to test the refusal: signing prompts then arrive [blocked](/docs/drive/prompts#blocked-prompts) with `insecureOrigin`.
+
+## What a test receives
+
+The `users` fixture holds each declared user by name:
+
+| Field      | What it is                                                                                                 |
+| ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `page`     | The user's browser tab                                                                                     |
+| `wallet`   | The user's wallet: [prompts](/docs/drive/prompts), policy and [wallet actions](/docs/drive/wallet-actions) |
+| `account`  | The account active when the test started                                                                   |
+| `accounts` | Every account in the wallet, by name, such as `accounts.main`                                              |
+| `name`     | The user's name in `test.use`, such as `'trader'`                                                          |
+
+Use the `User` type for helper functions:
+
+```ts
+import type { User } from 'stardust-stellar/test';
+
+async function connect(user: User) {
+  await user.page.getByRole('button', { name: 'Connect wallet' }).click();
+}
+```
+
+## Where to put `test.use`
+
+Put it at the top of the file, and keep one set of users per file. An inner `test.use` in a `test.describe` block replaces the outer users instead of merging with them.

@@ -1,0 +1,67 @@
+---
+title: SEP-60 and SEP-43
+description: The sep60 wallet. How apps discover it, the methods it offers, and how it behaves.
+---
+
+`wallet: 'sep60'` gives the page a wallet that announces itself through [SEP-60](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0060.md) (wallet discovery) and offers the [SEP-43](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0043.md) wallet API. Use it for apps that find wallets through SEP-60. This release matches SEP-60 0.1.0 and SEP-43 1.2.1.
+
+```ts title="e2e/sep60.spec.ts"
+import { expect, test } from 'stardust-stellar/test';
+
+test.use({ stardust: { users: { trader: { wallet: 'sep60' } } } });
+
+test('discovers the wallet and signs a message', async ({
+  users: { trader },
+}) => {
+  await trader.page.goto('/');
+  await trader.page
+    .getByRole('button', { name: 'Stardust (test wallet)' })
+    .click();
+  await trader.wallet.nextPrompt('connect');
+
+  await trader.page.getByLabel('Message').fill('Hello over SEP-43');
+  await trader.page.getByRole('button', { name: 'Sign message' }).click();
+
+  const prompt = await trader.wallet.nextPrompt('signMessage');
+  expect(prompt.message).toBe('Hello over SEP-43');
+});
+```
+
+## How apps find it
+
+The wallet dispatches `sep0060:announceProvider` on every page load, and again on every `sep0060:requestProvider`. So an app that adds its listener, then dispatches `sep0060:requestProvider`, finds it:
+
+```ts title="src/wallets.ts"
+window.addEventListener('sep0060:announceProvider', (event) => {
+  const { info, provider } = (event as CustomEvent).detail;
+  addWalletButton(info.name, provider); // your app's code
+});
+window.dispatchEvent(new Event('sep0060:requestProvider'));
+```
+
+The wallet's `info.name` is `'Stardust (test wallet)'`.
+
+## Methods
+
+| Method                           | What happens                                                  |
+| -------------------------------- | ------------------------------------------------------------- |
+| `getAddress()`                   | The address on a connected site. Otherwise a `connect` prompt |
+| `getNetwork()`                   | The wallet's network and passphrase                           |
+| `signTransaction(xdr, opts)`     | A `signTransaction` prompt                                    |
+| `signAuthEntry(authEntry, opts)` | A `signAuthEntry` prompt                                      |
+| `signMessage(message, opts)`     | A `signMessage` prompt                                        |
+
+SEP-43 has no method to add a token, so this wallet never shows an `addToken` prompt.
+
+## How it differs from Varial
+
+- On a site that isn't connected, every signing method shows a `connect` prompt first.
+- `networkPassphrase` is optional. Without it, the wallet's network is used.
+- While locked, the account stays visible: `getAddress()` still answers on a connected site.
+- With `signTransaction(xdr, { submit: true })`, approving the prompt also sends the transaction, to `submitUrl` if the app gives one. [`toLand()`](/docs/check/transactions) works as usual.
+
+Connections, wrong networks, `http://` pages and signers named with `address` work as with [Varial (formerly Freighter)](/docs/wallets/varial).
+
+## How it's checked
+
+There's no real SEP-60 wallet to compare with, so Stardust's tests check each requirement of the two texts. See [How they're checked](/docs/wallets/checked).

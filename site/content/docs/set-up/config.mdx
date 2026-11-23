@@ -1,0 +1,121 @@
+---
+title: Config
+description: Set the network, where your app runs, and where your tests are, in stardust.config.ts.
+---
+
+`stardust.config.ts` tells Stardust which network to use, how to reach your app, and where your tests are. It sits in your project folder.
+
+```ts title="stardust.config.ts"
+import { defineConfig } from 'stardust-stellar';
+
+export default defineConfig({
+  network: 'testnet',
+  app: { url: 'http://localhost:3000', start: 'pnpm dev' },
+  tests: './e2e',
+});
+```
+
+## Fields
+
+| Field       | Required | Meaning                                                                                                                                                            |
+| ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `network`   | Yes      | The Stellar network the tests run on. See [Network](#network).                                                                                                     |
+| `app.url`   | Yes      | Where your app runs. `page.goto('/swap')` opens `app.url` plus `/swap`.                                                                                            |
+| `app.start` | No       | The command that starts your app, such as `'pnpm dev'`. Stardust runs it in the project folder only when nothing answers at `app.url`, and stops it after the run. |
+| `tests`     | No       | The folder with your test files, relative to the project folder. Default `'./e2e'`.                                                                                |
+
+Leave out `app.start` if you start the app yourself. A wrong or missing field stops the run with a message that names it.
+
+## Network
+
+| Value        | Network                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `'testnet'`  | SDF's testnet, through `https://soroban-testnet.stellar.org`. The right choice for almost every app.                                    |
+| `{ rpcUrl }` | Any other Stellar RPC endpoint: a paid provider for testnet, or `'https://rpc-futurenet.stellar.org'` for an app deployed on futurenet. |
+| `'local'`    | Reserved for a local network. Not available yet: it fails with `NETWORK_NOT_SUPPORTED`.                                                 |
+
+```ts
+network: { rpcUrl: 'https://rpc-futurenet.stellar.org' },
+```
+
+Stardust reads the network passphrase and Friendbot URL from the RPC server, so the config never contains them. The network needs a Friendbot to fund test accounts. Stardust refuses any network that reports the mainnet passphrase.
+
+<Callout type="warn" title="Your app must use the same network">
+  Stardust doesn't change your app's settings. If the app asks the wallet to
+  sign for a different network than the config's, the prompt is blocked with
+  `networkMismatch` and the test fails. See [strict
+  mode](/docs/check/strict-mode).
+</Callout>
+
+## Where the config lives
+
+`stardust test` reads `stardust.config.ts` from the folder it runs in: the project folder. `app.start` runs there, and `tests` is relative to it.
+
+```text
+my-dapp/
+  package.json          stardust-stellar in devDependencies
+  stardust.config.ts
+  e2e/swap.spec.ts
+  src/
+```
+
+### Monorepo
+
+In a monorepo, the project folder is your app's package. Put `stardust.config.ts` and the tests there, and add `stardust-stellar` to that package's devDependencies.
+
+```text
+my-monorepo/
+  package.json
+  apps/web/
+    package.json        stardust-stellar in devDependencies
+    stardust.config.ts  app.start: 'pnpm dev'
+    e2e/swap.spec.ts
+    src/
+```
+
+```json title="apps/web/package.json"
+{
+  "scripts": {
+    "dev": "next dev",
+    "test:e2e": "stardust test"
+  }
+}
+```
+
+Run it from the root with `pnpm --filter web test:e2e`. pnpm runs the script inside the package folder, so `stardust test` finds the config there, and results go to `apps/web/stardust-results/`.
+
+## TypeScript in the config
+
+Node loads `stardust.config.ts` by removing its types, so the file can't use `enum` or `namespace`.
+
+## Rules for tests
+
+1. **Stardust never deploys contracts.** Tests use the contracts your app already uses, on the network it already uses.
+2. **Tests import contract addresses from your app.** Stardust never handles them.
+
+```ts title="src/lib/contracts.ts"
+export const CONTRACTS = {
+  testnet: { router: 'CA3D...', token: 'CC7Q...' },
+};
+```
+
+```ts title="e2e/swap.spec.ts"
+import { test, expect } from 'stardust-stellar/test';
+import { CONTRACTS } from '../src/lib/contracts';
+
+const { router } = CONTRACTS.testnet;
+
+test.use({ stardust: { users: { trader: { connected: true } } } });
+
+test('swaps through the router', async ({ users: { trader } }) => {
+  await trader.page.goto('/swap');
+  await trader.page.getByLabel('You pay').fill('10');
+  await trader.page.getByRole('button', { name: 'Swap' }).click();
+
+  const prompt = await trader.wallet.nextPrompt('signTransaction');
+  expect(prompt).toInvoke({ contract: router, fn: 'swap_exact_in' });
+  await expect(prompt).toLand();
+});
+```
+
+When testnet resets, you redeploy your contracts and update the addresses in your app. The tests don't change.

@@ -1,0 +1,75 @@
+---
+title: Varial
+description: The default wallet. Which libraries work with it, and how it behaves where apps often get it wrong.
+---
+
+`wallet: 'varial'` is the default. The page sees Varial (formerly Freighter), the Stellar browser wallet, and your app talks to it through Varial's own messages, as it would with the real extension. This release matches Varial 5.53.0.
+
+```ts title="e2e/connect.spec.ts"
+import { expect, test } from 'stardust-stellar/test';
+
+test.use({ stardust: { users: { trader: { wallet: 'varial' } } } });
+
+test('connects and shows the address', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+
+  await trader.wallet.nextPrompt('connect');
+  await expect(trader.page.getByTestId('address')).toHaveText(
+    trader.account.address,
+  );
+});
+```
+
+| Library                                          | Versions     |
+| ------------------------------------------------ | ------------ |
+| `@stellar/freighter-api`                         | 6.x          |
+| `@stellar/varial-sdk`                            | 7.x          |
+| [Stellar Wallets Kit](/docs/wallets/wallets-kit) | 2.7.x, 2.8.x |
+
+## Connecting
+
+- A site is connected per network, account and hostname. The port doesn't count.
+- Approving a `connect` prompt connects the site for the active account on the active network. After a switch of account or network, the user approves again.
+- `requestAccess()` becomes a `connect` prompt on a site that isn't connected. `getAddress()` never prompts: it returns `""` there.
+- On a site that isn't connected, `signTransaction` arrives [blocked](/docs/drive/prompts#blocked-prompts) with `notConnected`. `signAuthEntry` and `signMessage` show a `connect` prompt first.
+
+## Network
+
+Varial signs only for the network it's on. Otherwise the prompt arrives blocked with `networkMismatch`.
+
+| Prompt            | Where Varial reads the network                                 |
+| ----------------- | -------------------------------------------------------------- |
+| `signTransaction` | The app's `networkPassphrase`. Without one, it assumes mainnet |
+| `signAuthEntry`   | The network ID inside the auth entry                           |
+| `signMessage`     | The app's `networkPassphrase`. Without one, there's no check   |
+| `addToken`        | The app's `networkPassphrase`. Without one, it assumes mainnet |
+
+<Callout type="warn" title="Always pass networkPassphrase">
+  An app that calls `signTransaction(xdr)` or `addToken` without
+  `networkPassphrase` can't sign on testnet with real Varial. Stardust blocks
+  the prompt too, and [strict mode](/docs/check/strict-mode) fails the test.
+</Callout>
+
+## Locked
+
+While [locked](/docs/drive/wallet-actions#lock-and-unlock), Varial acts as if it holds no account, even on a connected site: `getAddress()` returns `""`, `isAllowed()` returns `false`, and a request for access becomes a `connect` prompt. Every prompt waits until `wallet.unlock()`.
+
+## Adding a token
+
+| Token                                                    | On approve                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| A Soroban token                                          | Added to the wallet's list. Nothing happens on chain         |
+| A Stellar Asset Contract without a trustline             | The wallet submits a `changeTrust` and replies once it lands |
+| A Stellar Asset Contract with a trustline, or native XLM | Nothing: the prompt arrives blocked with `alreadyAdded`      |
+
+## Signing for another account
+
+When the app passes `accountToSign`:
+
+- If it's another account in the user's wallet, the wallet switches to it and signs, as Varial does.
+- If it isn't in the wallet, the wallet signs with the active account, as Varial does, and [strict mode](/docs/check/strict-mode) records `signerMismatch`.
+
+## How it's checked
+
+Every night, the same scenarios run against the latest real Varial extension and against Stardust, and their replies are compared. See [How they're checked](/docs/wallets/checked).

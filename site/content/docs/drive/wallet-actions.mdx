@@ -1,0 +1,97 @@
+---
+title: Wallet actions
+description: Switch account or network, lock, unlock and disconnect, as the user would in the wallet.
+---
+
+Wallet actions do what the user would do in the wallet itself, in the middle of a test. Call them on `user.wallet`, with `await`.
+
+| Action                   | What the user does                                                 |
+| ------------------------ | ------------------------------------------------------------------ |
+| `switchAccount(account)` | Picks another of their accounts, such as `trader.accounts.savings` |
+| `switchNetwork(name)`    | Switches the wallet to `'testnet'`, `'futurenet'` or `'mainnet'`   |
+| `lock()`                 | Locks the wallet                                                   |
+| `unlock()`               | Unlocks it                                                         |
+| `disconnect()`           | Removes the site from the wallet's connected sites                 |
+
+## The app sees changes when it asks
+
+The wallet doesn't push changes to the app. The app sees a change the next time it asks the wallet:
+
+- Apps using `@stellar/freighter-api`'s `WatchWalletChanges` see it within 3 seconds.
+- [Stellar Wallets Kit](/docs/wallets/wallets-kit) doesn't ask again after connecting, so kit-based apps don't notice a switch. Real Varial (formerly Freighter) behaves the same.
+
+So check the page with an assertion that retries, such as `toHaveText`:
+
+```ts title="e2e/accounts.spec.ts"
+test('the app follows an account switch', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  const address = trader.page.getByTestId('address');
+  await expect(address).toHaveText(trader.accounts.main.address);
+
+  await trader.wallet.switchAccount(trader.accounts.savings);
+  await expect(address).toHaveText(trader.accounts.savings.address);
+});
+```
+
+The site stays connected after a switch only if the user connected it for that account and network. `connected: true` connects every account in the wallet on the starting network.
+
+## Switch network
+
+The app reads the new network from the wallet, and signing requests for the old network arrive [blocked](/docs/drive/prompts#blocked-prompts) with `networkMismatch`.
+
+```ts title="e2e/freighter.spec.ts"
+test('asks the user to switch network', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await trader.wallet.switchNetwork('futurenet');
+  await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+
+  await expect(trader.page.getByRole('status')).toHaveText(
+    'Switch your wallet to Testnet',
+  );
+});
+```
+
+<Callout type="warn" title="Nothing is signed for mainnet">
+  After `switchNetwork('mainnet')`, every prompt except `connect` is refused.
+  Use it only to test how the app reacts to a wallet on mainnet.
+</Callout>
+
+## Lock and unlock
+
+While the wallet is locked, every prompt arrives blocked with `'locked'` and waits. After `unlock()`, waiting prompts go ahead under the policy.
+
+```ts title="e2e/freighter.spec.ts"
+test('waits while the wallet is locked', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+  await trader.wallet.nextPrompt('connect');
+  await expect(trader.page.getByTestId('address')).toHaveText(
+    trader.account.address,
+  );
+
+  await trader.wallet.lock();
+  await trader.page.getByLabel('Message').fill('Signed after unlocking');
+  await trader.page.getByRole('button', { name: 'Sign message' }).click();
+
+  const prompt = await trader.wallet.nextPrompt('connect');
+  expect(prompt.blocked).toBe('locked');
+
+  await trader.wallet.unlock();
+  await expect(trader.page.getByRole('status')).toHaveText(
+    'Signature verified',
+  );
+});
+```
+
+With Varial, a locked wallet shows no account, even on a connected site, so the app's signing request becomes a second `connect` prompt. A SEP-60 wallet keeps showing the account.
+
+## Disconnect
+
+After `disconnect()`, the app no longer gets the address, and its next request for access is a `connect` prompt.
+
+```ts
+await trader.wallet.disconnect();
+await trader.page.reload();
+await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+await trader.wallet.nextPrompt('connect');
+```

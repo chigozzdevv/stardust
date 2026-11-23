@@ -1,0 +1,113 @@
+---
+title: Blend
+description: Stardust tests on Blend's lending app, supplying XLM to a real pool on testnet.
+---
+
+These tests run on Blend's lending app, unchanged, against Blend's own contracts on testnet. A lender supplies 10 XLM to a pool, then rejects the same request in a second test.
+
+Stardust runs them every night. The files are in [tests/dapps/blend](https://github.com/chigozzdevv/stardust/tree/main/tests/dapps/blend).
+
+- App: [blend-capital/blend-ui](https://github.com/blend-capital/blend-ui) at commit [`6aa2827`](https://github.com/blend-capital/blend-ui/tree/6aa28273640a86d62cb07680cdf482d9c88d69f9).
+- Build: `npm run build:testnet`, which writes a static site to `out/`.
+- Wallet library: Stellar Wallets Kit 2.7.1.
+
+## Config
+
+Blend builds to a static site, so `app.start` serves the build instead of running a dev server. Build it for testnet before you run `stardust test`.
+
+```ts title="stardust.config.ts"
+import { defineConfig } from 'stardust-stellar';
+
+export default defineConfig({
+  network: 'testnet',
+  app: {
+    url: 'http://localhost:3000',
+    start: 'python3 -m http.server 3000 --directory out',
+  },
+});
+```
+
+## The test
+
+```ts title="e2e/supply.spec.ts"
+import { Asset, Networks } from '@stellar/stellar-sdk';
+import { expect, test, xlm } from 'stardust-stellar/test';
+import type { User } from 'stardust-stellar/test';
+
+const xlmToken = Asset.native().contractId(Networks.TESTNET);
+
+test.use({ stardust: { users: { lender: { wallet: 'varial' } } } });
+
+const short = (address: string) =>
+  `${address.slice(0, 4)}...${address.slice(-4)}`;
+
+async function supply({ page, account }: User, amount: string) {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Acknowledge' }).click();
+  const dashboard = page.getByRole('link', { name: 'Dashboard' });
+  await expect(dashboard).toHaveAttribute('href', /poolId=C/);
+  const href = (await dashboard.getAttribute('href')) ?? '';
+  const pool = new URL(href, page.url()).searchParams.get('poolId') ?? '';
+
+  await page.goto(`/supply/?poolId=${pool}&assetId=${xlmToken}`);
+  await page.getByRole('button', { name: 'Connect Wallet' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Freighter' }).click();
+  await expect(
+    page.getByRole('button', { name: short(account.address) }),
+  ).toBeVisible();
+  await page.getByRole('textbox', { name: '0' }).fill(amount);
+  await expect(
+    page.getByRole('heading', { name: `${amount} XLM`, exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Supply', exact: true }).click();
+  return pool;
+}
+
+test('supplies 10 XLM to the default pool', async ({ users: { lender } }) => {
+  const pool = await supply(lender, '10');
+  const { address } = lender.account;
+
+  const prompt = await lender.wallet.nextPrompt('signTransaction');
+  expect(prompt).toInvoke({
+    contract: pool,
+    fn: 'submit',
+    args: { from: address, spender: address, to: address },
+  });
+  expect(prompt).toInvoke({
+    contract: xlmToken,
+    fn: 'transfer',
+    args: { from: address, to: pool, amount: xlm('10') },
+  });
+  await expect(prompt).toLand();
+  await expect(prompt).toChangeBalance(address, 'native', -xlm('10'));
+  await expect(prompt).toChangeBalance(pool, 'native', xlm('10'));
+  await expect(
+    lender.page.getByRole('heading', {
+      name: 'Transaction submitted successfully!',
+    }),
+  ).toBeVisible();
+});
+
+test('shows the wallet error when the lender rejects', async ({
+  users: { lender },
+}) => {
+  lender.wallet.setPolicy({ signTransaction: 'reject' });
+  await supply(lender, '10');
+
+  const prompt = await lender.wallet.nextPrompt('signTransaction');
+  expect(prompt.status).toBe('rejected');
+  await expect(
+    lender.page.getByRole('heading', {
+      name: 'Stellar Error: The user rejected this request.',
+    }),
+  ).toBeVisible();
+});
+```
+
+## What it shows
+
+- No contract address is hard-coded. The XLM contract comes from the Stellar SDK, and the pool from Blend's own Dashboard link.
+- Blend's Stellar Wallets Kit 2.7 still lists Varial (formerly Freighter) as "Freighter", so the test clicks that.
+- One transaction gets two `toInvoke` checks: the pool's `submit`, and the XLM `transfer` the lender authorizes inside it. See [Transactions](/docs/check/transactions).
+- `toChangeBalance` reads only this transaction's changes, so other people using the same pool don't affect it.
+- On rejection, Blend receives the same error the real wallet sends, and the test checks that Blend shows it.

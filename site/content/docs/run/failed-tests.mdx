@@ -1,0 +1,68 @@
+---
+title: When a test fails
+description: Read the failed check and the wallet's timeline, and open the screenshot and trace Stardust keeps.
+---
+
+When a test fails, the terminal shows the failed check and the wallet's timeline: everything the app asked the wallet and the network, in order. `stardust-results/` keeps a screenshot, a trace and the timeline, so you can see what happened without running the test again.
+
+```text
+✘ swap.spec.ts › swaps 10 XLM
+  expect(prompt).toLand() failed: transaction FAILED
+    result code: txFAILED
+    contract error: SlippageExceeded (CA3D…QK7M, #4)
+    Transaction 9162…c21e in ledger 5757773
+
+  Timeline:
+    0.0s  trader  isAllowed
+    0.0s  trader  connect           approved (localhost)
+    1.0s  trader  simulateTransaction  220ms
+    2.1s  trader  signTransaction   CA3D…QK7M.swap_exact_in(amount_in: 100000000)  approved
+    2.4s  trader  sendTransaction   PENDING  916282c2…
+    8.1s  trader  landed            FAILED   https://stellar.expert/explorer/testnet/tx/916282c2…
+                                    ledger 5757773, txFAILED
+                                    contract error: SlippageExceeded (CA3D…QK7M, #4)
+  Screenshot, trace and timeline: stardust-results/swap-swaps-10-XLM/
+```
+
+## Read the timeline
+
+Each line shows the seconds since the test started, the user, and what happened:
+
+- **Prompts**, decoded, with the answer. A blocked prompt shows why, such as `rejected (networkMismatch)`.
+- **Wallet reads** that need no popup, such as `isAllowed` and `getAddress`.
+- **RPC calls** from the page to the RPC URL in your config, such as `simulateTransaction` and `sendTransaction`.
+- **Landed** transactions, with the ledger, the contract error, and a stellar.expert link on testnet.
+- **Violations** recorded by [strict mode](/docs/check/strict-mode).
+
+Contract arguments are named from the contract's spec. Integers show as raw numbers, so XLM amounts are in stroops.
+
+`Timeline: nothing reached the wallet.` means the app never asked the wallet anything. Check that the app found the wallet, and that the test clicked what starts the flow.
+
+## Open the screenshot and trace
+
+Each failed test gets a folder, such as `stardust-results/swap-swaps-10-XLM/`, with:
+
+- a screenshot of each user's tab when the test ended,
+- `trace.zip`, a recording of every step, with the wallet actions next to the clicks,
+- `stardust-timeline.json`, the timeline.
+
+Drop `trace.zip` onto [trace.playwright.dev](https://trace.playwright.dev) to open it. It stays on your machine.
+
+Add `stardust-results/` to `.gitignore`. On CI, upload it as an artifact; see [CI](/docs/run/ci).
+
+## Failed or unknown
+
+A check that waits, such as `toLand()`, can fail in two ways:
+
+| You see              | It means                                                        |
+| -------------------- | --------------------------------------------------------------- |
+| `transaction FAILED` | The transaction is in a ledger and failed. The message says why |
+| `OUTCOME_UNKNOWN`    | The transaction didn't appear on the network within 30 seconds  |
+
+Stardust never reports a transaction it didn't see as failed. `OUTCOME_UNKNOWN` usually means the app got the signed transaction but never sent it. For `signAuthEntry`, it means the app or its relayer didn't send the transaction. If the network is slow, pass a longer timeout, such as `toLand({ timeoutMs: 60_000 })`.
+
+If the prompt was rejected, failed or hung, the check fails at once, because nothing was signed:
+
+```text
+expect(prompt).toLand() failed: p2 signTransaction is rejected, so nothing was signed and there's nothing to wait for.
+```

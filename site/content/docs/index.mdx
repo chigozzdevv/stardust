@@ -1,0 +1,57 @@
+---
+title: Overview
+description: Automated browser tests for Stellar apps, with a wallet your test controls.
+---
+
+Stardust tests Stellar apps in a real browser. Your test drives the app in Chromium the way a user would, and Stardust plays the wallet: it answers the app like the real wallet, signs with throwaway testnet keys, and checks what landed on chain. It runs on your machine or in CI, with no servers, sign-ups or dashboards.
+
+## Wallets
+
+Each user's tab sees one of three wallets.
+
+| `wallet`             | What the page sees                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'varial'` (default) | [Varial (formerly Freighter)](/docs/wallets/varial), through its own message protocol. Works with `@stellar/freighter-api`, `@stellar/varial-sdk` and Stellar Wallets Kit |
+| `'sep60'`            | A wallet announced through [SEP-60](/docs/wallets/sep60) discovery, with the SEP-43 wallet API                                                                            |
+| `'none'`             | No wallet at all                                                                                                                                                          |
+
+## What you do
+
+You write `stardust.config.ts` and your test files, then run `stardust test`. Stardust does the rest: it installs Chromium, starts your app, puts the wallet in the page, funds test accounts, answers prompts and checks what landed.
+
+## Safety
+
+- **Never mainnet.** Stardust refuses a network that reports the mainnet passphrase, and nothing is ever signed for mainnet. There's no setting to turn this off.
+- **Throwaway keys only.** Every test gets new testnet accounts. Stardust never asks for a real key.
+- **Keys stay out of the page.** Signing happens in Node, so your app never sees a secret key.
+
+## What Stardust is not
+
+- A smart-contract testing tool. Test contracts with the Soroban SDK.
+- A wallet.
+- Production monitoring. Stardust never runs on mainnet.
+
+## How a test works
+
+<Cards>
+  <Card
+    title="1. Set up"
+    href="/docs/set-up/config"
+    description="Point Stardust at your app, and declare the users in each file."
+  />
+  <Card
+    title="2. Drive"
+    href="/docs/drive/prompts"
+    description="Use the app like a user, and answer the wallet's prompts."
+  />
+  <Card
+    title="3. Check"
+    href="/docs/check/transactions"
+    description="Check what the app asked to sign, and what landed on chain."
+  />
+  <Card
+    title="4. Run"
+    href="/docs/run/command"
+    description="Run the tests on your machine or in CI."
+  />
+</Cards>

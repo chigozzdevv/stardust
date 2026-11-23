@@ -1,0 +1,63 @@
+---
+title: Accounts
+description: The accounts in a user's wallet, how much XLM each starts with, and how Stardust funds them.
+---
+
+Each user's wallet holds one or more accounts. A user who lists none gets one account, `main`, with 100 XLM. List them under `accounts` to name them and set their balances.
+
+```ts title="e2e/accounts.spec.ts"
+test.use({
+  stardust: {
+    users: {
+      trader: {
+        connected: true,
+        accounts: {
+          main: { fund: '1000' },
+          savings: { fund: '50' },
+        },
+      },
+    },
+  },
+});
+```
+
+The names are yours. The first account listed is active when the test starts. To switch to another one during a test, see [wallet actions](/docs/drive/wallet-actions).
+
+| In the test              | What it is                                                       |
+| ------------------------ | ---------------------------------------------------------------- |
+| `trader.account`         | The account active when the test started                         |
+| `trader.accounts.<name>` | Any account by name, such as `trader.accounts.savings`           |
+| `trader.wallet.address`  | The address the wallet reports now, which changes after a switch |
+
+Each account has an `address` (`G...`) and a `keypair`. The keypair stays in Node and never enters the page.
+
+## Starting balance
+
+| `fund`                            | Starting balance                                   |
+| --------------------------------- | -------------------------------------------------- |
+| `true` (default)                  | 100 XLM                                            |
+| An amount in XLM, such as `'500'` | That amount, up to `'1000'` per account            |
+| `false`                           | None. The account doesn't exist on the network yet |
+
+Use `fund: false` when the test doesn't need the account on chain, such as a test that only connects or signs a message. It's also how you test a payment to an account that doesn't exist yet:
+
+```ts
+test.use({
+  stardust: {
+    users: {
+      payer: { connected: true },
+      friend: { accounts: { main: { fund: false } } },
+    },
+  },
+});
+```
+
+## How funding works
+
+Every account is a new random key in every test, so tests never share balances, even in parallel. You don't fund anything yourself:
+
+- Stardust keeps a funder account on your machine, in `~/.stardust/funders/`, and funds test accounts from it. The first run creates it with one Friendbot call, and Stardust refills it when it runs low.
+- Each test creates its accounts in one transaction, so setup waits for about one ledger, around 5 seconds.
+- After each test, the accounts are merged back and their XLM returns to the funder.
+
+A CI machine starts without a funder, so each CI run calls Friendbot once. If Friendbot is busy, the run fails with `FUNDING_FAILED`. Run it again a few minutes later.

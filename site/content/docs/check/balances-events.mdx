@@ -1,0 +1,68 @@
+---
+title: Balances and events
+description: Check how a transaction moved balances, fees excluded, and which contract events it emitted.
+---
+
+`toChangeBalance` and `toEmit` wait for the transaction to land, then check what it changed. They run on `signTransaction` and `signAuthEntry` prompts.
+
+```ts title="e2e/pay.spec.ts"
+const prompt = await payer.wallet.nextPrompt('signTransaction');
+await expect(prompt).toChangeBalance(
+  payer.account.address,
+  'native',
+  -xlm('2'),
+);
+await expect(prompt).toChangeBalance(
+  friend.account.address,
+  'native',
+  xlm('2'),
+);
+await expect(prompt).toEmit({ contract: xlmToken, topic: 'transfer' });
+```
+
+Both wait up to 30 seconds, and take `{ timeoutMs }` as an optional last argument. If the transaction failed, they fail too.
+
+## Check a balance change
+
+```ts
+toChangeBalance(address, asset, change);
+```
+
+| Argument  | Meaning                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| `address` | The account `G...` or contract `C...` whose balance moved                                         |
+| `asset`   | `'native'` for XLM, `'CODE:ISSUER'` for a classic asset, or a token contract `C...`               |
+| `change`  | The exact change, negative for a decrease. Or `{ min, max }` when the exact amount can't be known |
+
+```ts
+await expect(prompt).toChangeBalance(trader.account.address, token, {
+  min: units('9', 7),
+});
+```
+
+- Fees are excluded. A payer who sends 5 XLM has a change of exactly `-xlm('5')`, whatever the fee.
+- It works the same for classic payments and Soroban token transfers. `'native'` and the XLM contract give the same result.
+- An address the transaction didn't touch has a change of `0n`.
+
+## Check an event
+
+```ts
+await expect(prompt).toEmit({ contract: token, topic: 'transfer' });
+```
+
+`topic` is compared with the event's first topic, such as `'transfer'` or `'mint'`. To check the other topics or the data, read `(await prompt.landed()).events`.
+
+## Amounts
+
+Amounts are `bigint`, written from decimal strings so nothing is rounded:
+
+```ts
+import { units, xlm } from 'stardust-stellar/test';
+
+xlm('10'); // 100_000_000n stroops
+units('9.8', 7); // 98_000_000n, for a token with 7 decimals
+```
+
+- `xlm()` takes up to 7 decimal places, and `units()` up to `decimals`. More throws a `RangeError`.
+- Write a decrease as `-xlm('10')`.
+- Classic assets have 7 decimals. For another token, use what its `decimals` function returns.

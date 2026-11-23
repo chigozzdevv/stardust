@@ -1,0 +1,907 @@
+---
+title: stardust-stellar/test
+description: Every export of stardust-stellar/test, and every type it uses, from users and wallets to prompts and checks.
+---
+
+`stardust-stellar/test` is the entry your test files import. This page lists its exports and every type they use. The guide pages linked from each section explain how to use them.
+
+```ts
+import { expect, test, units, xlm } from 'stardust-stellar/test';
+import type { User, UserOptions } from 'stardust-stellar/test';
+```
+
+| Import from             | Names                                                                                               |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| `stardust-stellar/test` | `test`, `expect`, `xlm`, `units`, and the types `StardustTestOptions`, `UserOptions` and `User`     |
+| `stardust-stellar`      | The other types on this page, such as `Wallet`, `TransactionPrompt` and `Landed`. Use `import type` |
+
+## Test and options
+
+### `test`
+
+```ts
+export const test: StardustTest;
+
+type StardustTest = TestType<
+  PlaywrightTestArgs & PlaywrightTestOptions & Fixtures,
+  PlaywrightWorkerArgs & PlaywrightWorkerOptions
+>;
+
+interface Fixtures {
+  stardust: StardustTestOptions;
+  users: Users;
+}
+
+type Users = Readonly<Record<string, User>>;
+```
+
+The test function, with Stardust's `stardust` option and `users` fixture. Declare the users once per file with `test.use`. Every test gets fresh ones, with new keys, new balances and new tabs.
+
+```ts title="e2e/pay.spec.ts"
+test.use({
+  stardust: {
+    users: {
+      payer: { wallet: 'varial', connected: true },
+      friend: {},
+    },
+  },
+});
+
+test('sends 5 XLM to a friend', async ({ users: { payer, friend } }) => {
+  await payer.page.goto('/');
+  // ...
+});
+```
+
+| Fixture    | Type                                          | Description                                             |
+| ---------- | --------------------------------------------- | ------------------------------------------------------- |
+| `stardust` | [`StardustTestOptions`](#stardusttestoptions) | The option set with `test.use({ stardust: { users } })` |
+| `users`    | `Users`                                       | The test's users, by the names declared in `test.use`   |
+
+- `test.use` goes at the top of a file or inside a `test.describe` block. An inner `test.use` replaces the outer `stardust` object. It doesn't merge with it.
+- Reading a user the file doesn't declare throws `CONFIG_INVALID`.
+
+See [Users and wallet state](/docs/set-up/users).
+
+### `StardustTestOptions`
+
+```ts
+export interface StardustTestOptions {
+  users: Readonly<Record<string, UserOptions>>;
+}
+```
+
+Stardust's option for `test.use`. `users` holds the users each test in the file gets, by name. A file without `test.use` has no users.
+
+### `UserOptions`
+
+```ts
+export interface UserOptions {
+  accounts?: Readonly<Record<string, AccountOptions>>;
+  allowHttp?: boolean;
+  connected?: boolean;
+  policy?: Policy;
+  strict?: boolean;
+  wallet?: 'varial' | 'sep60' | 'none';
+}
+```
+
+One user in `test.use({ stardust: { users } })`. Every setting is optional.
+
+| Setting     | Type                                       | Default                    | Description                                                                                          |
+| ----------- | ------------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `wallet`    | `'varial' \| 'sep60' \| 'none'`            | `'varial'`                 | The wallet in the user's browser. `'none'` means no wallet                                           |
+| `connected` | `boolean`                                  | `false`                    | Start as if the user had already connected the site, for every account                               |
+| `policy`    | [`Policy`](#policy)                        | `'approve'`                | How the wallet answers prompts                                                                       |
+| `accounts`  | `Readonly<Record<string, AccountOptions>>` | `{ main: { fund: true } }` | The wallet's accounts, by name. The first is active. List at least one                               |
+| `allowHttp` | `boolean`                                  | `true`                     | Whether the wallet signs on `http://` pages                                                          |
+| `strict`    | `boolean`                                  | `true`                     | Fail the test at its end when the app broke wallet rules. See [strict mode](/docs/check/strict-mode) |
+
+A wrong setting fails with `CONFIG_INVALID` before the test touches the network.
+
+### `AccountOptions`
+
+```ts
+interface AccountOptions {
+  fund?: boolean | string;
+}
+```
+
+How an account is created.
+
+| Setting | Type                | Default | Description                                                                                                                         |
+| ------- | ------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `fund`  | `boolean \| string` | `true`  | The starting balance: `true` for 100 XLM, an amount in XLM up to `'1000'`, or `false` to leave the account uncreated on the network |
+
+See [Accounts](/docs/set-up/accounts).
+
+## Users
+
+### `User`
+
+```ts
+export interface User {
+  readonly account: Account;
+  readonly accounts: Readonly<Record<string, Account>>;
+  readonly name: string;
+  readonly page: Page;
+  readonly wallet: Wallet;
+}
+```
+
+One person in a test: a browser tab, the wallet in it, and the wallet's accounts.
+
+| Field      | Type                                | Description                                                                       |
+| ---------- | ----------------------------------- | --------------------------------------------------------------------------------- |
+| `name`     | `string`                            | The user's name in `test.use`                                                     |
+| `page`     | `Page`                              | The user's browser tab, a [`Page`](https://playwright.dev/docs/api/class-page)    |
+| `wallet`   | [`Wallet`](#wallet)                 | The emulated wallet in the user's tab                                             |
+| `account`  | [`Account`](#account)               | The account active when the test started. It doesn't change after `switchAccount` |
+| `accounts` | `Readonly<Record<string, Account>>` | Every account in the user's wallet, by name, such as `accounts.main`              |
+
+With `wallet: 'none'`, `user.wallet` exists but isn't in the page, so the app sees no wallet.
+
+Use `User` to type helper functions:
+
+```ts
+async function connect(user: User) {
+  await user.page.getByRole('button', { name: 'Connect wallet' }).click();
+}
+```
+
+### `Account`
+
+```ts
+interface Account {
+  readonly address: string;
+  readonly keypair: Keypair;
+}
+```
+
+A throwaway testnet account Stardust created for one test.
+
+| Field     | Type      | Description                                                                                |
+| --------- | --------- | ------------------------------------------------------------------------------------------ |
+| `address` | `string`  | The account's public address, `G...`                                                       |
+| `keypair` | `Keypair` | The account's key, from `@stellar/stellar-sdk`. It stays in Node and never enters the page |
+
+## Wallet and policies
+
+### `Wallet`
+
+```ts
+interface Wallet {
+  readonly address: string;
+  attach(
+    host: PageHost,
+    options: {
+      wallet: 'varial' | 'sep60';
+    },
+  ): Promise<void>;
+  disconnect(): Promise<void>;
+  lock(): Promise<void>;
+  readonly network: NetworkInfo;
+  nextPrompt<K extends PromptKind = PromptKind>(
+    kind?: K,
+    options?: WaitOptions,
+  ): Promise<PromptOf<K>>;
+  prompts<K extends PromptKind = PromptKind>(kind?: K): readonly PromptOf<K>[];
+  setPolicy(policy: Policy): void;
+  subscribe(listener: (prompt: Prompt) => void): () => void;
+  switchAccount(account: Account): Promise<void>;
+  switchNetwork(network: 'testnet' | 'futurenet' | 'mainnet'): Promise<void>;
+  unlock(): Promise<void>;
+  violations(): readonly Violation[];
+}
+```
+
+The emulated wallet in a user's page. It answers the app as the real wallet does, and records every prompt.
+
+| Member                        | Description                                                                                                                                                      |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `address`                     | The active account's address, as the wallet reports it to the app                                                                                                |
+| `network`                     | The network the wallet reports to the app, a [`NetworkInfo`](#networkinfo)                                                                                       |
+| `nextPrompt(kind?, options?)` | Returns the oldest prompt of `kind`, or of any kind, that it hasn't returned yet, waiting for one if needed. Throws `NO_PROMPT` when none arrives in time (10 s) |
+| `prompts(kind?)`              | Every prompt so far in this test, or only those of `kind`, in arrival order                                                                                      |
+| `setPolicy(policy)`           | Changes how the wallet answers prompts from now on                                                                                                               |
+| `violations()`                | The wallet rules the app has broken so far                                                                                                                       |
+| `subscribe(listener)`         | Calls `listener` when a prompt arrives and again when it's answered. Returns a function that stops the calls                                                     |
+| `switchAccount(account)`      | Makes another of the wallet's accounts active. Throws `UNKNOWN_ACCOUNT` for an account that isn't in this wallet                                                 |
+| `switchNetwork(network)`      | Makes the wallet report another network. On `'mainnet'`, nothing is signed                                                                                       |
+| `lock()`                      | Locks the wallet. Prompts wait until `unlock()`                                                                                                                  |
+| `unlock()`                    | Unlocks the wallet. Waiting prompts go ahead under the policy                                                                                                    |
+| `disconnect()`                | Removes the site from the wallet's connected sites                                                                                                               |
+| `attach(host, options)`       | Puts the wallet in a page. The fixtures do this for every user. Call it only in a [custom setup](/docs/reference/stardust-stellar#core-api)                      |
+
+`nextPrompt` and `prompts` return a prompt once it's decoded. Under `'manual'` the test answers it. Under the other policies it's already answered, and the test inspects it.
+
+See [Prompts](/docs/drive/prompts) and [Wallet actions](/docs/drive/wallet-actions).
+
+### `NetworkInfo`
+
+```ts
+interface NetworkInfo {
+  readonly friendbotUrl: string | null;
+  readonly name: 'testnet' | 'futurenet' | 'mainnet' | 'custom';
+  readonly networkPassphrase: string;
+  readonly protocolVersion: number;
+  readonly rpcUrl: string;
+}
+```
+
+A network, as Stardust read it from its RPC.
+
+| Field               | Type                                                | Description                                                                                                             |
+| ------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `name`              | `'testnet' \| 'futurenet' \| 'mainnet' \| 'custom'` | The network's name, from its passphrase. `'mainnet'` appears only on `wallet.network`, after `switchNetwork('mainnet')` |
+| `rpcUrl`            | `string`                                            | The RPC URL                                                                                                             |
+| `networkPassphrase` | `string`                                            | The network passphrase                                                                                                  |
+| `friendbotUrl`      | `string \| null`                                    | The network's Friendbot, or `null` when it has none                                                                     |
+| `protocolVersion`   | `number`                                            | The protocol version the RPC reports                                                                                    |
+
+### `WaitOptions`
+
+```ts
+interface WaitOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+```
+
+How long to wait, for `nextPrompt`, `landed()` and the checks that wait.
+
+| Field       | Type          | Default                                       | Description                       |
+| ----------- | ------------- | --------------------------------------------- | --------------------------------- |
+| `timeoutMs` | `number`      | 10 s for `nextPrompt`, 30 s for a transaction | How long to wait, in milliseconds |
+| `signal`    | `AbortSignal` | none                                          | Stops the wait early              |
+
+### `Policy`
+
+```ts
+type Policy =
+  | PolicyMode
+  | Partial<Record<PromptKind, PolicyMode>>
+  | ((prompt: Prompt) => Decision | Promise<Decision>);
+
+type PolicyMode = 'approve' | 'reject' | 'manual';
+```
+
+How the wallet answers prompts.
+
+| Policy                          | Behaviour                                                                              |
+| ------------------------------- | -------------------------------------------------------------------------------------- |
+| `'approve'`                     | Every prompt is approved as it arrives. The default                                    |
+| `'reject'`                      | Every prompt is rejected as it arrives, including `connect`                            |
+| `'manual'`                      | Prompts wait until the test answers them                                               |
+| `{ signTransaction: 'manual' }` | One `PolicyMode` per [prompt kind](#promptkind). Kinds left out are approved           |
+| `(prompt) => Decision`          | A function that returns a [`Decision`](#decision) for each prompt, or a promise of one |
+
+```ts
+trader.wallet.setPolicy({ signTransaction: 'manual' });
+trader.wallet.setPolicy((prompt) =>
+  prompt.kind === 'signMessage' ? { action: 'reject' } : { action: 'approve' },
+);
+```
+
+When a policy approves a [blocked](#blockedreason) prompt, the wallet rejects it instead, as a real user could only reject it. After `switchNetwork('mainnet')`, it does the same for every prompt except `connect`. A locked wallet's prompts wait under every policy. See [Policies](/docs/drive/policies).
+
+### `Decision`
+
+```ts
+type Decision =
+  | {
+      action: 'approve';
+    }
+  | {
+      action: 'reject';
+    }
+  | {
+      action: 'fail';
+      code: -1 | -2 | -3;
+      message?: string;
+    }
+  | {
+      action: 'hang';
+    };
+```
+
+How a policy function answers a prompt.
+
+| Decision                             | What the app receives                                     |
+| ------------------------------------ | --------------------------------------------------------- |
+| `{ action: 'approve' }`              | The real result: signed transaction, signature or address |
+| `{ action: 'reject' }`               | Error -4, `The user rejected this request.`               |
+| `{ action: 'fail', code, message? }` | A wallet error, as with [`fail()`](#baseprompt)           |
+| `{ action: 'hang' }`                 | Nothing, ever                                             |
+
+A function that returns anything else fails the test with `CONFIG_INVALID`.
+
+### `Violation`
+
+```ts
+interface Violation {
+  readonly detail: string;
+  readonly kind: ViolationKind;
+  readonly promptId: string | null;
+}
+
+type ViolationKind =
+  | 'missingNetworkPassphrase'
+  | 'networkMismatch'
+  | 'invalidXdr'
+  | 'signerMismatch'
+  | 'unknownMessage';
+```
+
+A wallet rule the app broke. With `strict: true`, each one fails the test at its end.
+
+| Field      | Description                                                                     |
+| ---------- | ------------------------------------------------------------------------------- |
+| `promptId` | The prompt it happened on, such as `'p2'`, or `null` when it wasn't on a prompt |
+| `kind`     | Which rule the app broke                                                        |
+| `detail`   | What the app did, in a sentence                                                 |
+
+| Kind                       | When                                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `missingNetworkPassphrase` | `signTransaction` or `addToken` without a network passphrase. Real Varial (formerly Freighter) then assumes mainnet. Varial only |
+| `networkMismatch`          | The app asked to sign for a different network than the wallet's                                                                  |
+| `invalidXdr`               | The app sent something that isn't valid XDR                                                                                      |
+| `signerMismatch`           | The app named a signer that isn't the wallet's account                                                                           |
+| `unknownMessage`           | The app sent a message type Varial doesn't recognize. Varial only                                                                |
+
+See [Strict mode](/docs/check/strict-mode).
+
+## Prompts
+
+### `Prompt`
+
+```ts
+type Prompt =
+  | ConnectPrompt
+  | TransactionPrompt
+  | AuthEntryPrompt
+  | MessagePrompt
+  | AddTokenPrompt;
+
+type PromptOf<K extends PromptKind> = Extract<
+  Prompt,
+  {
+    kind: K;
+  }
+>;
+```
+
+Anything a real wallet shows the user as a popup. Narrow it by `kind`. `PromptOf<'signTransaction'>` is `TransactionPrompt`, which is what `nextPrompt('signTransaction')` returns.
+
+### `PromptKind`
+
+```ts
+type PromptKind =
+  'connect' | 'signTransaction' | 'signAuthEntry' | 'signMessage' | 'addToken';
+```
+
+| Kind              | The app asks for                                                             | Prompt type                               |
+| ----------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
+| `connect`         | The address, on a site that isn't connected                                  | [`ConnectPrompt`](#connectprompt)         |
+| `signTransaction` | A whole transaction to be signed                                             | [`TransactionPrompt`](#transactionprompt) |
+| `signAuthEntry`   | One contract call to be authorized, while someone else sends the transaction | [`AuthEntryPrompt`](#authentryprompt)     |
+| `signMessage`     | A message to be signed, as proof of owning the address                       | [`MessagePrompt`](#messageprompt)         |
+| `addToken`        | A token to be added. `'varial'` only                                         | [`AddTokenPrompt`](#addtokenprompt)       |
+
+### `PromptStatus`
+
+```ts
+type PromptStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'hung';
+```
+
+Where a prompt is in its life: `'pending'` until it's answered, then the answer. `approve()` gives `'approved'`, `reject()` gives `'rejected'`, `fail()` gives `'failed'` and `hang()` gives `'hung'`.
+
+### `BlockedReason`
+
+```ts
+type BlockedReason =
+  | 'notConnected'
+  | 'networkMismatch'
+  | 'insecureOrigin'
+  | 'alreadyAdded'
+  | 'locked';
+```
+
+Why the real wallet would refuse a prompt.
+
+| Reason            | Meaning                                             |
+| ----------------- | --------------------------------------------------- |
+| `notConnected`    | The site isn't connected                            |
+| `networkMismatch` | The app asked for another network than the wallet's |
+| `insecureOrigin`  | The page isn't `https` and `allowHttp` is `false`   |
+| `alreadyAdded`    | The token is already added                          |
+| `locked`          | The wallet is locked                                |
+
+`approve()` on a blocked prompt throws `PROMPT_BLOCKED`, or `WALLET_LOCKED` for `'locked'`. `reject()` always works.
+
+### `BasePrompt`
+
+```ts
+interface BasePrompt<K extends PromptKind> {
+  approve(): Promise<void>;
+  readonly blocked: BlockedReason | null;
+  fail(error: Failure): Promise<void>;
+  hang(): void;
+  readonly id: string;
+  readonly kind: K;
+  readonly networkPassphrase: string | null;
+  readonly origin: string;
+  reject(): Promise<void>;
+  readonly status: PromptStatus;
+}
+
+interface Failure {
+  code: -1 | -2 | -3;
+  message?: string;
+}
+```
+
+What every prompt has. Each prompt is answered exactly once. A second answer throws `ALREADY_ANSWERED`.
+
+| Member              | Description                                                                                                                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                | `'p1'`, `'p2'`, … in arrival order within a test                                                                                                                                                                                                          |
+| `kind`              | The [prompt kind](#promptkind)                                                                                                                                                                                                                            |
+| `origin`            | The site that sent it, taken from the browser, never from the page's message                                                                                                                                                                              |
+| `networkPassphrase` | The network passphrase the app asked for, or `null` when it sent none                                                                                                                                                                                     |
+| `status`            | A [`PromptStatus`](#promptstatus), `'pending'` until the prompt is answered                                                                                                                                                                               |
+| `blocked`           | A [`BlockedReason`](#blockedreason), or `null` when the real wallet wouldn't refuse it                                                                                                                                                                    |
+| `approve()`         | Approves the prompt. The app receives the real result. Resolves once the reply has reached the page. Throws `PROMPT_BLOCKED` when blocked, `WALLET_LOCKED` while locked, and `MAINNET_REFUSED` on every kind but `connect` while the wallet is on mainnet |
+| `reject()`          | Rejects the prompt. The app receives error -4, `The user rejected this request.`                                                                                                                                                                          |
+| `fail(error)`       | Answers with a wallet error                                                                                                                                                                                                                               |
+| `hang()`            | Never answers. The app's call waits forever, as when a user ignores the popup                                                                                                                                                                             |
+
+| `Failure` field | Description                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `code`          | `-1` for an internal error, `-2` for an external service, `-3` for an invalid request                                    |
+| `message`       | The error message. Default: Varial's internal-error text for `-1`, `Stardust: simulated wallet error (code N)` otherwise |
+
+### `ConnectPrompt`
+
+```ts
+type ConnectPrompt = BasePrompt<'connect'>;
+```
+
+The app asks for the user's address, on a site that isn't connected. It has no fields beyond [`BasePrompt`](#baseprompt).
+
+### `TransactionPrompt`
+
+```ts
+interface TransactionPrompt extends BasePrompt<'signTransaction'> {
+  landed(options?: WaitOptions): Promise<Landed>;
+  readonly transaction: DecodedTransaction;
+}
+```
+
+The app asks for a whole transaction to be signed.
+
+| Member             | Description                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transaction`      | The transaction, decoded, a [`DecodedTransaction`](#decodedtransaction)                                                                     |
+| `landed(options?)` | Waits for the signed transaction to land and returns its [outcome](#landed). Throws `OUTCOME_UNKNOWN` when it doesn't appear in time (30 s) |
+
+On a pending prompt, `landed()` first waits for the answer, within the same timeout. On a rejected, failed or hung prompt, it throws `UNSUPPORTED`, because nothing was signed.
+
+### `AuthEntryPrompt`
+
+```ts
+interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
+  landed(options?: WaitOptions): Promise<Landed>;
+  readonly preimage: DecodedAuthPreimage;
+}
+```
+
+The app asks for one contract call to be authorized, while someone else sends the transaction.
+
+| Member             | Description                                                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preimage`         | The authorization entry preimage, decoded, a [`DecodedAuthPreimage`](#decodedauthpreimage)                                                                  |
+| `landed(options?)` | Waits for a transaction that uses this authorization to land, and returns its [outcome](#landed). Throws `OUTCOME_UNKNOWN` when none appears in time (30 s) |
+
+`landed()` handles pending, rejected, failed and hung prompts as on [`TransactionPrompt`](#transactionprompt).
+
+### `MessagePrompt`
+
+```ts
+interface MessagePrompt extends BasePrompt<'signMessage'> {
+  readonly message: string;
+}
+```
+
+The app asks for a message to be signed, as proof of owning the address. Nothing moves on chain. `message` is the message as the app sent it.
+
+### `AddTokenPrompt`
+
+```ts
+interface AddTokenPrompt extends BasePrompt<'addToken'> {
+  readonly contractId: string;
+}
+```
+
+The app asks the wallet to add a token, `'varial'` only. `contractId` is the token contract, `C...`. See [Varial](/docs/wallets/varial).
+
+## Decoded data
+
+### `DecodedTransaction`
+
+```ts
+interface DecodedTransaction {
+  readonly authEntries: readonly DecodedAuthEntry[];
+  readonly fee: bigint;
+  readonly hash: string;
+  readonly invocations: readonly Invocation[];
+  readonly memo: {
+    type: 'none' | 'text' | 'id' | 'hash' | 'return';
+    value: string | null;
+  };
+  readonly operations: readonly DecodedOperation[];
+  readonly sequence: bigint;
+  readonly source: string;
+  readonly xdr: string;
+}
+```
+
+A transaction the app asked the wallet to sign, decoded.
+
+| Field         | Type                                               | Description                                                                                             |
+| ------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `xdr`         | `string`                                           | The transaction envelope as the app sent it, base64 XDR                                                 |
+| `hash`        | `string`                                           | The transaction hash, hex. For a fee bump, the fee bump's hash                                          |
+| `source`      | `string`                                           | The source account. For a fee bump, the account paying the fee                                          |
+| `fee`         | `bigint`                                           | The declared maximum fee, in stroops                                                                    |
+| `sequence`    | `bigint`                                           | The sequence number                                                                                     |
+| `memo`        | `{ type, value }`                                  | The memo. `value` is `null` for `'none'`, and hex for `'hash'` and `'return'`                           |
+| `operations`  | [`readonly DecodedOperation[]`](#decodedoperation) | The operations, in order                                                                                |
+| `invocations` | [`readonly Invocation[]`](#invocation)             | The contract call and every sub-call it authorizes, flattened in order. Empty for a classic transaction |
+| `authEntries` | [`readonly DecodedAuthEntry[]`](#decodedauthentry) | The authorization entries attached to the contract call                                                 |
+
+### `DecodedOperation`
+
+```ts
+interface DecodedOperation {
+  readonly body: Readonly<Record<string, unknown>>;
+  readonly source: string | null;
+  readonly type: string;
+}
+```
+
+One operation of a transaction.
+
+| Field    | Type                                | Description                                                                                                                 |
+| -------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `type`   | `string`                            | The operation type, as the Stellar SDK names it, such as `'payment'` or `'invokeHostFunction'`                              |
+| `source` | `string \| null`                    | The operation's own source account, or `null` when it uses the transaction's                                                |
+| `body`   | `Readonly<Record<string, unknown>>` | The operation's fields, named as in the Stellar SDK. Assets are `'native'` or `'CODE:ISSUER'`, amounts are `bigint` stroops |
+
+### `Invocation`
+
+```ts
+interface Invocation {
+  readonly args: readonly unknown[];
+  readonly contract: string;
+  readonly depth: number;
+  readonly fn: string;
+  readonly namedArgs: Readonly<Record<string, unknown>> | null;
+}
+```
+
+A contract call.
+
+| Field       | Type                                        | Description                                                                              |
+| ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `contract`  | `string`                                    | The contract called, `C...`                                                              |
+| `fn`        | `string`                                    | The function name                                                                        |
+| `args`      | `readonly unknown[]`                        | The arguments in order, converted from XDR. Integers are `bigint`, addresses are strings |
+| `namedArgs` | `Readonly<Record<string, unknown>> \| null` | The arguments by name, from the contract's spec, or `null` when the spec can't be read   |
+| `depth`     | `number`                                    | How deep the call is: `0` for the top-level call                                         |
+
+### `DecodedAuthEntry`
+
+```ts
+interface DecodedAuthEntry {
+  readonly address: string;
+  readonly expirationLedger: number;
+  readonly invocations: readonly Invocation[];
+  readonly xdr: string;
+}
+```
+
+An authorization entry attached to a transaction, decoded.
+
+| Field              | Type                                   | Description                                         |
+| ------------------ | -------------------------------------- | --------------------------------------------------- |
+| `xdr`              | `string`                               | The entry, base64 XDR                               |
+| `address`          | `string`                               | Who must authorize it                               |
+| `expirationLedger` | `number`                               | The last ledger in which the authorization is valid |
+| `invocations`      | [`readonly Invocation[]`](#invocation) | The calls it authorizes, flattened in order         |
+
+### `DecodedAuthPreimage`
+
+```ts
+interface DecodedAuthPreimage {
+  readonly expirationLedger: number;
+  readonly invocations: readonly Invocation[];
+  readonly networkPassphrase: string | null;
+  readonly nonce: bigint;
+  readonly xdr: string;
+}
+```
+
+An authorization entry preimage the app asked the wallet to sign, decoded.
+
+| Field               | Type                                   | Description                                                                                           |
+| ------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `xdr`               | `string`                               | The preimage as the app sent it, base64 XDR                                                           |
+| `networkPassphrase` | `string \| null`                       | The network the preimage is for, matched from its network ID, or `null` when it's not a known network |
+| `nonce`             | `bigint`                               | The authorization's nonce                                                                             |
+| `expirationLedger`  | `number`                               | The last ledger in which the authorization is valid                                                   |
+| `invocations`       | [`readonly Invocation[]`](#invocation) | The calls it authorizes, flattened in order                                                           |
+
+## Outcome
+
+### `Landed`
+
+```ts
+type Landed =
+  | {
+      readonly status: 'success';
+      readonly hash: string;
+      readonly ledger: number;
+      readonly feeCharged: bigint;
+      readonly feeBump: boolean;
+      readonly returnValue: unknown;
+      readonly events: readonly ContractEvent[];
+      readonly balanceChanges: readonly BalanceChange[];
+    }
+  | {
+      readonly status: 'failed';
+      readonly hash: string;
+      readonly ledger: number;
+      readonly resultCode: string;
+      readonly contractError: ContractError | null;
+    };
+```
+
+A transaction's outcome once it's in a ledger, from `prompt.landed()`. Check `status` before reading the other fields. A transaction that doesn't appear in time throws `OUTCOME_UNKNOWN` instead.
+
+| Field            | Status    | Description                                                                                         |
+| ---------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| `status`         | both      | `'success'` or `'failed'`                                                                           |
+| `hash`           | both      | The transaction hash, hex                                                                           |
+| `ledger`         | both      | The ledger the transaction is in                                                                    |
+| `feeCharged`     | `success` | The fee charged, in stroops                                                                         |
+| `feeBump`        | `success` | Whether the transaction landed inside a fee bump                                                    |
+| `returnValue`    | `success` | A contract call's return value, converted from XDR, or `undefined`                                  |
+| `events`         | `success` | The [contract events](#contractevent) the transaction emitted                                       |
+| `balanceChanges` | `success` | Every [balance](#balancechange) the transaction changed, read from its events. Fees aren't included |
+| `resultCode`     | `failed`  | The transaction's result code, such as `'txFAILED'`                                                 |
+| `contractError`  | `failed`  | The [contract error](#contracterror) that made it fail, or `null`                                   |
+
+### `BalanceChange`
+
+```ts
+interface BalanceChange {
+  readonly address: string;
+  readonly asset: Asset;
+  readonly change: bigint;
+}
+```
+
+How much one address's balance of one asset changed.
+
+| Field     | Type              | Description                                                                                            |
+| --------- | ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `address` | `string`          | The account or contract whose balance changed                                                          |
+| `asset`   | [`Asset`](#asset) | The asset. In `Landed.balanceChanges`, it's the token contract, `C...`, for XLM and classic assets too |
+| `change`  | `bigint`          | The change in the asset's smallest units: stroops for XLM. Negative when the balance went down         |
+
+### `Asset`
+
+```ts
+type Asset = 'native' | `${string}:${string}` | `C${string}`;
+```
+
+An asset: `'native'` for XLM, `'CODE:ISSUER'` for a classic asset, or a token contract's address, `C...`.
+
+### `ContractEvent`
+
+```ts
+interface ContractEvent {
+  readonly contract: string;
+  readonly data: unknown;
+  readonly topics: readonly unknown[];
+}
+```
+
+An event a contract emitted.
+
+| Field      | Type                 | Description                                                                                 |
+| ---------- | -------------------- | ------------------------------------------------------------------------------------------- |
+| `contract` | `string`             | The contract that emitted the event, `C...`                                                 |
+| `topics`   | `readonly unknown[]` | The event's topics, converted from XDR. The first is usually its name, such as `'transfer'` |
+| `data`     | `unknown`            | The event's data, converted from XDR                                                        |
+
+### `ContractError`
+
+```ts
+interface ContractError {
+  readonly code: number;
+  readonly contract: string;
+  readonly name: string | null;
+}
+```
+
+An error a contract returned.
+
+| Field      | Type             | Description                                                                      |
+| ---------- | ---------------- | -------------------------------------------------------------------------------- |
+| `contract` | `string`         | The contract that returned the error, `C...`                                     |
+| `code`     | `number`         | The error number                                                                 |
+| `name`     | `string \| null` | The error's name from the contract's spec, or `null` when the spec can't be read |
+
+## Checks
+
+### `expect`
+
+```ts
+export const expect: Expect<StardustMatchers>;
+```
+
+`expect`, with Stardust's checks on prompts added. Checks on the page, such as `toBeVisible()`, work as usual.
+
+| Check                                               | Prompt kinds                       | Waits | Passes when                                                                       |
+| --------------------------------------------------- | ---------------------------------- | ----- | --------------------------------------------------------------------------------- |
+| `toInvoke(expected)`                                | `signTransaction`, `signAuthEntry` | No    | The contract call, or a sub-call it authorizes, matches                           |
+| `toHaveOperation(expected)`                         | `signTransaction`                  | No    | The transaction contains this classic operation                                   |
+| `toLand(options?)`                                  | `signTransaction`, `signAuthEntry` | Yes   | The transaction lands with status `SUCCESS`                                       |
+| `toFail(expected?, options?)`                       | `signTransaction`, `signAuthEntry` | Yes   | The transaction lands with status `FAILED`, with this error if one is given       |
+| `toChangeBalance(address, asset, change, options?)` | `signTransaction`, `signAuthEntry` | Yes   | The transaction changed `address`'s balance of `asset` by `change`, fees excluded |
+| `toEmit(expected, options?)`                        | `signTransaction`, `signAuthEntry` | Yes   | The contract emitted an event with this first topic                               |
+
+- Checks that wait take [`WaitOptions`](#waitoptions) last, 30 s by default. To pass only options to `toFail`, give `{}` first.
+- On a rejected, failed or hung prompt, a check that waits fails at once and names the status. On a pending prompt, it waits for the answer within the same timeout.
+- `.not` works only on checks that don't wait. On the others it throws `UNSUPPORTED`. Use `toFail` instead of `.not.toLand()`.
+- `toInvoke` with `args` throws `UNSUPPORTED` when the contract's spec can't be read.
+- `asset` in `toChangeBalance` is `'native'`, `'CODE:ISSUER'` or a token contract, `C...`.
+
+```ts
+await expect(prompt).toLand({ timeoutMs: 60_000 });
+await expect(prompt).toFail({}, { timeoutMs: 60_000 });
+```
+
+See [Transactions](/docs/check/transactions) and [Balances and events](/docs/check/balances-events).
+
+### `StardustMatchers`
+
+```ts
+type StardustMatchers = {
+  toInvoke(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected: InvokeExpectation,
+  ): MatcherResult;
+  toHaveOperation(
+    this: MatcherState,
+    prompt: TransactionPrompt,
+    expected: OperationExpectation,
+  ): MatcherResult;
+  toLand(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  toFail(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected?: FailExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  toChangeBalance(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    address: string,
+    asset: string,
+    change: BalanceExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+  toEmit(
+    this: MatcherState,
+    prompt: TransactionPrompt | AuthEntryPrompt,
+    expected: EmitExpectation,
+    options?: WaitOptions,
+  ): Promise<MatcherResult>;
+};
+```
+
+Stardust's checks, as `expect` receives them. In a test, `prompt` is the value you pass to `expect`, and the other parameters are the check's arguments.
+
+### Expectations
+
+```ts
+interface InvokeExpectation {
+  readonly args?: Readonly<Record<string, unknown>>;
+  readonly contract: string;
+  readonly fn: string;
+}
+
+interface OperationExpectation {
+  readonly [field: string]: unknown;
+  readonly type: string;
+}
+
+interface FailExpectation {
+  readonly contractError?: string | number;
+  readonly resultCode?: string;
+}
+
+type BalanceExpectation =
+  | bigint
+  | {
+      readonly min?: bigint;
+      readonly max?: bigint;
+    };
+
+interface EmitExpectation {
+  readonly contract: string;
+  readonly topic: string;
+}
+```
+
+What each check compares.
+
+| Type                   | Field           | Description                                                                                                                                              |
+| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `InvokeExpectation`    | `contract`      | The contract, `C...`                                                                                                                                     |
+|                        | `fn`            | The function name                                                                                                                                        |
+|                        | `args`          | Arguments by name, from the contract's spec. Only listed arguments are compared                                                                          |
+| `OperationExpectation` | `type`          | The operation type, such as `'payment'` or `'changeTrust'`                                                                                               |
+|                        | any other       | A field to compare, named as in the Stellar SDK. Assets are `'native'` or `'CODE:ISSUER'`, amounts are `bigint` stroops. Only listed fields are compared |
+| `FailExpectation`      | `resultCode`    | The result code, such as `'txFAILED'`                                                                                                                    |
+|                        | `contractError` | The contract error, by name from the contract's spec or by number. Leave both fields out to accept any failure                                           |
+| `BalanceExpectation`   |                 | An exact change in the asset's smallest units, or `{ min?, max? }` when the exact amount can't be known                                                  |
+| `EmitExpectation`      | `contract`      | The contract that emits the event, `C...`                                                                                                                |
+|                        | `topic`         | The event's name, compared with its first topic, such as `'transfer'`                                                                                    |
+
+### `MatcherState` and `MatcherResult`
+
+```ts
+interface MatcherState {
+  readonly isNot: boolean;
+}
+
+interface MatcherResult {
+  readonly message: () => string;
+  readonly pass: boolean;
+}
+```
+
+What `expect` passes to a check and reads back. `isNot` is `true` when the check was called through `.not`. Tests don't use these types.
+
+## Helpers
+
+### `xlm`
+
+```ts
+export function xlm(amount: string): bigint;
+```
+
+Converts an XLM amount, written as a decimal string, to stroops. `xlm('10')` is `100_000_000n`. Throws a `RangeError` when `amount` isn't a decimal amount or has more than 7 decimal places.
+
+### `units`
+
+```ts
+export function units(amount: string, decimals: number): bigint;
+```
+
+Converts a token amount, written as a decimal string, to the token's smallest units. `units('9.8', 7)` is `98_000_000n`. Throws a `RangeError` when `amount` isn't a decimal amount or has more decimal places than `decimals`, and when `decimals` isn't a whole number of 0 or more.
+
+Both helpers take amounts of 0 or more. For a decrease, negate the result:
+
+```ts
+await expect(prompt).toChangeBalance(address, 'native', -xlm('10'));
+```

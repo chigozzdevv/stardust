@@ -1,0 +1,4 @@
+{
+  "title": "Check",
+  "pages": ["transactions", "balances-events", "strict-mode"]
+}

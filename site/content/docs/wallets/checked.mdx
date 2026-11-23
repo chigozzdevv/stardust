@@ -1,0 +1,30 @@
+---
+title: How they're checked
+description: How Stardust's wallets are kept true to the real ones.
+---
+
+Stardust's wallets copy real behaviour, so a test that passes with Stardust should pass for your users too. These checks keep it that way.
+
+| Check                                                  | When         |
+| ------------------------------------------------------ | ------------ |
+| Against the real Varial (formerly Freighter) extension | Nightly      |
+| Against the SEP-60 and SEP-43 texts                    | Every change |
+| On Blend and Stellar Lab                               | Nightly      |
+
+"Every change" means every pull request and every push to `main`.
+
+## Against the real Varial
+
+Every night, the same scenarios run against the latest Varial release and against Stardust, with the same test keys. The results are compared: every return value, every message and reply, and which prompts appeared. Signatures are deterministic, so they must match byte for byte.
+
+The scenarios cover each Varial message in every state that matters: connected or not, locked or not, the right or wrong network, signing for another account, and adding each kind of token.
+
+Varial's recorded replies are then replayed in the unit tests on every change. Those tests also fail if the Varial version Stardust says it matches falls behind.
+
+## Against the SEP texts
+
+No real SEP-60 wallet exists to compare with, so tests check each requirement of SEP-60, and each SEP-43 method's options, replies and errors.
+
+## On real apps
+
+Every night, Blend and Stellar Lab, each pinned to a commit, install Stardust as your project would and run their tests. See the [Blend](/docs/examples/blend) and [Stellar Lab](/docs/examples/stellar-lab) examples.

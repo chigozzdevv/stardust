@@ -1,0 +1,71 @@
+---
+title: CI
+description: Run Stardust tests on GitHub Actions and keep the screenshots, traces and timelines of failed tests.
+---
+
+Stardust runs on CI the same way it runs on your machine. This GitHub Actions workflow runs the tests on every pull request, and uploads the results when a test fails.
+
+```yaml title=".github/workflows/e2e.yml"
+name: e2e
+on: [pull_request]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: stardust-results
+          path: stardust-results/
+```
+
+It runs the `test:e2e` script from your package.json:
+
+```json title="package.json"
+{
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "dev": "next dev",
+    "test:e2e": "stardust test"
+  }
+}
+```
+
+## The pnpm version
+
+`pnpm/action-setup` reads the pnpm version from `packageManager` in package.json. Without that field, set `version` on the step.
+
+With npm, drop the `pnpm/action-setup` step, set `cache: npm`, and run `npm ci` and `npm run test:e2e`.
+
+## Monorepo
+
+Run the app package's script, and upload that package's results folder:
+
+```yaml
+- run: pnpm --filter web test:e2e
+- uses: actions/upload-artifact@v7
+  if: failure()
+  with:
+    name: stardust-results
+    path: apps/web/stardust-results/
+```
+
+See [where the config lives](/docs/set-up/config#where-the-config-lives).
+
+## What changes on CI
+
+- **No browser setup step.** GitHub Actions sets `CI=true`, and with it Stardust installs Chromium with the system libraries it needs. On other CI services, set `CI=true` yourself.
+- **One Friendbot call per run.** A CI machine starts without a funder, so each run creates one with a single Friendbot call. If Friendbot is busy, the run fails with `FUNDING_FAILED`; run the job again a few minutes later.
+
+## Results of failed tests
+
+The last step uploads `stardust-results/` when the job fails. Download the `stardust-results` artifact from the run's summary page. See [When a test fails](/docs/run/failed-tests).

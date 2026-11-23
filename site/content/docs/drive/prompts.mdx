@@ -1,0 +1,122 @@
+---
+title: Prompts
+description: Wait for the wallet's prompts, check what the app asked for, and answer them from the test.
+---
+
+A prompt is anything a real wallet shows the user as a popup. Stardust records every prompt, so the test can check what the app asked for, or answer it.
+
+```ts title="e2e/pay.spec.ts"
+await payer.page.getByRole('button', { name: 'Send payment' }).click();
+
+const prompt = await payer.wallet.nextPrompt('signTransaction');
+await expect(prompt).toLand();
+```
+
+| Prompt            | The app wants to                                              |
+| ----------------- | ------------------------------------------------------------- |
+| `connect`         | Read the user's address on a site that isn't connected yet    |
+| `signTransaction` | Get a whole transaction signed                                |
+| `signAuthEntry`   | Get one contract call authorized, while someone else sends it |
+| `signMessage`     | Prove the user owns the address. Nothing moves on chain       |
+| `addToken`        | Add a token to the wallet. Varial (formerly Freighter) only   |
+
+Reading the address, network or connection status needs no popup, so it isn't a prompt.
+
+## Wait for a prompt
+
+`wallet.nextPrompt(kind)` waits for the next prompt of that kind and returns it, typed for that kind. It also returns prompts that arrived before the call.
+
+```ts
+const prompt = await trader.wallet.nextPrompt('signTransaction');
+
+// any kind, or a longer wait than the default 10 seconds
+const next = await trader.wallet.nextPrompt();
+const slow = await trader.wallet.nextPrompt('signMessage', {
+  timeoutMs: 20_000,
+});
+```
+
+If no prompt arrives in time, it throws `NO_PROMPT` and lists the prompts that did arrive.
+
+`wallet.prompts()` returns every prompt so far without waiting, optionally of one kind.
+
+## Check what the app asked for
+
+Most tests use [checks](/docs/check/transactions) such as `toInvoke` and `toLand`. To look at a prompt directly, read its fields:
+
+```ts
+expect(prompt.status).toBe('approved');
+expect(prompt.origin).toBe('http://localhost:3000');
+expect(prompt.transaction.memo).toEqual({ type: 'text', value: 'rent' });
+```
+
+- Every prompt has `kind`, `origin`, `networkPassphrase`, `status` and `blocked`.
+- `signTransaction` prompts have the decoded `transaction`, `signAuthEntry` prompts the decoded `preimage`, `signMessage` prompts the `message`, and `addToken` prompts the `contractId`.
+- Amounts are `bigint`, and contract arguments are named from the contract's spec.
+
+The [reference](/docs/reference/test#prompts) lists every field.
+
+## Answer a prompt yourself
+
+By default the wallet approves every prompt. To answer from the test, set the user's [policy](/docs/drive/policies) to `'manual'`, for every prompt or for one kind:
+
+```ts title="e2e/freighter.spec.ts"
+test.use({
+  stardust: {
+    users: {
+      trader: { wallet: 'varial', policy: { signTransaction: 'manual' } },
+    },
+  },
+});
+
+test('handles the user rejecting', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+  await trader.page.getByLabel('Recipient').fill(trader.account.address);
+  await trader.page.getByLabel('Amount (XLM)').fill('1');
+  await trader.page.getByRole('button', { name: 'Send payment' }).click();
+
+  const prompt = await trader.wallet.nextPrompt('signTransaction');
+  await prompt.reject();
+
+  await expect(trader.page.getByRole('status')).toHaveText(
+    'Transaction cancelled',
+  );
+});
+```
+
+| Answer                    | What the app receives                                         |
+| ------------------------- | ------------------------------------------------------------- |
+| `approve()`               | The real result: the signed transaction, signature or address |
+| `reject()`                | The user rejected the request (error -4)                      |
+| `fail({ code, message })` | A wallet error: -1 internal, -2 external service, -3 invalid  |
+| `hang()`                  | Nothing, ever. Use it to test the app's timeout               |
+
+- Answer each prompt once. A second answer throws `ALREADY_ANSWERED`.
+- A prompt still pending when the test ends fails it with `PROMPTS_PENDING`.
+
+## Blocked prompts
+
+A blocked prompt is one the real wallet would refuse to sign. `prompt.blocked` says why:
+
+| `blocked`           | When                                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `'notConnected'`    | The site isn't connected. With Varial, `signTransaction` arrives this way; other requests show a `connect` prompt first |
+| `'networkMismatch'` | The app asked to sign for a different network than the wallet's                                                         |
+| `'insecureOrigin'`  | The page isn't `https` and the user has `allowHttp: false`                                                              |
+| `'alreadyAdded'`    | `addToken` for a token the wallet already has                                                                           |
+| `'locked'`          | The wallet is [locked](/docs/drive/wallet-actions#lock-and-unlock)                                                      |
+
+A blocked prompt can only be rejected, as a real user can only close the popup. `approve()` throws `PROMPT_BLOCKED`, and policies reject it. A `'locked'` prompt waits until `wallet.unlock()` instead.
+
+```ts title="e2e/freighter.spec.ts"
+test('refuses to add XLM twice', async ({ users: { trader } }) => {
+  await trader.page.goto('/');
+  await trader.page.getByRole('button', { name: 'Connect wallet' }).click();
+  await trader.page.getByRole('button', { name: 'Add XLM token' }).click();
+
+  const prompt = await trader.wallet.nextPrompt('addToken');
+  expect(prompt.blocked).toBe('alreadyAdded');
+  await expect(trader.page.getByRole('status')).toHaveText('Token not added');
+});
+```
