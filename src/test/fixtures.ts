@@ -54,6 +54,12 @@ export interface UserOptions {
   strict?: boolean;
 }
 
+/**
+ * The wallet in a user's tab. It's the core `Wallet` without `attach`: Stardust
+ * puts it in the page before the test starts.
+ */
+export type UserWallet = Omit<Wallet, 'attach'>;
+
 /** One person in a test: a browser tab, the wallet in it, and the wallet's accounts. */
 export interface User {
   /** The user's name in `test.use`. */
@@ -61,7 +67,7 @@ export interface User {
   /** The user's browser tab, a Playwright `Page`. */
   readonly page: Page;
   /** The emulated wallet in the user's tab. */
-  readonly wallet: Wallet;
+  readonly wallet: UserWallet;
   /** The account active when the test started. */
   readonly account: Account;
   /** Every account in the user's wallet, by name, such as `accounts.main`. */
@@ -352,7 +358,7 @@ async function openUser(
   return { user, wallet };
 }
 
-function withSteps(user: string, wallet: Wallet): Wallet {
+function withSteps(user: string, wallet: Wallet): UserWallet {
   const step = <T>(action: string, run: () => Promise<T>) =>
     base.step(`${user}: wallet.${action}`, run, { box: true });
   return {
@@ -362,7 +368,6 @@ function withSteps(user: string, wallet: Wallet): Wallet {
     get network() {
       return wallet.network;
     },
-    attach: (host, options) => wallet.attach(host, options),
     setPolicy: (policy) => wallet.setPolicy(policy),
     nextPrompt: <K extends PromptKind = PromptKind>(
       kind?: K,

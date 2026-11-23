@@ -3,7 +3,20 @@ import { matchers } from '@/test/matchers';
 
 export { units, xlm } from '@/amounts';
 export { test } from '@/test/fixtures';
-export type { StardustTestOptions, User, UserOptions } from '@/test/fixtures';
+export type {
+  StardustTestOptions,
+  User,
+  UserOptions,
+  UserWallet,
+} from '@/test/fixtures';
+export type {
+  BalanceExpectation,
+  EmitExpectation,
+  FailExpectation,
+  InvokeExpectation,
+  OperationExpectation,
+  StardustMatchers,
+} from '@/test/matchers';
 
 /**
  * Playwright's `expect`, with Stardust's checks on prompts: `toInvoke` and

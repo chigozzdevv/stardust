@@ -29,9 +29,11 @@ export type { Policy, PolicyMode } from '@/wallet/policy';
 export type {
   AddTokenPrompt,
   AuthEntryPrompt,
+  BasePrompt,
   BlockedReason,
   ConnectPrompt,
   Decision,
+  Failure,
   MessagePrompt,
   Prompt,
   PromptKind,
@@ -40,7 +42,7 @@ export type {
   TransactionPrompt,
   WaitOptions,
 } from '@/wallet/prompts';
-export type { Violation } from '@/wallet/strict';
+export type { Violation, ViolationKind } from '@/wallet/strict';
 export type { PageHost, Wallet, WalletOptions } from '@/wallet/emulated';
 
 /** Stardust's core, for setups that don't use `stardust-stellar/test`. */

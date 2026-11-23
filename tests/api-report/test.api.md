@@ -48,7 +48,7 @@ interface BalanceChange {
 }
 
 // @public
-type BalanceExpectation = bigint | {
+export type BalanceExpectation = bigint | {
     readonly min?: bigint;
     readonly max?: bigint;
 };
@@ -146,7 +146,7 @@ interface DecodedTransaction {
 }
 
 // @public
-interface EmitExpectation {
+export interface EmitExpectation {
     readonly contract: string;
     readonly topic: string;
 }
@@ -155,7 +155,7 @@ interface EmitExpectation {
 export const expect: _playwright_test.Expect<StardustMatchers>;
 
 // @public
-interface FailExpectation {
+export interface FailExpectation {
     readonly contractError?: string | number;
     readonly resultCode?: string;
 }
@@ -183,7 +183,7 @@ interface Invocation {
 }
 
 // @public
-interface InvokeExpectation {
+export interface InvokeExpectation {
     readonly args?: Readonly<Record<string, unknown>>;
     readonly contract: string;
     // (undocumented)
@@ -239,7 +239,7 @@ interface NetworkInfo {
 }
 
 // @public
-interface OperationExpectation {
+export interface OperationExpectation {
     readonly [field: string]: unknown;
     readonly type: string;
 }
@@ -271,7 +271,7 @@ type PromptOf<K extends PromptKind> = Extract<Prompt, {
 type PromptStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'hung';
 
 // @public
-type StardustMatchers = {
+export type StardustMatchers = {
     toInvoke(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, expected: InvokeExpectation): MatcherResult;
     toHaveOperation(this: MatcherState, prompt: TransactionPrompt, expected: OperationExpectation): MatcherResult;
     toLand(this: MatcherState, prompt: TransactionPrompt | AuthEntryPrompt, options?: WaitOptions): Promise<MatcherResult>;
@@ -307,7 +307,7 @@ export interface User {
     readonly accounts: Readonly<Record<string, Account>>;
     readonly name: string;
     readonly page: Page;
-    readonly wallet: Wallet;
+    readonly wallet: UserWallet;
 }
 
 // @public
@@ -322,6 +322,9 @@ export interface UserOptions {
 
 // @public
 type Users = Readonly<Record<string, User>>;
+
+// @public
+export type UserWallet = Omit<Wallet, 'attach'>;
 
 // @public
 interface Violation {

@@ -52,7 +52,7 @@ export interface WalletError {
 }
 
 /** A wallet error to answer a prompt with. */
-interface Failure {
+export interface Failure {
   /** `-1` for an internal error, `-2` for an external service, `-3` for an invalid request. */
   code: -1 | -2 | -3;
   /** The error message. Default: Varial's text for `-1`, `Stardust: simulated wallet error (code N)` otherwise. */
@@ -60,7 +60,7 @@ interface Failure {
 }
 
 /** What every prompt has. Each prompt is answered exactly once; a second answer throws `ALREADY_ANSWERED`. */
-interface BasePrompt<K extends PromptKind> {
+export interface BasePrompt<K extends PromptKind> {
   /** `'p1'`, `'p2'`, … in arrival order within a test. */
   readonly id: string;
   readonly kind: K;
@@ -96,7 +96,9 @@ export interface TransactionPrompt extends BasePrompt<'signTransaction'> {
   readonly transaction: DecodedTransaction;
   /**
    * Waits for the signed transaction to land and returns its outcome. Throws
-   * `OUTCOME_UNKNOWN` when it doesn't appear in time.
+   * `OUTCOME_UNKNOWN` when it doesn't appear in time, `PROMPTS_PENDING` when
+   * the prompt isn't answered in time, and `UNSUPPORTED` when it was rejected,
+   * failed or hung.
    */
   landed(options?: WaitOptions): Promise<Landed>;
 }
@@ -106,7 +108,9 @@ export interface AuthEntryPrompt extends BasePrompt<'signAuthEntry'> {
   readonly preimage: DecodedAuthPreimage;
   /**
    * Waits for a transaction that uses this authorization to land, and returns
-   * its outcome. Throws `OUTCOME_UNKNOWN` when none appears in time.
+   * its outcome. Throws `OUTCOME_UNKNOWN` when none appears in time,
+   * `PROMPTS_PENDING` when the prompt isn't answered in time, and
+   * `UNSUPPORTED` when it was rejected, failed or hung.
    */
   landed(options?: WaitOptions): Promise<Landed>;
 }
@@ -371,7 +375,7 @@ export class PromptEntry {
           finish(() =>
             reject(
               new StardustError(
-                'OUTCOME_UNKNOWN',
+                'PROMPTS_PENDING',
                 `${this.label} is still pending after ${timeoutMs / 1000}s, so nothing was signed. Answer it before waiting for it to land, or pass a longer timeoutMs.`,
               ),
             ),

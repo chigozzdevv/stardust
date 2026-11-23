@@ -41,7 +41,7 @@ export interface BalanceChange {
 }
 
 // @public
-interface BasePrompt<K extends PromptKind> {
+export interface BasePrompt<K extends PromptKind> {
     approve(): Promise<void>;
     readonly blocked: BlockedReason | null;
     fail(error: Failure): Promise<void>;
@@ -147,7 +147,7 @@ export interface DecodedTransaction {
 export function defineConfig(config: StardustConfig): StardustConfig;
 
 // @public
-interface Failure {
+export interface Failure {
     code: -1 | -2 | -3;
     message?: string;
 }
@@ -275,7 +275,7 @@ export interface Violation {
 }
 
 // @public
-type ViolationKind = 'missingNetworkPassphrase' | 'networkMismatch' | 'invalidXdr' | 'signerMismatch' | 'unknownMessage';
+export type ViolationKind = 'missingNetworkPassphrase' | 'networkMismatch' | 'invalidXdr' | 'signerMismatch' | 'unknownMessage';
 
 // @public
 export interface WaitOptions {

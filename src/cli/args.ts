@@ -4,7 +4,7 @@ export interface CommandArgs {
   readonly playwright: readonly string[];
 }
 
-const usage = 'Run: stardust test [files] [--show] [-- playwright flags]';
+const usage = 'Run: stardust test [files] [--show] [-- flags]';
 
 export function parseArgs(argv: readonly string[]): CommandArgs {
   const [command, ...rest] = argv;
@@ -24,7 +24,7 @@ export function parseArgs(argv: readonly string[]): CommandArgs {
       show = true;
     } else if (arg.startsWith('-')) {
       throw new Error(
-        `unknown flag ${arg.split('=')[0]}. Put Playwright flags after --, for example: stardust test -- --grep swap`,
+        `unknown flag ${arg.split('=')[0]}. Put other flags after --, for example: stardust test -- --grep swap`,
       );
     } else {
       files.push(arg);

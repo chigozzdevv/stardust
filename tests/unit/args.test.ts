@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseArgs } from '@/cli/args';
 
 const unknownFlag = (flag: string) =>
-  `unknown flag ${flag}. Put Playwright flags after --, for example: stardust test -- --grep swap`;
+  `unknown flag ${flag}. Put other flags after --, for example: stardust test -- --grep swap`;
 
 describe('parseArgs', () => {
   it('runs every test with the browser hidden by default', () => {
@@ -48,7 +48,7 @@ describe('parseArgs', () => {
   });
 
   it('asks for the test command', () => {
-    const usage = 'Run: stardust test [files] [--show] [-- playwright flags]';
+    const usage = 'Run: stardust test [files] [--show] [-- flags]';
     expect(() => parseArgs([])).toThrow(`missing command. ${usage}`);
     expect(() => parseArgs(['run'])).toThrow(`unknown command run. ${usage}`);
     expect(() => parseArgs(['--show'])).toThrow(

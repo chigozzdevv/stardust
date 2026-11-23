@@ -17,7 +17,7 @@
  * - `UNKNOWN_ACCOUNT`: `switchAccount` got an account that isn't in the wallet.
  * - `UNSUPPORTED`: a feature isn't available here, such as an unreadable contract spec.
  * - `PROTOCOL_VIOLATION`: at the end of the test, strict mode recorded violations.
- * - `PROMPTS_PENDING`: at the end of the test, prompts were left unanswered.
+ * - `PROMPTS_PENDING`: at the end of the test, prompts were left unanswered, or `landed()` waited for an answer that didn't come.
  */
 export type StardustErrorCode =
   | 'CONFIG_NOT_FOUND'

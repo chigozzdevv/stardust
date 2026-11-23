@@ -308,12 +308,12 @@ describe('landed()', () => {
     await expect(landing).resolves.toMatchObject({ status: 'success' });
   });
 
-  it('throws OUTCOME_UNKNOWN when the prompt is still pending at the timeout', async () => {
+  it('throws PROMPTS_PENDING when the prompt is still pending at the timeout', async () => {
     const { queue, arrive } = promptQueue();
     arrive('signTransaction');
     const prompt = await queue.nextPrompt('signTransaction');
     await expect(prompt.landed({ timeoutMs: 20 })).rejects.toMatchObject({
-      code: 'OUTCOME_UNKNOWN',
+      code: 'PROMPTS_PENDING',
       message:
         'p1 signTransaction is still pending after 0.02s, so nothing was signed. Answer it before waiting for it to land, or pass a longer timeoutMs.',
     });
