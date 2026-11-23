@@ -1,6 +1,6 @@
 # Stardust
 
-Browser automation for testing Stellar dapps, with a wallet your test controls.
+Automated browser tests for Stellar apps, with a wallet your test controls.
 
 Set up the wallet and its state: installed or not, connected or not, and the accounts it holds. Your test then drives the app the way a user would, against a wallet that answers like the real one. Every test gets fresh, funded testnet accounts. Varial and SEP-60 wallets are supported, and Stardust is checked nightly against the real Varial extension.
 
