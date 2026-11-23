@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2024-11-23
 
 The first release. It matches Varial 5.53.0, SEP-43 1.2.1 and SEP-60 0.1.0.
 

@@ -1,6 +1,6 @@
 {
   "name": "stardust-stellar",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Automated browser tests for Stellar apps",
   "keywords": [
     "stellar",
@@ -13,7 +13,7 @@
     "freighter",
     "dapp"
   ],
-  "homepage": "https://github.com/chigozzdevv/stardust#readme",
+  "homepage": "https://stardust-stellar.vercel.app",
   "bugs": {
     "url": "https://github.com/chigozzdevv/stardust/issues"
   },
