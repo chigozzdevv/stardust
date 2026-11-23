@@ -1,5 +1,8 @@
 # Stardust
 
+[![npm](https://img.shields.io/npm/v/stardust-stellar)](https://www.npmjs.com/package/stardust-stellar)
+[![License](https://img.shields.io/github/license/chigozzdevv/stardust)](LICENSE)
+
 Automated browser tests for Stellar apps, with a wallet your test controls.
 
 Set up the wallet and its state: installed or not, connected or not, and the accounts it holds. Your test then drives the app the way a user would, against a wallet that answers like the real one. Every test gets fresh, funded testnet accounts. Varial and SEP-60 wallets are supported, and Stardust is checked nightly against the real Varial extension.
@@ -158,7 +161,7 @@ The output shows the failed check and the wallet's timeline: each prompt and its
 
 ## Learn more
 
-[Examples on real dapps](tests/dapps) · [Changelog](CHANGELOG.md) · [Contributing](AGENTS.md)
+**[Documentation](https://stardust-stellar.vercel.app)** · [Examples on real dapps](tests/dapps) · [Changelog](CHANGELOG.md) · [Contributing](AGENTS.md)
 
 ## License
 
